@@ -16,3 +16,5 @@ release/
 *.jks
 *.keystore
 *-release-base64.txt
+*.p12
+*.pfx
