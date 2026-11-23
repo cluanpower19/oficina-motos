@@ -134,14 +134,15 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
-- **Etapa concluída mais recente:** Etapa 1 (código existe e `npm run build` passa; **falta testar login com Supabase real**)
-- **Etapa atual:** 1 (validar) e depois 2
+- **Etapa concluída mais recente:** Etapa 1 (código + migração 0001 aplicada; build OK). **Falta só testar cadastro/login na tela** (ver pendências).
+- **Etapa atual:** 2 (tabelas clientes e motos + telas), depois do teste de login
 - **Pasta local:** `C:\Users\iaras\oficina-moto`
 - **Ambiente:** Windows + PowerShell, Node v26.13.0, npm 11.20.0, git 2.56.1. `gh` não instalado.
-- **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `src/hooks/useAuth.tsx`, `src/lib/supabase.ts`, `src/components/Layout.tsx` (menu), páginas `Login`, `Painel`, `EmBreve`; rotas OS/Clientes/Lembretes/Financeiro/Configurações como "em breve"
-- **Migrações:** `0001_base.sql` (oficinas, usuarios, RLS, função `criar_oficina`). **Aplicada no Supabase: NÃO CONFIRMADO**
-- **Supabase:** não há `.env` local ainda (pendente: criar projeto, rodar 0001, preencher `.env` com URL e anon key)
-- **Repositório GitHub:** ainda não conectado (pendente: URL do repo privado vazio)
-- **Git:** repo local iniciado, primeiro commit pendente (falta nome/e-mail do git)
-- **Última tag:** nenhuma
+- **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`
+- **Migrações aplicadas no Supabase:** `0001_base.sql` (oficinas, usuarios, RLS, função `criar_oficina`)
+- **Supabase:** projeto `layuhmhkzqttgfhawpsh` (https://layuhmhkzqttgfhawpsh.supabase.co), região us-east-2. `.env` local criado (ignorado pelo Git). Chave usada: publishable/anon. Em outro PC: recriar `.env` a partir do `.env.example`.
+- **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
+- **Última tag:** `etapa-01`
+- **Git:** identidade local do repo = cluanpower19 / cluanpower19@users.noreply.github.com
+- **Pendências:** (1) no Supabase, Authentication > Sign In / Providers > Email, desligar "Confirm email" para testes (hoje está ligado, então o cadastro não entra direto); (2) testar cadastro e login no app (`npm run dev`); (3) existe um usuário de teste sem confirmação, criado por script (teste.<número>@gmail.com), pode ser apagado em Authentication > Users.
 - **Nota:** em 22/11/2026 o PROJETO.md, .gitignore e .env.example anteriores foram sobrescritos por versões novas antes do primeiro commit.
