@@ -29,8 +29,8 @@
 .emblema-chave { position: relative; width: 52%; height: 52%; color: #fff3d2; }
 @keyframes gira { to { transform: rotate(360deg); } }
 .marca { display: flex; align-items: center; gap: 0.8rem; }
-.marca-nome { font-family: var(--fonte-titulo); font-weight: 800; font-size: 1.55rem; line-height: 0.9; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
-.marca-nome small { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.32em; color: var(--tungstenio); margin-top: 3px; }
+.marca-nome { font-family: var(--fonte-marca); font-weight: 700; font-size: 1.6rem; line-height: 0.95; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; text-shadow: 0 0 22px rgba(242, 160, 61, 0.25); }
+.marca-nome small { display: block; font-family: var(--fonte-titulo); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.3em; color: var(--tungstenio); margin-top: 4px; }
 
 /* ---------- Menu lateral ---------- */
 .menu-lateral { background-image: linear-gradient(180deg, rgba(31,111,120,0.10), transparent 30%), linear-gradient(180deg, #0f151c, #0a0f14); }

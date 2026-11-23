@@ -75,8 +75,8 @@ export default function Login() {
           <div className="marca">
             <Emblema tamanho={52} />
             <div className="marca-nome">
-              Oficina
-              <small>Moto · Gestão</small>
+              Ofício
+              <small>do motor · Gestão</small>
             </div>
           </div>
           <div>

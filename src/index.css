@@ -10,7 +10,8 @@
   --sombra: #1f6f78;
   --cromo: #e8ebef;
   --suave: #9aa4b2;
-  --fonte-titulo: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --fonte-titulo: 'Big Shoulders Display', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --fonte-marca: 'Stardos Stencil', 'Big Shoulders Display', 'Arial Narrow', sans-serif;
   --fonte-texto: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -30,12 +31,12 @@ body {
 
 h1, h2, h3, .titulo {
   font-family: var(--fonte-titulo);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
 }
-h1 { font-size: 2.1rem; }
-h2 { font-size: 1.6rem; }
+h1 { font-size: 2.3rem; }
+h2 { font-size: 1.75rem; }
 
 /* granulado de filme + vinheta (não bloqueiam cliques) */
 body::before {
@@ -203,8 +204,8 @@ select option { background: #10151c; color: var(--cromo); }
 
 .cena-texto { position: absolute; z-index: 4; left: 0; right: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between;
   padding: clamp(1.5rem, 5vw, 3.5rem); }
-.manchete { font-family: var(--fonte-titulo); font-weight: 800; letter-spacing: 0.005em; line-height: 0.95;
-  font-size: clamp(2.2rem, 6vw, 4.6rem); max-width: 14ch; color: #f3f1ea; text-shadow: 0 4px 40px rgba(0, 0, 0, 0.7);
+.manchete { font-family: var(--fonte-titulo); font-weight: 900; letter-spacing: 0.01em; line-height: 0.92; text-transform: uppercase;
+  font-size: clamp(2.4rem, 6.4vw, 5rem); max-width: 14ch; color: #f3f1ea; text-shadow: 0 4px 40px rgba(0, 0, 0, 0.7);
   animation: sobe 1.2s ease-out 1.2s both; }
 .sub-manchete { margin-top: 1rem; max-width: 34ch; color: #b5bdc9; font-size: 1.05rem; animation: sobe 1.2s ease-out 1.5s both; }
 @keyframes sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
