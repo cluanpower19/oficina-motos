@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { calcularAssinatura, linkSuporte } from '../lib/assinatura'
 
 const todos = [
   { to: '/', label: 'Painel', icone: '🏠' },
@@ -13,6 +14,13 @@ const todos = [
 
 export default function Layout() {
   const { perfil, sair } = useAuth()
+  const assin = calcularAssinatura(perfil!.oficina.status_assinatura, perfil!.oficina.teste_ate)
+  const suporte = linkSuporte(perfil!.oficina.nome)
+  const faixa = !assin.ativa
+    ? 'Assinatura inativa: você pode consultar os dados, mas não pode salvar alterações.'
+    : assin.status === 'teste'
+      ? `Teste grátis: ${assin.diasRestantes === 0 ? 'termina hoje' : `faltam ${assin.diasRestantes} dia(s)`}.`
+      : ''
   const itens = todos.filter((i) => i.to !== '/financeiro' || perfil?.papel === 'dono')
 
   return (
@@ -46,6 +54,19 @@ export default function Layout() {
           <span className="font-bold text-orange-400">{perfil?.oficina.nome ?? 'Oficina Moto'}</span>
           <button onClick={sair} className="rounded bg-gray-700 px-3 py-2 text-sm">Sair</button>
         </header>
+        {faixa && (
+          <div className={`px-4 py-2 text-sm ${assin.ativa ? 'bg-yellow-100 text-yellow-900' : 'bg-red-600 text-white'}`}>
+            {faixa}
+            {!assin.ativa && suporte && (
+              <>
+                {' '}
+                <a href={suporte} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+                  Falar com o suporte
+                </a>
+              </>
+            )}
+          </div>
+        )}
         <main className="mx-auto max-w-5xl p-4 md:p-8">
           <Outlet />
         </main>

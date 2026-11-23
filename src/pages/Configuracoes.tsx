@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { soDigitos } from '../lib/formatos'
 import { reduzirImagem } from '../lib/imagem'
+import { calcularAssinatura, linkSuporte } from '../lib/assinatura'
 import { MODELO_LEMBRETE, MODELO_ORCAMENTO, MODELO_PRONTA } from '../lib/whatsapp'
 
 const campo =
@@ -16,6 +17,8 @@ export default function Configuracoes() {
   const { perfil, recarregarPerfil } = useAuth()
   const of = perfil!.oficina
   const dono = perfil!.papel === 'dono'
+  const assin = calcularAssinatura(of.status_assinatura, of.teste_ate)
+  const suporte = linkSuporte(of.nome)
 
   const [nome, setNome] = useState(of.nome)
   const [telefone, setTelefone] = useState(of.telefone ?? '')
@@ -166,6 +169,27 @@ export default function Configuracoes() {
           </button>
         </div>
       </form>
+
+      <section className={cartao}>
+        <h2 className="text-lg font-semibold text-gray-800">Assinatura</h2>
+        <p className="text-gray-800">
+          Plano {of.plano === 'completo' ? 'Completo' : 'Básico'}:{' '}
+          <strong>
+            {assin.status === 'ativo' && 'ativa'}
+            {assin.status === 'teste' && `teste grátis (${assin.diasRestantes} dia(s) restantes)`}
+            {assin.status === 'teste_vencido' && 'teste vencido'}
+            {assin.status === 'bloqueado' && 'bloqueada'}
+          </strong>
+        </p>
+        {of.status_assinatura === 'teste' && (
+          <p className="text-sm text-gray-600">Teste até {of.teste_ate.split('-').reverse().join('/')}.</p>
+        )}
+        {suporte && (
+          <a href={suporte} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-green-600 px-4 py-3 font-semibold text-white">
+            Ativar ou renovar pelo WhatsApp
+          </a>
+        )}
+      </section>
 
       <section className={cartao}>
         <h2 className="text-lg font-semibold text-gray-800">Equipe</h2>

@@ -14,6 +14,9 @@ export type Perfil = {
     msg_orcamento: string | null
     msg_pronta: string | null
     msg_lembrete: string | null
+    plano: string
+    status_assinatura: string
+    teste_ate: string
   }
 }
 
@@ -37,7 +40,7 @@ async function buscarPerfil(session: Session): Promise<Perfil | null> {
   const ler = () =>
     supabase
       .from('usuarios')
-      .select('nome, papel, oficinas(id, nome, telefone, endereco, logo_url, msg_orcamento, msg_pronta, msg_lembrete)')
+      .select('nome, papel, oficinas(id, nome, telefone, endereco, logo_url, msg_orcamento, msg_pronta, msg_lembrete, plano, status_assinatura, teste_ate)')
       .eq('id', session.user.id)
       .maybeSingle()
 
