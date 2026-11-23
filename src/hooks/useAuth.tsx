@@ -36,6 +36,8 @@ const Ctx = createContext<AuthCtx>({
   recarregarPerfil: async () => {},
 })
 
+export let erroCriacao = ''
+
 async function buscarPerfil(session: Session): Promise<Perfil | null> {
   const ler = () =>
     supabase
@@ -53,11 +55,12 @@ async function buscarPerfil(session: Session): Promise<Perfil | null> {
       await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
       ;({ data } = await ler())
     } else if (meta.oficina_nome) {
-      await supabase.rpc('criar_oficina', {
+      const r = await supabase.rpc('criar_oficina', {
         p_nome: meta.oficina_nome,
         p_telefone: meta.telefone ?? '',
         p_usuario_nome: meta.nome ?? 'Dono',
       })
+      erroCriacao = r.error?.message ?? ''
       ;({ data } = await ler())
     }
   }

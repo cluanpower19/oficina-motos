@@ -22,7 +22,7 @@
 
 ## 3. Gerir assinaturas (Supabase > SQL Editor)
 
-Cada oficina nova começa em `teste` por 14 dias. Teste vencido ou `bloqueado`: a oficina ainda consulta, mas não grava (o banco impede).
+Cada oficina nova começa em `teste` por 7 dias (um teste por pessoa: e-mail canonico e telefone ficam registrados em `testes_usados`; repetiu, a oficina nasce bloqueada). Teste vencido ou `bloqueado`: a oficina ainda consulta, mas não grava (o banco impede).
 
 ```sql
 -- ver oficinas

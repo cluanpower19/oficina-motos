@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { AuthProvider, useAuth } from './hooks/useAuth'
+import { AuthProvider, useAuth, erroCriacao } from './hooks/useAuth'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Painel from './pages/Painel'
@@ -20,7 +20,7 @@ function Rotas() {
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
   if (!session) return <Login />
   if (!perfil) {
-    return <div className="p-8 text-gray-600">Não foi possível carregar sua oficina. Saia e entre novamente.</div>
+    return <div className="p-8 text-gray-600">Não foi possível carregar sua oficina. Saia e entre novamente.{erroCriacao && <p className="mt-2 font-semibold text-red-600">{erroCriacao}</p>}</div>
   }
 
   return (

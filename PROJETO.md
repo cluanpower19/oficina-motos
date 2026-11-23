@@ -1,4 +1,4 @@
-﻿# PROJETO.md: Sistema de Gestão para Oficinas de Moto
+# PROJETO.md: Sistema de Gestão para Oficinas de Moto
 
 > Fonte da verdade do projeto. Fica na **raiz do repositório**.
 > Como continuar em qualquer conta/computador: veja **CONTINUAR.md**.
@@ -131,7 +131,8 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 | 22/11/2026 | Nicho inicial: oficinas de moto pequenas. Sem nota fiscal e sem WhatsApp por API no MVP. |
 | 22/11/2026 | Backup principal: Git + GitHub privado, tag `etapa-NN` por etapa. Migrações numeradas, só para frente. |
 | 22/11/2026 | Desenvolvimento passa a ser **local, pelo Claude + Remote Desktop Commander** (Windows), sem bolt.new. Retomada por um único comando que lê `CONTINUAR.md`. |
-| 23/11/2026 | Assinatura: teste de 14 dias, ativação manual (Pix) por SQL no Supabase. Bloqueio no banco por políticas restritivas: oficina inativa só lê. |
+| 23/11/2026 | Assinatura: teste de 14 dias (depois reduzido para 7, ver abaixo), ativação manual (Pix) por SQL no Supabase. Bloqueio no banco por políticas restritivas: oficina inativa só lê. |
+| 23/11/2026 | Teste grátis de **7 dias, 1 por pessoa**: migração 0012 (	estes_usados com e-mail canônico sem pontos/+alias e telefone; e-mails descartáveis bloqueados; repetidos nascem loqueado). Recomendado ligar Confirm email no Supabase. |
 
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
@@ -140,7 +141,7 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 - **Pasta local:** `C:\Users\iaras\oficina-moto`
 - **Ambiente:** Windows + PowerShell, Node v26.13.0, npm 11.20.0, git 2.56.1. `gh` não instalado.
 - **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`, `Catalogo` (abas `CatalogoServicos` e `CatalogoPecas`), `Clientes` (lista, busca por nome/placa, novo cliente+moto), `ClienteDetalhe` (editar, motos, remover), `OrdensServico`, `NovaOS`, `OSDetalhe` (itens, status, fotos, copiar/abrir link do orçamento), `OrcamentoPublico` (rota pública sem login), `lib/formatos.ts`, `lib/imagem.ts` (reduz foto a 1600px JPEG), `lib/status.ts`, `lib/whatsapp.ts` (wa.me + mensagens padrão), `Lembretes` (página), `lib/lembretes.ts` (tipos, datas AAAA-MM-DD no fuso local), `Financeiro` (página, só dono), `Painel` (resumo real), `Configuracoes` (dados, logo, mensagens, assinatura, equipe e código de convite), `lib/assinatura.ts`
-- **Migrações aplicadas no Supabase (NÃO rodar de novo):** `0001_base.sql`, `0002_clientes_motos.sql`, `0003_grants.sql`, `0004_catalogo_pecas.sql`, `0005_ordens_servico.sql`, `0006_fotos_orcamento_publico.sql`, `0007_lembretes.sql`, `0008_financeiro.sql`, `0009_configuracoes.sql`, `0010_logos.sql`, `0011_assinatura.sql`. Próxima: `0012_...`. O conector Supabase (MCP) está ligado: aplicar migrações com `apply_migration` no projeto `layuhmhkzqttgfhawpsh` e conferir `list_migrations` antes.
+- **Migrações aplicadas no Supabase (NÃO rodar de novo):** `0001_base.sql`, `0002_clientes_motos.sql`, `0003_grants.sql`, `0004_catalogo_pecas.sql`, `0005_ordens_servico.sql`, `0006_fotos_orcamento_publico.sql`, `0007_lembretes.sql`, `0008_financeiro.sql`, `0009_configuracoes.sql`, `0010_logos.sql`, `0011_assinatura.sql`, `0012_teste_7_dias_unico.sql`. Próxima: `0013_...`. O conector Supabase (MCP) está ligado: aplicar migrações com `apply_migration` no projeto `layuhmhkzqttgfhawpsh` e conferir `list_migrations` antes.
 - **Supabase:** projeto `layuhmhkzqttgfhawpsh` (https://layuhmhkzqttgfhawpsh.supabase.co), região us-east-2. `.env` local criado (ignorado pelo Git). Chave usada: publishable/anon. Em outro PC: recriar `.env` a partir do `.env.example`. "Confirm email" está DESLIGADO.
 - **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
 - **Última tag:** `etapa-10`
