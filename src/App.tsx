@@ -12,6 +12,7 @@ import NovaOS from './pages/NovaOS'
 import OSDetalhe from './pages/OSDetalhe'
 import OrcamentoPublico from './pages/OrcamentoPublico'
 import Lembretes from './pages/Lembretes'
+import Financeiro from './pages/Financeiro'
 
 function Rotas() {
   const { session, perfil, carregando } = useAuth()
@@ -33,7 +34,7 @@ function Rotas() {
         <Route path="clientes/:id" element={<ClienteDetalhe />} />
         <Route path="catalogo" element={<Catalogo />} />
         <Route path="lembretes" element={<Lembretes />} />
-        <Route path="financeiro" element={<EmBreve titulo="Financeiro" />} />
+        <Route path="financeiro" element={<Financeiro />} />
         <Route path="configuracoes" element={<EmBreve titulo="Configurações" />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
