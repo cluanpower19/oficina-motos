@@ -2,6 +2,11 @@ name: Build and publish official Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/pages/Login.tsx'
 
 permissions:
   contents: write
