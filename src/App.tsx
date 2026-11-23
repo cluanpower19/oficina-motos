@@ -15,10 +15,10 @@ import Lembretes from './pages/Lembretes'
 import Financeiro from './pages/Financeiro'
 
 function Rotas() {
-  const { session, perfil, carregando } = useAuth()
+  const { session, perfil, carregando, recuperacao } = useAuth()
 
-  // O link de recuperação do Supabase retorna à página inicial com type=recovery no fragmento.
-  if (window.location.hash.includes('type=recovery')) return <Login />
+  // O SDK pode limpar o fragmento após processar o link; o evento PASSWORD_RECOVERY é a fonte confiável.
+  if (recuperacao || window.location.hash.includes('type=recovery')) return <Login redefinir />
 
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
   if (!session) return <Login />
