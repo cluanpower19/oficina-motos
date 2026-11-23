@@ -17,6 +17,7 @@ const icones: Record<string, ReactNode> = {
   catalogo: <Svg><path d="M21 8 12 3 3 8v8l9 5 9-5V8z" /><path d="M3 8l9 5 9-5M12 13v8" /></Svg>,
   lembretes: <Svg><path d="M6 16V11a6 6 0 1 1 12 0v5l1.6 2H4.4L6 16z" /><path d="M10 21a2 2 0 0 0 4 0" /></Svg>,
   financeiro: <Svg><rect x="2.5" y="6" width="19" height="12" rx="2" /><circle cx="12" cy="12" r="2.6" /><path d="M6 9.5v.01M18 14.5v.01" /></Svg>,
+  suporte: <Svg><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z" /></Svg>,
   config: <Svg><path d="M4 7h9M17 7h3M4 17h3M11 17h9" /><circle cx="15" cy="7" r="2" /><circle cx="9" cy="17" r="2" /></Svg>,
 }
 
@@ -28,6 +29,7 @@ const todos = [
   { to: '/lembretes', label: 'Lembretes', icone: 'lembretes' },
   { to: '/financeiro', label: 'Financeiro', icone: 'financeiro' },
   { to: '/configuracoes', label: 'Config.', icone: 'config' },
+  { to: '/suporte', label: 'Suporte', icone: 'suporte' },
 ]
 
 export default function Layout() {
