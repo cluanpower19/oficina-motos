@@ -80,12 +80,12 @@ export default function Login() {
             </div>
           </div>
           <div>
-            <h1 className="manchete">Moto na bancada. Cliente no controle.</h1>
-            <p className="sub-manchete">Orçamento aprovado pelo WhatsApp, histórico por placa e aviso de retorno. Tudo no celular.</p>
+            <h1 className="manchete">Chega de orçamento só de boca.</h1>
+            <p className="sub-manchete">O cliente aprova pelo link no WhatsApp e a oficina guarda o dia e a hora. Depois não tem discussão.</p>
             <div className="assinatura">
-              <span>Ordem de serviço</span>
+              <span>Orçamento por link</span>
               <span>Histórico por placa</span>
-              <span>Financeiro</span>
+              <span>Lembrete de óleo</span>
             </div>
           </div>
         </div>
@@ -130,11 +130,11 @@ export default function Login() {
             onClick={() => { setModo(modo === 'entrar' ? 'cadastrar' : 'entrar'); setErro(''); setAviso('') }}
             className="link"
           >
-            {modo === 'entrar' ? 'Ainda não tenho conta' : 'Já tenho conta'}
+            {modo === 'entrar' ? 'Quero cadastrar minha oficina' : 'Já tenho conta, quero entrar'}
           </button>
           {modo !== 'mecanico' && (
             <button type="button" onClick={() => { setModo('mecanico'); setErro(''); setAviso('') }} className="link">
-              Sou mecânico (tenho um código)
+              Sou mecânico e tenho o código da oficina
             </button>
           )}
         </form>
