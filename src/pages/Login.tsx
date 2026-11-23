@@ -138,29 +138,28 @@ export default function Login() {
               Sou mecânico e tenho o código da oficina
             </button>
           )}
-        </form>
-
-        {noSite && (
-          <div className="cartao-entrada mt-4 text-center">
-            <p className="mb-3 text-sm text-gray-600">Prefere usar no computador?</p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <a
-                href={linkWindows ?? URL_DOWNLOAD}
-                {...(linkWindows ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
-                className="flex min-h-12 w-full items-center justify-center rounded-lg border-2 border-orange-500 px-3 py-3 text-center font-semibold leading-tight text-orange-600 transition-colors hover:bg-orange-50"
-              >
-                Baixar para Windows
-              </a>
-              <a
-                href={linkMac ?? URL_DOWNLOAD}
-                {...(linkMac ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
-                className="flex min-h-12 w-full items-center justify-center rounded-lg border-2 border-orange-500 px-3 py-3 text-center font-semibold leading-tight text-orange-600 transition-colors hover:bg-orange-50"
-              >
-                Baixar para Mac
-              </a>
+          {noSite && (
+            <div className="downloads-entrada mt-5 border-t border-gray-700 pt-4 text-center">
+              <p className="mb-3 text-sm text-gray-400">Prefere usar no computador?</p>
+              <div className="downloads-lista">
+                <a
+                  href={linkWindows ?? URL_DOWNLOAD}
+                  {...(linkWindows ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
+                  className="download-app"
+                >
+                  Baixar para Windows
+                </a>
+                <a
+                  href={linkMac ?? URL_DOWNLOAD}
+                  {...(linkMac ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
+                  className="download-app"
+                >
+                  Baixar para Mac
+                </a>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </form>
       </section>
     </div>
   )
