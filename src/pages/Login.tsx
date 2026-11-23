@@ -122,7 +122,6 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
       <section className="cena-form">
         <form onSubmit={enviar} className="cartao-entrada space-y-3">
           <h2 className="titulo text-3xl text-gray-800">{titulo}</h2>
-          {modo === 'cadastrar' && <p className="text-sm text-gray-600">Teste grátis por 7 dias. Sem cartão.</p>}
 
           {!supabaseConfigurado && (
             <p className="rounded bg-yellow-100 p-3 text-sm text-yellow-800">
