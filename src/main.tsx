@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
 )
 
 // PWA: registra o service worker só no site publicado (não no `npm run dev`).
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+if (import.meta.env.PROD && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {})
   })

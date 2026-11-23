@@ -9,3 +9,5 @@ dist
 .npm-install.log
 
 *.log
+
+release/

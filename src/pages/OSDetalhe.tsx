@@ -8,6 +8,7 @@ import { reduzirImagem } from '../lib/imagem'
 import { linkWhatsApp, msgOrcamento, msgPronta } from '../lib/whatsapp'
 import { useAuth } from '../hooks/useAuth'
 import { hojeISO, somarDias } from '../lib/lembretes'
+import { urlSite } from '../lib/urlSite'
 
 type OS = {
   id: string
@@ -173,7 +174,7 @@ export default function OSDetalhe() {
 
   async function copiarLink() {
     if (!os) return
-    const link = `${window.location.origin}${import.meta.env.BASE_URL}orcamento/${os.token_publico}`
+    const link = `${urlSite()}orcamento/${os.token_publico}`
     try {
       await navigator.clipboard.writeText(link)
       setCopiado(true)
@@ -191,7 +192,7 @@ export default function OSDetalhe() {
   function enviarOrcamentoWhats() {
     const d = dadosMsg()
     if (!os || !d) return
-    const link = linkWhatsApp(os.clientes?.telefone, msgOrcamento(d, `${window.location.origin}${import.meta.env.BASE_URL}orcamento/${os.token_publico}`, perfil?.oficina.msg_orcamento))
+    const link = linkWhatsApp(os.clientes?.telefone, msgOrcamento(d, `${urlSite()}orcamento/${os.token_publico}`, perfil?.oficina.msg_orcamento))
     if (!link) return setErro('O cliente não tem um telefone válido com DDD. Corrija no cadastro do cliente.')
     window.open(link, '_blank', 'noopener')
     if (os.status === 'orcamento') mudarStatus('aguardando_aprovacao')

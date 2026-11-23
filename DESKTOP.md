@@ -25,8 +25,8 @@ Use o Remote Desktop Commander. Leia C:\Users\iaras\oficiodomotor.github.io\DESK
 
 ## Checklist
 - [x] 1. PWA: manifest, ícones, service worker simples. Teste de "Instalar app" no Chrome/Edge.
-- [ ] 2. Verificar compatibilidade com janela desktop: o roteador (BrowserRouter x HashRouter), `base` do Vite, caminhos `/img/...`. Ajustar sem quebrar o site web.
-- [ ] 3. Estrutura Electron: pasta `electron/` (main.cjs, preload.cjs), scripts `desktop:dev` e `desktop:build` no package.json, janela com ícone e menu enxuto.
+- [x] 2. Verificar compatibilidade com janela desktop: o roteador (BrowserRouter x HashRouter), `base` do Vite, caminhos `/img/...`. Ajustar sem quebrar o site web.
+- [x] 3. Estrutura Electron: pasta `electron/` (main.cjs, preload.cjs), scripts `desktop:dev` e `desktop:build` no package.json, janela com ícone e menu enxuto.
 - [ ] 4. Build local do instalador Windows (.exe NSIS) e teste de abrir, logar e usar.
 - [ ] 5. GitHub Actions: build Windows + Mac ao criar uma tag `desktop-vX.Y.Z`, anexando os instaladores na Release.
 - [ ] 6. Ícone final, nome do app, link do WhatsApp abrindo no navegador padrão, impressão de orçamento.
@@ -35,4 +35,4 @@ Use o Remote Desktop Commander. Leia C:\Users\iaras\oficiodomotor.github.io\DESK
 
 ## Diário
 - 23/11/2026, etapa 1 (PWA): criados public/manifest.webmanifest, public/sw.js (cache só do próprio site, rede primeiro nas páginas), public/icons/* (192, 512, maskable, apple-touch), links no index.html e registro do service worker em src/main.tsx (só em produção). Pendência: testar 'Instalar app' no Chrome/Edge com o site publicado e conferir se o deploy serve /sw.js e /manifest.webmanifest (não podem cair no redirect para index.html).
-
+- 23/11/2026, etapas 2 e 3: BrowserRouter mantido; electron/main.cjs serve dist pelo protocolo app://oficio com fallback para index.html (rotas e /img/... funcionam). Service worker so registra em http/https. Links de orcamento usam src/lib/urlSite.ts (site publico quando em app://). Scripts desktop:start, desktop:win, desktop:mac e config do electron-builder (NSIS x64, dmg x64+arm64) no package.json. npm run build web passando. Pendente: gerar e testar o instalador .exe (etapa 4).
