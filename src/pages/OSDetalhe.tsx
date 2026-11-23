@@ -173,7 +173,7 @@ export default function OSDetalhe() {
 
   async function copiarLink() {
     if (!os) return
-    const link = `${window.location.origin}/orcamento/${os.token_publico}`
+    const link = `${window.location.origin}${import.meta.env.BASE_URL}orcamento/${os.token_publico}`
     try {
       await navigator.clipboard.writeText(link)
       setCopiado(true)
@@ -191,7 +191,7 @@ export default function OSDetalhe() {
   function enviarOrcamentoWhats() {
     const d = dadosMsg()
     if (!os || !d) return
-    const link = linkWhatsApp(os.clientes?.telefone, msgOrcamento(d, `${window.location.origin}/orcamento/${os.token_publico}`, perfil?.oficina.msg_orcamento))
+    const link = linkWhatsApp(os.clientes?.telefone, msgOrcamento(d, `${window.location.origin}${import.meta.env.BASE_URL}orcamento/${os.token_publico}`, perfil?.oficina.msg_orcamento))
     if (!link) return setErro('O cliente não tem um telefone válido com DDD. Corrija no cadastro do cliente.')
     window.open(link, '_blank', 'noopener')
     if (os.status === 'orcamento') mudarStatus('aguardando_aprovacao')
@@ -342,7 +342,7 @@ export default function OSDetalhe() {
         )}
         <div className="flex gap-2">
           <button className={botao + ' flex-1'} onClick={copiarLink}>{copiado ? 'Link copiado!' : 'Copiar link'}</button>
-          <a className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-800" href={`/orcamento/${os.token_publico}`} target="_blank" rel="noreferrer">Abrir</a>
+          <a className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-800" href={`${import.meta.env.BASE_URL}orcamento/${os.token_publico}`} target="_blank" rel="noreferrer">Abrir</a>
         </div>
       </div>
     </div>
