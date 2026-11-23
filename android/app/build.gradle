@@ -24,6 +24,7 @@ android {
             def keyPasswordValue = System.getenv("ANDROID_KEY_PASSWORD")
             if (keystorePath && keystorePassword && keyAliasValue && keyPasswordValue) {
                 storeFile file(keystorePath)
+                storeType "PKCS12"
                 storePassword keystorePassword
                 keyAlias keyAliasValue
                 keyPassword keyPasswordValue
