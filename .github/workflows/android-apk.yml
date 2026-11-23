@@ -83,8 +83,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/downloads/OficioDoMotor.apk
-          git commit -m "Publica APK oficial assinado"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "Publica APK oficial assinado"
+            git push
+          fi
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
