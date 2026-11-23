@@ -16,6 +16,9 @@ jobs:
   build-release:
     name: Build signed APK and publish it on the website
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     timeout-minutes: 45
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
@@ -102,9 +105,6 @@ jobs:
       - name: Deploy website with official APK
         id: deployment
         uses: actions/deploy-pages@v4
-        environment:
-          name: github-pages
-          url: ${{ steps.deployment.outputs.page_url }}
 
       - name: Remove temporary signing key
         if: always()
