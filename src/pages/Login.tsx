@@ -2,6 +2,7 @@ import { useState, type FormEvent, type MouseEvent as MouseReact } from 'react'
 import { supabase, supabaseConfigurado } from '../lib/supabase'
 import { Emblema } from '../components/Cenario'
 import { Atmosfera } from '../components/Atmosfera'
+import { URL_DOWNLOAD, noSite } from '../lib/urlSite'
 
 const campo = 'campo'
 
@@ -130,6 +131,20 @@ export default function Login() {
             </button>
           )}
         </form>
+
+        {noSite && (
+          <div className="cartao-entrada mt-4 space-y-2 text-center">
+            <p className="text-sm text-gray-600">Prefere usar no computador?</p>
+            <a
+              href={URL_DOWNLOAD}
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full rounded-lg border-2 border-orange-500 py-3 font-semibold text-orange-600 hover:bg-orange-50"
+            >
+              Baixar o programa para Windows ou Mac
+            </a>
+          </div>
+        )}
       </section>
     </div>
   )

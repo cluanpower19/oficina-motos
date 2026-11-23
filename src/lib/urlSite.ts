@@ -6,3 +6,9 @@ export function urlSite(): string {
   if (window.location.protocol.startsWith('http')) return `${window.location.origin}${import.meta.env.BASE_URL}`
   return SITE_PUBLICO.replace(/\/$/, '') + '/'
 }
+
+// Página de downloads do app desktop (instaladores anexados nas Releases do GitHub).
+export const URL_DOWNLOAD = 'https://github.com/oficiodomotor/oficiodomotor.github.io/releases/latest'
+
+// Verdadeiro no site (http/https); falso dentro do app instalado (app://).
+export const noSite = window.location.protocol.startsWith('http')
