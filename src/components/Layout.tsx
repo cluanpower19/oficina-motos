@@ -1,15 +1,32 @@
+import type { ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { calcularAssinatura, linkSuporte } from '../lib/assinatura'
 
+const Svg = ({ children }: { children: ReactNode }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {children}
+  </svg>
+)
+
+const icones: Record<string, ReactNode> = {
+  painel: <Svg><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></Svg>,
+  os: <Svg><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.5 17.2a1.8 1.8 0 0 0 2.6 2.6l5.8-5.8a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.2-.6-.6-2.2 2.4-2.4z" /></Svg>,
+  clientes: <Svg><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c.8-3.6 3.8-5.4 7.5-5.4s6.7 1.8 7.5 5.4" /></Svg>,
+  catalogo: <Svg><path d="M21 8 12 3 3 8v8l9 5 9-5V8z" /><path d="M3 8l9 5 9-5M12 13v8" /></Svg>,
+  lembretes: <Svg><path d="M6 16V11a6 6 0 1 1 12 0v5l1.6 2H4.4L6 16z" /><path d="M10 21a2 2 0 0 0 4 0" /></Svg>,
+  financeiro: <Svg><rect x="2.5" y="6" width="19" height="12" rx="2" /><circle cx="12" cy="12" r="2.6" /><path d="M6 9.5v.01M18 14.5v.01" /></Svg>,
+  config: <Svg><path d="M4 7h9M17 7h3M4 17h3M11 17h9" /><circle cx="15" cy="7" r="2" /><circle cx="9" cy="17" r="2" /></Svg>,
+}
+
 const todos = [
-  { to: '/', label: 'Painel', icone: '🏠' },
-  { to: '/os', label: 'OS', icone: '🔧' },
-  { to: '/clientes', label: 'Clientes', icone: '👤' },
-  { to: '/catalogo', label: 'Catálogo', icone: '📦' },
-  { to: '/lembretes', label: 'Lembretes', icone: '🔔' },
-  { to: '/financeiro', label: 'Financeiro', icone: '💰' },
-  { to: '/configuracoes', label: 'Config.', icone: '⚙️' },
+  { to: '/', label: 'Painel', icone: 'painel' },
+  { to: '/os', label: 'OS', icone: 'os' },
+  { to: '/clientes', label: 'Clientes', icone: 'clientes' },
+  { to: '/catalogo', label: 'Catálogo', icone: 'catalogo' },
+  { to: '/lembretes', label: 'Lembretes', icone: 'lembretes' },
+  { to: '/financeiro', label: 'Financeiro', icone: 'financeiro' },
+  { to: '/configuracoes', label: 'Config.', icone: 'config' },
 ]
 
 export default function Layout() {
@@ -25,34 +42,31 @@ export default function Layout() {
 
   return (
     <div className="min-h-full md:flex">
-      <aside className="hidden md:flex md:w-60 md:flex-col bg-gray-800 text-white">
-        <div className="px-5 py-6 text-xl font-bold text-orange-400">🏍️ Oficina Moto</div>
+      <aside className="menu-lateral hidden md:flex md:w-64 md:flex-col text-white">
+        <div className="px-5 pb-6 pt-7">
+          <div className="placa">
+            <span className="faixa">BRASIL</span>
+            <span className="nome">OFICINA MOTO</span>
+          </div>
+          <p className="mt-4 truncate text-sm text-gray-600">{perfil?.oficina.nome}</p>
+        </div>
         <nav className="flex-1 space-y-1 px-3">
           {itens.map((i) => (
-            <NavLink
-              key={i.to}
-              to={i.to}
-              end={i.to === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-4 py-3 text-base ${
-                  isActive ? 'bg-orange-500 text-white' : 'text-gray-200 hover:bg-gray-700'
-                }`
-              }
-            >
-              <span>{i.icone}</span>
+            <NavLink key={i.to} to={i.to} end={i.to === '/'} className={({ isActive }) => `item-menu ${isActive ? 'ativo' : ''}`}>
+              {icones[i.icone]}
               {i.label}
             </NavLink>
           ))}
         </nav>
-        <button onClick={sair} className="m-3 rounded-lg bg-gray-700 px-4 py-3 text-left hover:bg-gray-600">
+        <button onClick={sair} className="item-menu m-3">
           Sair
         </button>
       </aside>
 
       <div className="flex-1 pb-24 md:pb-0">
-        <header className="flex items-center justify-between bg-gray-800 px-4 py-3 text-white md:hidden">
-          <span className="font-bold text-orange-400">{perfil?.oficina.nome ?? 'Oficina Moto'}</span>
-          <button onClick={sair} className="rounded bg-gray-700 px-3 py-2 text-sm">Sair</button>
+        <header className="flex items-center justify-between border-b border-[#2c3542] bg-[#0b1016] px-4 py-3 text-white md:hidden">
+          <span className="titulo text-xl text-orange-400">{perfil?.oficina.nome ?? 'Oficina Moto'}</span>
+          <button onClick={sair} className="rounded-md border border-[#364152] px-3 py-1.5 text-sm text-gray-300">Sair</button>
         </header>
         {faixa && (
           <div className={`px-4 py-2 text-sm ${assin.ativa ? 'bg-yellow-100 text-yellow-900' : 'bg-red-600 text-white'}`}>
@@ -72,17 +86,10 @@ export default function Layout() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 flex justify-around bg-gray-800 pb-[env(safe-area-inset-bottom)] text-white md:hidden">
+      <nav className="barra-celular fixed inset-x-0 bottom-0 z-10 flex justify-around pb-[env(safe-area-inset-bottom)] md:hidden">
         {itens.map((i) => (
-          <NavLink
-            key={i.to}
-            to={i.to}
-            end={i.to === '/'}
-            className={({ isActive }) =>
-              `flex min-w-0 flex-1 flex-col items-center py-2 text-[11px] ${isActive ? 'text-orange-400' : 'text-gray-300'}`
-            }
-          >
-            <span className="text-xl">{i.icone}</span>
+          <NavLink key={i.to} to={i.to} end={i.to === '/'} className={({ isActive }) => `aba-celular ${isActive ? 'ativo' : ''}`}>
+            {icones[i.icone]}
             {i.label}
           </NavLink>
         ))}

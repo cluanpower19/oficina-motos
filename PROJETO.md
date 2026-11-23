@@ -133,6 +133,7 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 | 22/11/2026 | Desenvolvimento passa a ser **local, pelo Claude + Remote Desktop Commander** (Windows), sem bolt.new. Retomada por um único comando que lê `CONTINUAR.md`. |
 | 23/11/2026 | Assinatura: teste de 14 dias (depois reduzido para 7, ver abaixo), ativação manual (Pix) por SQL no Supabase. Bloqueio no banco por políticas restritivas: oficina inativa só lê. |
 | 23/11/2026 | Teste grátis de **7 dias, 1 por pessoa**: migração 0012 (	estes_usados com e-mail canônico sem pontos/+alias e telefone; e-mails descartáveis bloqueados; repetidos nascem loqueado). Recomendado ligar Confirm email no Supabase. |
+| 23/11/2026 | Visual cinematogrÃ¡fico (Etapa 10c): tema garagem Ã  noite (asfalto, aÃ§o, tungstÃªnio, sombra azulada), fontes Barlow/Barlow Condensed, granulado e vinheta, tela de entrada com farol e faixas de cinema, menu com Ã­cones SVG. As telas antigas foram remapeadas por CSS em src/index.css (classes bg-white, text-gray-* etc. viram tema escuro). |
 
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
