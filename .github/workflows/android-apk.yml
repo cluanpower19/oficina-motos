@@ -8,6 +8,10 @@ on:
     paths:
       - 'src/pages/Login.tsx'
       - 'src/App.tsx'
+      - 'src/components/Layout.tsx'
+      - 'android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml'
+      - 'android/app/src/main/res/mipmap-anydpi/ic_launcher.xml'
+      - 'android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml'
 
 permissions:
   contents: write
