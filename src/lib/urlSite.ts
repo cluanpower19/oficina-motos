@@ -12,3 +12,18 @@ export const URL_DOWNLOAD = 'https://github.com/oficiodomotor/oficiodomotor.gith
 
 // Verdadeiro no site (http/https); falso dentro do app instalado (app://).
 export const noSite = window.location.protocol.startsWith('http')
+
+// Link direto do instalador da Release mais recente (baixa na hora, sem abrir a página do GitHub).
+// Procura o arquivo pelo final do nome, então continua valendo quando a versão muda.
+const API_RELEASE = 'https://api.github.com/repos/oficiodomotor/oficiodomotor.github.io/releases/latest'
+
+export async function urlInstalador(sufixo: string): Promise<string | null> {
+  try {
+    const r = await fetch(API_RELEASE, { headers: { Accept: 'application/vnd.github+json' } })
+    if (!r.ok) return null
+    const dados = (await r.json()) as { assets?: { name: string; browser_download_url: string }[] }
+    return dados.assets?.find((a) => a.name.endsWith(sufixo))?.browser_download_url ?? null
+  } catch {
+    return null
+  }
+}

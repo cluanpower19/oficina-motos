@@ -1,8 +1,8 @@
-import { useState, type FormEvent, type MouseEvent as MouseReact } from 'react'
+import { useEffect, useState, type FormEvent, type MouseEvent as MouseReact } from 'react'
 import { supabase, supabaseConfigurado } from '../lib/supabase'
 import { Emblema } from '../components/Cenario'
 import { Atmosfera } from '../components/Atmosfera'
-import { URL_DOWNLOAD, noSite } from '../lib/urlSite'
+import { URL_DOWNLOAD, noSite, urlInstalador } from '../lib/urlSite'
 
 const campo = 'campo'
 
@@ -17,6 +17,14 @@ export default function Login() {
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [linkWindows, setLinkWindows] = useState<string | null>(null)
+  const [linkMac, setLinkMac] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!noSite) return
+    urlInstalador('-win-x64.exe').then(setLinkWindows)
+    urlInstalador(navigator.userAgent.includes('Mac') ? '-mac-arm64.dmg' : '-mac-x64.dmg').then(setLinkMac)
+  }, [])
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
@@ -136,12 +144,14 @@ export default function Login() {
           <div className="cartao-entrada mt-4 space-y-2 text-center">
             <p className="text-sm text-gray-600">Prefere usar no computador?</p>
             <a
-              href={URL_DOWNLOAD}
-              target="_blank"
-              rel="noreferrer"
+              href={linkWindows ?? URL_DOWNLOAD}
+              {...(linkWindows ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
               className="block w-full rounded-lg border-2 border-orange-500 py-3 font-semibold text-orange-600 hover:bg-orange-50"
             >
-              Baixar o programa para Windows ou Mac
+              Baixar para Windows
+            </a>
+            <a href={linkMac ?? URL_DOWNLOAD} {...(linkMac ? { download: true } : { target: '_blank', rel: 'noreferrer' })} className="link">
+              Baixar para Mac
             </a>
           </div>
         )}
