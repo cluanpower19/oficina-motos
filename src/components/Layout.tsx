@@ -83,7 +83,7 @@ export default function Layout() {
           </span>
         </div>
         <header className="flex items-center justify-between border-b border-[#2c3542] bg-[#0b1016] px-4 py-3 text-white md:hidden">
-          <span className="titulo text-xl text-orange-400">{perfil?.oficina.nome ?? 'Ofício do motor'}</span>
+          <span className="flex min-w-0 items-center gap-2"><Emblema tamanho={32} /><span className="titulo truncate text-xl text-orange-400">{perfil?.oficina.nome ?? 'Ofício do motor'}</span></span>
           <button onClick={sair} className="rounded-md border border-[#364152] px-3 py-1.5 text-sm text-gray-300">Sair</button>
         </header>
         {faixa && (
