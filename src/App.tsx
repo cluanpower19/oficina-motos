@@ -17,6 +17,9 @@ import Financeiro from './pages/Financeiro'
 function Rotas() {
   const { session, perfil, carregando } = useAuth()
 
+  // O link de recuperação do Supabase retorna à página inicial com type=recovery no fragmento.
+  if (window.location.hash.includes('type=recovery')) return <Login />
+
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
   if (!session) return <Login />
   if (!perfil) {
