@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { formatarMoeda, formatarPlaca, formatarTelefone, lerNumero, mensagemErro } from '../lib/formatos'
 import { COR, ROTULO, STATUS, type StatusOS } from '../lib/status'
 import { botao, campo } from './Clientes'
+import { reduzirImagem } from '../lib/imagem'
 
 type OS = {
   id: string
@@ -14,11 +15,14 @@ type OS = {
   km_entrada: number | null
   criado_em: string
   cliente_id: string
+  oficina_id: string
+  token_publico: string
   clientes: { nome: string; telefone: string | null } | null
   motos: { placa: string; marca: string | null; modelo: string | null } | null
 }
 type Item = { id: string; tipo: 'servico' | 'peca'; descricao: string; quantidade: number; valor_unitario: number; peca_id: string | null }
 type Cat = { id: string; nome: string; preco: number }
+type Foto = { id: string; path: string }
 
 const vazio = { tipo: 'servico' as 'servico' | 'peca', catId: '', descricao: '', qtd: '1', valor: '' }
 
@@ -34,12 +38,15 @@ export default function OSDetalhe() {
   const [editId, setEditId] = useState<string | null>(null)
   const [f, setF] = useState(vazio)
   const [salvando, setSalvando] = useState(false)
+  const [fotos, setFotos] = useState<Foto[]>([])
+  const [enviandoFoto, setEnviandoFoto] = useState(false)
+  const [copiado, setCopiado] = useState(false)
 
   const carregar = useCallback(async () => {
     const [a, b] = await Promise.all([
       supabase
         .from('ordens_servico')
-        .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, clientes(nome, telefone), motos(placa, marca, modelo)')
+        .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, oficina_id, token_publico, clientes(nome, telefone), motos(placa, marca, modelo)')
         .eq('id', id)
         .single(),
       supabase
@@ -51,6 +58,8 @@ export default function OSDetalhe() {
     if (a.error) setErro(a.error.message)
     else setOs(a.data as unknown as OS)
     if (b.data) setItens(b.data as Item[])
+    const c = await supabase.from('os_fotos').select('id, path').eq('os_id', id).order('criado_em')
+    if (c.data) setFotos(c.data as Foto[])
     setCarregando(false)
   }, [id])
 
@@ -116,6 +125,48 @@ export default function OSDetalhe() {
     const { error } = await supabase.from('os_itens').delete().eq('id', i.id)
     if (error) setErro(mensagemErro(error))
     else carregar()
+  }
+
+  const urlFoto = (p: string) => supabase.storage.from('os-fotos').getPublicUrl(p).data.publicUrl
+
+  async function enviarFotos(lista: FileList | null) {
+    if (!os || !lista?.length) return
+    setErro('')
+    setEnviandoFoto(true)
+    for (const arq of Array.from(lista)) {
+      try {
+        const blob = await reduzirImagem(arq)
+        const path = `${os.oficina_id}/${os.id}/${crypto.randomUUID()}.jpg`
+        const up = await supabase.storage.from('os-fotos').upload(path, blob, { contentType: 'image/jpeg' })
+        if (up.error) throw up.error
+        const ins = await supabase.from('os_fotos').insert({ os_id: os.id, path })
+        if (ins.error) throw ins.error
+      } catch (e) {
+        setErro(mensagemErro(e as { message: string }))
+      }
+    }
+    setEnviandoFoto(false)
+    carregar()
+  }
+
+  async function removerFoto(fo: Foto) {
+    if (!window.confirm('Remover esta foto?')) return
+    await supabase.storage.from('os-fotos').remove([fo.path])
+    const { error } = await supabase.from('os_fotos').delete().eq('id', fo.id)
+    if (error) setErro(mensagemErro(error))
+    else carregar()
+  }
+
+  async function copiarLink() {
+    if (!os) return
+    const link = `${window.location.origin}/orcamento/${os.token_publico}`
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 2000)
+    } catch {
+      window.prompt('Copie o link do orçamento:', link)
+    }
   }
 
   if (carregando) return <p className="text-gray-600">Carregando...</p>
@@ -218,6 +269,37 @@ export default function OSDetalhe() {
       <div className="flex items-center justify-between rounded-xl bg-gray-800 p-4 text-white">
         <span>Total</span>
         <span className="text-2xl font-bold text-orange-400">{formatarMoeda(Number(os.valor_total))}</span>
+      </div>
+
+      <div className="space-y-3 rounded-xl bg-white p-4 shadow">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-bold text-gray-800">Fotos</h2>
+          <label className={botao + ' cursor-pointer'}>
+            {enviandoFoto ? 'Enviando...' : '+ Foto'}
+            <input type="file" accept="image/*" capture="environment" multiple hidden disabled={enviandoFoto} onChange={(e) => { enviarFotos(e.target.files); e.target.value = '' }} />
+          </label>
+        </div>
+        {fotos.length === 0 ? (
+          <p className="text-sm text-gray-600">Sem fotos. Elas aparecem no orçamento do cliente.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {fotos.map((fo) => (
+              <div key={fo.id} className="relative">
+                <img src={urlFoto(fo.path)} alt="Foto da OS" className="h-32 w-full rounded-lg object-cover" />
+                <button onClick={() => removerFoto(fo)} className="absolute right-1 top-1 rounded-full bg-red-600 px-2 py-1 text-xs text-white" aria-label="Remover foto">✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2 rounded-xl bg-white p-4 shadow">
+        <h2 className="text-lg font-bold text-gray-800">Orçamento para o cliente</h2>
+        <p className="text-sm text-gray-600">Link com botões Aprovar/Recusar. O envio por WhatsApp vem na Etapa 6.</p>
+        <div className="flex gap-2">
+          <button className={botao + ' flex-1'} onClick={copiarLink}>{copiado ? 'Link copiado!' : 'Copiar link'}</button>
+          <a className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-800" href={`/orcamento/${os.token_publico}`} target="_blank" rel="noreferrer">Abrir</a>
+        </div>
       </div>
     </div>
   )

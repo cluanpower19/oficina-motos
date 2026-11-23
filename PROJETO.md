@@ -104,7 +104,7 @@ Teste grátis de 14 dias, sem cartão. No MVP, cobrança manual (Pix). Depois, g
 - [x] **Etapa 2:** Tabelas `oficinas`, `usuarios`, `clientes`, `motos` com RLS. Telas de clientes e motos
 - [x] **Etapa 3:** Catálogo de serviços e peças
 - [x] **Etapa 4:** Nova OS e detalhe da OS (itens, status, número sequencial)
-- [ ] **Etapa 5:** Fotos da OS (Supabase Storage) e página pública do orçamento com aprovar/recusar
+- [x] **Etapa 5:** Fotos da OS (Supabase Storage) e página pública do orçamento com aprovar/recusar
 - [ ] **Etapa 6:** Botões de WhatsApp com mensagens padrão (wa.me)
 - [ ] **Etapa 7:** Lembretes de retorno
 - [ ] **Etapa 8:** Financeiro e painel inicial
@@ -134,14 +134,14 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
-- **Etapa concluída mais recente:** Etapa 4 (OS: lista, nova OS por placa, detalhe com itens/status/total). Migração 0005 aplicada pelo conector Supabase e lógica validada no banco (numeração, total, baixa de estoque única). Telas ainda sem teste manual no navegador. Tag `etapa-04`.
-- **Etapa atual:** 5 (fotos da OS no Storage e página pública do orçamento com aprovar/recusar). Ainda não iniciada.
+- **Etapa concluída mais recente:** Etapa 5 (fotos da OS no Storage + página pública `/orcamento/:token` com Aprovar/Recusar). Migração 0006 aplicada; funções `orcamento_publico` e `responder_orcamento` validadas no banco (aprova uma vez só, grava `aprovado_em`, token inválido não vaza dados). Build OK. Telas ainda sem teste manual no navegador. Tag `etapa-05`.
+- **Etapa atual:** 6 (botões de WhatsApp com mensagens padrão, wa.me). Ainda não iniciada.
 - **Pasta local:** `C:\Users\iaras\oficina-moto`
 - **Ambiente:** Windows + PowerShell, Node v26.13.0, npm 11.20.0, git 2.56.1. `gh` não instalado.
-- **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`, `Catalogo` (abas `CatalogoServicos` e `CatalogoPecas`), `Clientes` (lista, busca por nome/placa, novo cliente+moto), `ClienteDetalhe` (editar, motos, remover), `lib/formatos.ts`
-- **Migrações aplicadas no Supabase (NÃO rodar de novo):** `0001_base.sql`, `0002_clientes_motos.sql`, `0003_grants.sql`, `0004_catalogo_pecas.sql`, `0005_ordens_servico.sql`. Próxima: `0006_...`. O conector Supabase (MCP) está ligado: aplicar migrações com `apply_migration` no projeto `layuhmhkzqttgfhawpsh` e conferir `list_migrations` antes.
+- **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`, `Catalogo` (abas `CatalogoServicos` e `CatalogoPecas`), `Clientes` (lista, busca por nome/placa, novo cliente+moto), `ClienteDetalhe` (editar, motos, remover), `OrdensServico`, `NovaOS`, `OSDetalhe` (itens, status, fotos, copiar/abrir link do orçamento), `OrcamentoPublico` (rota pública sem login), `lib/formatos.ts`, `lib/imagem.ts` (reduz foto a 1600px JPEG), `lib/status.ts`
+- **Migrações aplicadas no Supabase (NÃO rodar de novo):** `0001_base.sql`, `0002_clientes_motos.sql`, `0003_grants.sql`, `0004_catalogo_pecas.sql`, `0005_ordens_servico.sql`, `0006_fotos_orcamento_publico.sql`. Próxima: `0007_...`. O conector Supabase (MCP) está ligado: aplicar migrações com `apply_migration` no projeto `layuhmhkzqttgfhawpsh` e conferir `list_migrations` antes.
 - **Supabase:** projeto `layuhmhkzqttgfhawpsh` (https://layuhmhkzqttgfhawpsh.supabase.co), região us-east-2. `.env` local criado (ignorado pelo Git). Chave usada: publishable/anon. Em outro PC: recriar `.env` a partir do `.env.example`. "Confirm email" está DESLIGADO.
 - **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
-- **Última tag:** `etapa-04`
+- **Última tag:** `etapa-05`
 - **Git:** identidade local do repo = cluanpower19 / cluanpower19@users.noreply.github.com
-- **Pendências:** (1) Teste manual das telas de OS no navegador (Nova OS, itens, status); se houver bug, corrigir antes/junto da Etapa 5. (2) Etapa 5: migração 0006 com bucket Storage `os-fotos` + tabela `os_fotos`, função segura para a página pública por `token_publico` (anon só lê/aprova pela função, nunca tabela aberta). (3) Usuários de teste podem ser apagados em Authentication > Users.
+- **Pendências:** (1) Teste manual no navegador: Nova OS, itens, status, enviar foto (celular), abrir `/orcamento/<token>` e aprovar/recusar. Se houver bug, corrigir junto da Etapa 6. (2) Etapa 6: usar `token_publico` para montar o link `window.location.origin + /orcamento/ + token` na mensagem do wa.me (o botão "Copiar link" já existe no OSDetalhe). (3) Segurança (opcional, migração 0007): fixar `search_path` nas funções de trigger e revogar `execute` de `anon` em `minha_oficina_id()`; ativar "Leaked password protection" em Auth. Os avisos sobre `orcamento_publico`/`responder_orcamento` executáveis por anon são intencionais. (4) Usuários de teste podem ser apagados em Authentication > Users.

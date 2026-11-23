@@ -10,6 +10,7 @@ import Catalogo from './pages/Catalogo'
 import OrdensServico from './pages/OrdensServico'
 import NovaOS from './pages/NovaOS'
 import OSDetalhe from './pages/OSDetalhe'
+import OrcamentoPublico from './pages/OrcamentoPublico'
 
 function Rotas() {
   const { session, perfil, carregando } = useAuth()
@@ -42,9 +43,17 @@ function Rotas() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Rotas />
-      </AuthProvider>
+      <Routes>
+        <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
+        <Route
+          path="*"
+          element={
+            <AuthProvider>
+              <Rotas />
+            </AuthProvider>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   )
 }
