@@ -1,39 +1,49 @@
 # Aplicativo Android — Ofício do Motor
 
-O aplicativo Android é gerado com Capacitor a partir do mesmo projeto React/Vite. O site continua sendo a versão principal; não é necessário manter uma segunda aplicação.
+O APK oficial é compilado na nuvem pelo GitHub Actions e publicado diretamente no site. Não é necessário instalar Android Studio ou Android SDK.
 
-## Gerar a versão oficial pelo GitHub Actions
+## Chave de assinatura criada
 
-A compilação oficial roda na nuvem. Não é necessário instalar Android Studio ou Android SDK no computador.
+Foi criada uma chave de assinatura PKCS#12 permanente para o aplicativo. No computador autorizado, os arquivos estão em:
 
-Antes do primeiro lançamento, crie uma chave de assinatura permanente (keystore) em um local seguro. Nunca envie o arquivo keystore ou as senhas para o repositório.
+`C:\Users\iaras\Documents\OficioDoMotor-Release\`
 
-O workflow `.github/workflows/android-apk.yml` espera estes quatro **Repository secrets**:
+- `oficio-do-motor-release.p12`: chave privada de assinatura (backup essencial).
+- `GITHUB-ACTIONS-SECRETS.txt`: valores para configurar os quatro segredos privados do GitHub.
+- `LEIA-ME.txt`: instruções de segurança e impressão digital do certificado.
 
-- `ANDROID_KEYSTORE_BASE64`: conteúdo do keystore codificado em Base64.
-- `ANDROID_KEYSTORE_PASSWORD`: senha do keystore.
-- `ANDROID_KEY_ALIAS`: alias da chave.
-- `ANDROID_KEY_PASSWORD`: senha da chave.
+**Não publique, envie por e-mail/chat nem adicione esses arquivos ao repositório.** Mantenha duas cópias seguras da pasta, uma delas offline. Perder a chave pode impedir atualizações compatíveis para os usuários que instalaram o app.
 
-Para criar uma chave com JDK 21, execute em um terminal local (ajuste o caminho de destino e defina suas próprias senhas fortes):
+## Etapa necessária: cadastrar os segredos no GitHub
 
-```powershell
-keytool -genkeypair -v -keystore "$HOME\oficio-do-motor-release.jks" -alias oficio-do-motor -keyalg RSA -keysize 4096 -validity 10000
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\oficio-do-motor-release.jks")) | Set-Content "$HOME\oficio-do-motor-release-base64.txt" -NoNewline
-```
+O GitHub não permite que este fluxo de trabalho cadastre segredos privados por meio da integração disponível. É necessário fazer esta única etapa manualmente:
 
-No GitHub, abra **Settings > Secrets and variables > Actions > New repository secret** e cadastre os quatro valores. Para `ANDROID_KEYSTORE_BASE64`, use o conteúdo do arquivo `oficio-do-motor-release-base64.txt`. Use o mesmo alias e as senhas definidos na criação da chave.
+1. Abra o repositório `oficiodomotor/oficiodomotor.github.io` no GitHub.
+2. Acesse **Settings → Secrets and variables → Actions**.
+3. Clique em **New repository secret**.
+4. Abra localmente `GITHUB-ACTIONS-SECRETS.txt` na pasta indicada acima e crie os quatro segredos, copiando cada valor correspondente:
+   - `ANDROID_KEYSTORE_BASE64`
+   - `ANDROID_KEYSTORE_PASSWORD`
+   - `ANDROID_KEY_ALIAS`
+   - `ANDROID_KEY_PASSWORD`
 
-Depois, abra **Actions > Build and publish official Android APK > Run workflow**. O workflow compila a variante `release`, verifica a assinatura e publica o arquivo em `public/downloads/OficioDoMotor.apk`. O deploy do site disponibiliza então o link:
+Não cole esses valores no chat. As duas senhas foram geradas automaticamente e são iguais para o formato PKCS#12.
 
+## Compilar e publicar
+
+Depois de cadastrar os quatro segredos:
+
+1. Abra **Actions** no repositório.
+2. Selecione **Build and publish official Android APK**.
+3. Clique em **Run workflow** e confirme.
+
+O workflow compila a variante `release`, verifica a assinatura, publica o arquivo `public/downloads/OficioDoMotor.apk` e executa o deploy do site. O botão Android na tela de login só aparece quando o APK já estiver disponível.
+
+Link de download após a publicação:
 `https://oficiodomotor.github.io/downloads/OficioDoMotor.apk`
 
-O botão Android na tela de login do site só aparece quando esse arquivo já estiver publicado. O workflow não publica APK de depuração nem usa a chave em arquivos versionados.
-
-**Importante:** mantenha o keystore e suas senhas em backup seguro. Perder a chave pode impedir a publicação de atualizações compatíveis para quem já instalou esta versão. Não compartilhe esses dados no chat ou no repositório.
-
-Antes de divulgar amplamente, teste instalação, login, navegação, seleção/tirada de fotos, envio de imagens, links do WhatsApp e retorno do Android. A assinatura não elimina necessariamente os avisos do Android para instalações fora da Play Store.
+Antes de divulgar amplamente, teste instalação, login, navegação, fotos, uploads, links do WhatsApp e retorno do Android. A assinatura não elimina necessariamente os avisos do Android para instalações fora da Play Store.
 
 ## Versão do aplicativo
 
-Antes de cada lançamento, atualize `versionCode` (sempre crescente) e `versionName` em `android/app/build.gradle`.
+Antes de cada lançamento, incremente `versionCode` e atualize `versionName` em `android/app/build.gradle`. Use sempre a mesma chave de assinatura criada para esta aplicação.
