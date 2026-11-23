@@ -1,0 +1,154 @@
+/* ===== Oficina: camada visual profissional e cinematográfica =====
+   Carregada depois do index.css. Textura de aço, chapa xadrez, rebites, listra de perigo, garagem à noite. */
+
+:root {
+  --ferrugem: #b5532a;
+  --aco-claro: #c9ced6;
+  --perigo: repeating-linear-gradient(-45deg, #f2a03d 0 12px, #12161b 12px 24px);
+}
+
+/* ---------- Texturas reutilizáveis ---------- */
+.listra-perigo { height: 8px; background: var(--perigo); opacity: 0.9; }
+.chapa-xadrez {
+  background-color: #10151c;
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.045) 25%, transparent 25% 75%, rgba(255,255,255,0.045) 75%),
+    linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25% 75%, rgba(255,255,255,0.03) 75%);
+  background-size: 14px 14px;
+}
+.aco-escovado {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #1d2631, #131a22);
+}
+
+/* ---------- Emblema (logo) ---------- */
+.emblema { position: relative; display: inline-grid; place-items: center; color: var(--tungstenio); flex: none;
+  filter: drop-shadow(0 0 10px rgba(242, 160, 61, 0.35)); }
+.emblema-engrenagem { position: absolute; inset: 0; width: 100%; height: 100%; animation: gira 24s linear infinite; opacity: 0.9; }
+.emblema-chave { position: relative; width: 52%; height: 52%; color: #fff3d2; }
+@keyframes gira { to { transform: rotate(360deg); } }
+.marca { display: flex; align-items: center; gap: 0.8rem; }
+.marca-nome { font-family: var(--fonte-titulo); font-weight: 800; font-size: 1.55rem; line-height: 0.9; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
+.marca-nome small { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.32em; color: var(--tungstenio); margin-top: 3px; }
+
+/* ---------- Menu lateral ---------- */
+.menu-lateral { background-image: linear-gradient(180deg, rgba(31,111,120,0.10), transparent 30%), linear-gradient(180deg, #0f151c, #0a0f14); }
+.menu-lateral .rodape-menu { margin: 0.75rem; border-radius: 0.7rem; padding: 0.8rem 0.9rem; border: 1px solid var(--linha); background: rgba(255,255,255,0.03); font-size: 0.82rem; color: var(--suave); }
+.lampada { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #37d68b; box-shadow: 0 0 10px #37d68b; margin-right: 0.45rem; animation: pulsa 2.4s ease-in-out infinite; }
+@keyframes pulsa { 50% { opacity: 0.45; } }
+
+/* ---------- Área principal ---------- */
+.area-principal { position: relative; min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 44px 44px; }
+.topo-desktop { display: none; }
+@media (min-width: 768px) {
+  .topo-desktop { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 2rem;
+    border-bottom: 1px solid var(--linha); background: rgba(11, 16, 22, 0.75); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 20; }
+}
+.chip-usuario { display: inline-flex; align-items: center; gap: 0.6rem; border: 1px solid var(--linha); border-radius: 999px; padding: 0.3rem 0.85rem 0.3rem 0.35rem; font-size: 0.9rem; color: var(--cromo); background: rgba(255,255,255,0.03); }
+.chip-usuario b { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: linear-gradient(180deg, #f8b457, #e58f27); color: #1b1205; font-family: var(--fonte-titulo); font-size: 1rem; }
+
+/* títulos de página com filete âmbar */
+main h1 { text-transform: uppercase; letter-spacing: 0.04em; position: relative; padding-bottom: 0.55rem; }
+main h1::after { content: ''; position: absolute; left: 0; bottom: 0; width: 56px; height: 3px; background: var(--tungstenio); box-shadow: 0 0 14px var(--tungstenio); border-radius: 2px; }
+main h2 { letter-spacing: 0.03em; color: var(--aco-claro); text-transform: uppercase; font-size: 1.2rem; }
+
+/* cartões das telas existentes: aço com rebites e filete de luz */
+main .rounded-xl.bg-white, main .rounded-lg.bg-white, main .rounded-xl.bg-gray-100 { position: relative; border-radius: 0.9rem; transition: transform .15s, border-color .15s, box-shadow .15s; }
+main a.rounded-xl.bg-white:hover { transform: translateY(-2px); border-color: rgba(242,160,61,0.55); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 18px 38px rgba(0,0,0,0.5), 0 0 0 1px rgba(242,160,61,0.15); }
+main .rounded-xl.bg-white::before { content: ''; position: absolute; left: 16px; right: 16px; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,214,140,0.55), transparent); }
+main .shadow { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 32px rgba(0,0,0,0.38); }
+main button, main a[class*='bg-orange'] { letter-spacing: 0.01em; }
+main .bg-orange-500 { border-radius: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--fonte-titulo); font-size: 1.05rem; }
+main input, main select, main textarea { border-radius: 0.6rem; }
+main hr, main .border-b, main .divide-y > * + * { border-color: var(--linha); }
+main table { border-collapse: separate; border-spacing: 0 6px; }
+main th { font-family: var(--fonte-titulo); text-transform: uppercase; letter-spacing: 0.08em; color: var(--suave); font-weight: 600; }
+
+/* ---------- Painel: herói e velocímetros ---------- */
+.heroi { position: relative; overflow: hidden; border-radius: 1.1rem; border: 1px solid var(--linha); isolation: isolate;
+  background:
+    radial-gradient(60% 120% at 82% 100%, rgba(242,160,61,0.22), transparent 62%),
+    radial-gradient(70% 90% at 0% 0%, rgba(31,111,120,0.35), transparent 65%),
+    linear-gradient(180deg, #121a23, #0a0f14); }
+.heroi-conteudo { position: relative; z-index: 2; padding: 1.4rem 1.4rem 1.6rem; max-width: 30rem; }
+.heroi .saudacao { font-family: var(--fonte-titulo); letter-spacing: 0.28em; text-transform: uppercase; font-size: 0.8rem; color: var(--tungstenio); }
+.heroi h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); margin-top: 0.35rem; }
+.heroi h1::after { display: none; }
+.heroi .moto { position: absolute; z-index: 1; right: -4%; bottom: -6%; width: min(62%, 30rem); opacity: 0.92; }
+@media (max-width: 640px) { .heroi .moto { width: 85%; right: -22%; opacity: 0.45; } }
+.heroi .listra-perigo { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; height: 6px; }
+.heroi .engrenagem-fundo { position: absolute; z-index: 0; right: 30%; top: -18%; width: 14rem; color: rgba(255,255,255,0.04); animation: gira 70s linear infinite; }
+.heroi .chave-fundo { position: absolute; z-index: 0; left: 46%; top: 12%; width: 11rem; color: rgba(255,255,255,0.05); transform: rotate(-24deg); }
+.moto-farol { animation: oscila 4s ease-in-out infinite; transform-origin: 452px 128px; }
+@keyframes oscila { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 50% { opacity: 0.55; } 53% { opacity: 1; } }
+
+.velocimetro { position: relative; display: block; width: 100%; padding: 0.9rem 0.6rem 0.8rem; text-align: center; border-radius: 1rem;
+  border: 1px solid var(--linha); background: radial-gradient(90% 80% at 50% 0%, rgba(255,255,255,0.05), transparent 70%), linear-gradient(180deg, #151c26, #0e131a);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 30px rgba(0,0,0,0.4); transition: transform .15s, border-color .15s; }
+.velocimetro svg { width: 100%; max-width: 8.5rem; margin: 0 auto; display: block; }
+.velocimetro-arco { transition: stroke-dasharray 1.2s cubic-bezier(.2,.8,.2,1); filter: drop-shadow(0 0 4px rgba(242,160,61,0.55)); }
+.velocimetro-numero { position: absolute; left: 0; right: 0; top: 2.35rem; font-family: var(--fonte-titulo); font-weight: 800; font-size: 2.4rem; line-height: 1; color: #fff; text-shadow: 0 0 18px rgba(242,160,61,0.45); }
+.velocimetro-rotulo { margin-top: -0.2rem; font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--suave); font-weight: 600; }
+.velocimetro-destaque { border-color: rgba(242,160,61,0.5); }
+a:hover > .velocimetro { transform: translateY(-2px); border-color: rgba(242,160,61,0.55); }
+
+.placar { position: relative; border-radius: 1rem; padding: 1rem 1.1rem; border: 1px solid var(--linha); overflow: hidden; }
+.placar::after { content: ''; position: absolute; right: -14px; bottom: -14px; width: 5.5rem; height: 5.5rem; opacity: 0.07; background: radial-gradient(circle, #fff 0 18%, transparent 19% 34%, #fff 35% 40%, transparent 41%); border-radius: 50%; }
+.placar-rotulo { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--suave); font-weight: 600; }
+.placar-valor { font-family: var(--fonte-titulo); font-weight: 800; font-size: 2rem; line-height: 1.1; margin-top: 0.15rem; }
+
+/* ---------- Login: garagem à noite ---------- */
+.cena-visual { background: #05080c; }
+.parede { position: absolute; inset: 0 0 24% 0; z-index: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0 2px, transparent 2px 42px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.22) 0 2px, transparent 2px 86px),
+    linear-gradient(180deg, #0c1117 0%, #131b24 100%); }
+.portao { position: absolute; z-index: 0; left: 6%; right: 6%; top: 8%; height: 40%;
+  background: repeating-linear-gradient(180deg, #1a232e 0 16px, #0b1016 16px 19px);
+  border: 3px solid #0a0e13; border-radius: 4px; box-shadow: inset 0 0 60px rgba(0,0,0,0.8); opacity: 0.75; }
+.portao::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(242,160,61,0.14), transparent 55%); }
+.painel-ferramentas { position: absolute; z-index: 1; left: 3%; top: 46%; width: min(30%, 15rem); height: 26%; border-radius: 6px; border: 2px solid #0a0e13;
+  background-color: #0e141b; background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.4px, transparent 1.6px); background-size: 14px 14px;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.7); }
+.painel-ferramentas .chave { position: absolute; color: #6f7a89; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.6)); }
+.pendente { position: absolute; z-index: 2; top: 0; width: 2px; background: #27303b; transform-origin: top center; animation: balanca 7s ease-in-out infinite; }
+.pendente::after { content: ''; position: absolute; bottom: -12px; left: -22px; width: 46px; height: 24px; border-radius: 46px 46px 6px 6px / 40px 40px 6px 6px; background: linear-gradient(180deg, #3a4452, #1b222b); }
+.pendente::before { content: ''; position: absolute; bottom: -14px; left: -60px; width: 122px; height: 150px; clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(255,214,140,0.38), rgba(255,214,140,0)); mix-blend-mode: screen; filter: blur(5px); }
+@keyframes balanca { 0%, 100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg); } }
+.neon { position: absolute; z-index: 2; right: 7%; top: 15%; font-family: var(--fonte-titulo); font-weight: 800; letter-spacing: 0.18em; font-size: clamp(1rem, 2.6vw, 1.7rem); text-transform: uppercase;
+  color: #ffe0b0; text-shadow: 0 0 6px #ffb454, 0 0 18px #f2a03d, 0 0 42px #e0701b; border: 2px solid rgba(255,196,120,0.9); padding: 0.2rem 0.9rem; border-radius: 8px;
+  box-shadow: 0 0 14px rgba(242,160,61,0.6), inset 0 0 14px rgba(242,160,61,0.4); animation: neon-pisca 6s infinite; }
+@keyframes neon-pisca { 0%, 18%, 22%, 62%, 64%, 100% { opacity: 1; } 20%, 63% { opacity: 0.35; } }
+.piso { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 26%;
+  background:
+    radial-gradient(60% 70% at 60% 0%, rgba(255,200,120,0.20), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 120px),
+    linear-gradient(180deg, #151b23, #05080b);
+  border-top: 2px solid #232c37; }
+.poca-oleo { position: absolute; z-index: 1; left: 18%; bottom: 5%; width: 24%; height: 7%; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,0,0,0.85), rgba(0,0,0,0.2) 70%, transparent); box-shadow: 0 0 0 1px rgba(255,255,255,0.03); }
+.poca-oleo::after { content: ''; position: absolute; inset: 20% 30% 40% 25%; border-radius: 50%; background: linear-gradient(120deg, rgba(31,111,120,0.5), rgba(181,83,42,0.4), rgba(242,160,61,0.4)); filter: blur(3px); opacity: 0.5; }
+.moto-cena { position: absolute; z-index: 3; left: 50%; bottom: 7%; width: min(86%, 41rem); transform: translateX(-46%); filter: drop-shadow(0 12px 22px rgba(0,0,0,0.65)); animation: sobe 1.6s ease-out 0.7s both; }
+.faisca { position: absolute; z-index: 4; width: 3px; height: 3px; border-radius: 50%; background: #ffd58a; box-shadow: 0 0 8px 2px #ff9d2e; opacity: 0; animation: faisca 2.6s ease-out infinite; }
+@keyframes faisca { 0% { opacity: 0; transform: translate(0,0); } 8% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+.chao-listra { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; height: 9px; background: var(--perigo); opacity: 0.8; }
+.cena-visual .farol, .cena-visual .farol-ponto, .cena-visual .estrada { display: none; }
+.cena-texto .assinatura { margin-top: 1.2rem; display: flex; gap: 1.4rem; flex-wrap: wrap; font-family: var(--fonte-titulo); letter-spacing: 0.18em; font-size: 0.82rem; text-transform: uppercase; color: var(--aco-claro); animation: sobe 1.2s ease-out 1.8s both; }
+.cena-texto .assinatura span::before { content: '◆ '; color: var(--tungstenio); }
+.cartao-entrada { padding: 2rem 1.8rem; border-radius: 1.1rem; border: 1px solid var(--linha); position: relative;
+  background: linear-gradient(180deg, rgba(28,36,48,0.92), rgba(15,20,27,0.96)); box-shadow: 0 30px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06); }
+.cartao-entrada::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 6px; border-radius: 1.1rem 1.1rem 0 0; background: var(--perigo); opacity: 0.9; }
+.cartao-entrada .campo { background: #0c1117; }
+.cartao-entrada .marca { margin-bottom: 1.2rem; }
+@media (max-width: 899px) { .pendente, .neon, .painel-ferramentas { display: none; } .moto-cena { width: 92%; } }
+@media (prefers-reduced-motion: reduce) { .pendente, .neon, .faisca, .emblema-engrenagem, .lampada, .moto-farol, .heroi .engrenagem-fundo { animation: none !important; } .faisca { opacity: 0.8; } }
+
+/* texto no alto da cena, moto embaixo */
+.cena-texto { justify-content: flex-start; gap: 2.2rem; padding-top: clamp(3.2rem, 9vw, 5.5rem); }
+@media (max-width: 899px) { .cena-visual { min-height: 24rem; } .manchete { font-size: 2rem; } .assinatura { display: none; } }

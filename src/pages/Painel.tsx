@@ -4,7 +4,8 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { formatarMoeda } from '../lib/formatos'
 import { hojeISO } from '../lib/lembretes'
-import { COR, ROTULO, STATUS, type StatusOS } from '../lib/status'
+import { ROTULO, STATUS, type StatusOS } from '../lib/status'
+import { Chave, Engrenagem, MotoSilhueta, Velocimetro } from '../components/Cenario'
 import { botao } from './Clientes'
 
 type Resumo = {
@@ -49,53 +50,63 @@ export default function Painel() {
 
   const abertas = r ? STATUS.filter((s) => (r.porStatus[s] ?? 0) > 0) : []
 
+  const totalAbertas = r ? Object.values(r.porStatus).reduce((s, n) => s + (n ?? 0), 0) : 0
+  const escala = Math.max(8, ...abertas.map((s) => r?.porStatus[s] ?? 0))
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">{perfil?.oficina.nome}</h1>
-          <p className="text-gray-600">Olá, {perfil?.nome}!</p>
+    <div className="space-y-6">
+      <section className="heroi">
+        <Engrenagem className="engrenagem-fundo" />
+        <Chave className="chave-fundo" />
+        <MotoSilhueta className="moto" />
+        <div className="heroi-conteudo">
+          <p className="saudacao">Olá, {perfil?.nome}</p>
+          <h1>{perfil?.oficina.nome}</h1>
+          <p className="mt-2 text-gray-600">
+            {r ? (totalAbertas === 0 ? 'Bancada livre. Nenhuma moto em serviço agora.' : `${totalAbertas} moto(s) em serviço na oficina.`) : 'Abrindo a oficina...'}
+          </p>
+          <Link to="/os/nova" className={`${botao} mt-5 inline-block`}>+ Nova OS</Link>
         </div>
-        <Link to="/os/nova" className={botao}>+ Nova OS</Link>
-      </div>
+        <div className="listra-perigo" />
+      </section>
 
       {!r ? (
         <p className="text-gray-600">Carregando...</p>
       ) : (
         <>
-          <section className="space-y-2">
-            <h2 className="font-bold text-gray-800">OS em aberto</h2>
+          <section className="space-y-3">
+            <h2>Motos na bancada</h2>
             {abertas.length === 0 ? (
               <p className="text-gray-600">Nenhuma OS em aberto.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 {abertas.map((s) => (
-                  <Link key={s} to="/os" className="rounded-xl bg-white p-4 shadow active:bg-gray-50">
-                    <div className="text-3xl font-bold text-gray-800">{r.porStatus[s]}</div>
-                    <span className={`mt-1 inline-block rounded-full px-2 py-1 text-xs font-semibold ${COR[s]}`}>{ROTULO[s]}</span>
+                  <Link key={s} to="/os">
+                    <Velocimetro valor={r.porStatus[s] ?? 0} max={escala} rotulo={ROTULO[s]} />
                   </Link>
                 ))}
               </div>
             )}
           </section>
 
-          <Link to="/lembretes" className="block rounded-xl bg-white p-4 shadow active:bg-gray-50">
-            <div className="text-sm text-gray-500">Lembretes para enviar hoje</div>
-            <div className={`text-3xl font-bold ${r.lembretes > 0 ? 'text-orange-600' : 'text-gray-800'}`}>{r.lembretes}</div>
-          </Link>
-
-          {dono && (
-            <Link to="/financeiro" className="grid grid-cols-2 gap-2">
-              <div className="rounded-xl bg-gray-800 p-4 shadow">
-                <div className="text-sm text-gray-300">Recebido no mês</div>
-                <div className="text-xl font-bold text-orange-400">{formatarMoeda(r.recebido ?? 0)}</div>
-              </div>
-              <div className="rounded-xl bg-white p-4 shadow">
-                <div className="text-sm text-gray-500">A receber</div>
-                <div className="text-xl font-bold text-gray-800">{formatarMoeda(r.aReceber ?? 0)}</div>
-              </div>
+          <div className={`grid gap-3 ${dono ? 'md:grid-cols-3' : ''}`}>
+            <Link to="/lembretes" className="placar chapa-xadrez block">
+              <div className="placar-rotulo">Lembretes para enviar hoje</div>
+              <div className={`placar-valor ${r.lembretes > 0 ? 'text-orange-600' : 'text-gray-800'}`}>{r.lembretes}</div>
             </Link>
-          )}
+            {dono && (
+              <>
+                <Link to="/financeiro" className="placar aco-escovado block">
+                  <div className="placar-rotulo">Recebido no mês</div>
+                  <div className="placar-valor text-orange-400">{formatarMoeda(r.recebido ?? 0)}</div>
+                </Link>
+                <Link to="/financeiro" className="placar aco-escovado block">
+                  <div className="placar-rotulo">A receber</div>
+                  <div className="placar-valor text-gray-800">{formatarMoeda(r.aReceber ?? 0)}</div>
+                </Link>
+              </>
+            )}
+          </div>
         </>
       )}
     </div>

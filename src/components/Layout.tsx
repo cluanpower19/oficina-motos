@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { calcularAssinatura, linkSuporte } from '../lib/assinatura'
+import { Emblema } from './Cenario'
 
 const Svg = ({ children }: { children: ReactNode }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -43,13 +44,17 @@ export default function Layout() {
   return (
     <div className="min-h-full md:flex">
       <aside className="menu-lateral hidden md:flex md:w-64 md:flex-col text-white">
-        <div className="px-5 pb-6 pt-7">
-          <div className="placa">
-            <span className="faixa">BRASIL</span>
-            <span className="nome">OFICINA MOTO</span>
+        <div className="px-5 pb-5 pt-7">
+          <div className="marca">
+            <Emblema tamanho={46} />
+            <div className="marca-nome">
+              Oficina
+              <small>Moto · Gestão</small>
+            </div>
           </div>
-          <p className="mt-4 truncate text-sm text-gray-600">{perfil?.oficina.nome}</p>
+          <p className="mt-5 truncate text-sm text-gray-600">{perfil?.oficina.nome}</p>
         </div>
+        <div className="listra-perigo mx-5 mb-4 rounded-sm" />
         <nav className="flex-1 space-y-1 px-3">
           {itens.map((i) => (
             <NavLink key={i.to} to={i.to} end={i.to === '/'} className={({ isActive }) => `item-menu ${isActive ? 'ativo' : ''}`}>
@@ -58,12 +63,25 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <button onClick={sair} className="item-menu m-3">
+        <div className="rodape-menu">
+          <span className="lampada" />
+          Oficina aberta
+        </div>
+        <button onClick={sair} className="item-menu m-3 mt-0">
           Sair
         </button>
       </aside>
 
-      <div className="flex-1 pb-24 md:pb-0">
+      <div className="area-principal flex-1 pb-24 md:pb-0">
+        <div className="topo-desktop">
+          <span className="titulo text-lg uppercase tracking-widest text-gray-600">
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+          </span>
+          <span className="chip-usuario">
+            <b>{(perfil?.nome ?? 'O').slice(0, 1).toUpperCase()}</b>
+            {perfil?.nome}
+          </span>
+        </div>
         <header className="flex items-center justify-between border-b border-[#2c3542] bg-[#0b1016] px-4 py-3 text-white md:hidden">
           <span className="titulo text-xl text-orange-400">{perfil?.oficina.nome ?? 'Oficina Moto'}</span>
           <button onClick={sair} className="rounded-md border border-[#364152] px-3 py-1.5 text-sm text-gray-300">Sair</button>
