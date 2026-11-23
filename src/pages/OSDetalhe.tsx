@@ -6,6 +6,7 @@ import { COR, ROTULO, STATUS, type StatusOS } from '../lib/status'
 import { botao, campo } from './Clientes'
 import { reduzirImagem } from '../lib/imagem'
 import { linkWhatsApp, msgOrcamento, msgPronta } from '../lib/whatsapp'
+import { hojeISO, somarDias } from '../lib/lembretes'
 
 type OS = {
   id: string
@@ -18,6 +19,7 @@ type OS = {
   cliente_id: string
   oficina_id: string
   token_publico: string
+  moto_id: string
   clientes: { nome: string; telefone: string | null } | null
   motos: { placa: string; marca: string | null; modelo: string | null } | null
 }
@@ -47,7 +49,7 @@ export default function OSDetalhe() {
     const [a, b] = await Promise.all([
       supabase
         .from('ordens_servico')
-        .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, oficina_id, token_publico, clientes(nome, telefone), motos(placa, marca, modelo)')
+        .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, moto_id, oficina_id, token_publico, clientes(nome, telefone), motos(placa, marca, modelo)')
         .eq('id', id)
         .single(),
       supabase
@@ -78,8 +80,17 @@ export default function OSDetalhe() {
     if (!os || status === os.status) return
     setErro('')
     const { error } = await supabase.from('ordens_servico').update({ status }).eq('id', os.id)
-    if (error) setErro(mensagemErro(error))
-    else carregar()
+    if (error) return setErro(mensagemErro(error))
+    if (status === 'entregue' && window.confirm('Criar lembrete de retorno (troca de óleo em 90 dias ou +1.500 km)? Você pode editar depois em Lembretes.')) {
+      const r = await supabase.from('lembretes').insert({
+        moto_id: os.moto_id,
+        tipo: 'oleo',
+        data_prevista: somarDias(hojeISO(), 90),
+        km_previsto: os.km_entrada ? os.km_entrada + 1500 : null,
+      })
+      if (r.error) setErro(mensagemErro(r.error))
+    }
+    carregar()
   }
 
   function escolherCatalogo(catId: string) {
