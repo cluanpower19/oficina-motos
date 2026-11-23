@@ -32,13 +32,11 @@ const todos = [
 
 export default function Layout() {
   const { perfil, sair } = useAuth()
-  const assin = calcularAssinatura(perfil!.oficina.status_assinatura, perfil!.oficina.teste_ate)
+  const assin = calcularAssinatura(perfil!.oficina.status_assinatura)
   const suporte = linkSuporte(perfil!.oficina.nome)
   const faixa = !assin.ativa
     ? 'Assinatura inativa: você pode consultar os dados, mas não pode salvar alterações.'
-    : assin.status === 'teste'
-      ? `Teste grátis: ${assin.diasRestantes === 0 ? 'termina hoje' : `faltam ${assin.diasRestantes} dia(s)`}.`
-      : ''
+    : ''
   const itens = todos.filter((i) => i.to !== '/financeiro' || perfil?.papel === 'dono')
 
   return (
