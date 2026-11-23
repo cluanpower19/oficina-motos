@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import AdminExtras from './AdminExtras'
 
 type Oficina = {
   id: string
@@ -30,6 +31,7 @@ export default function Admin() {
   const [salvando, setSalvando] = useState<string | null>(null)
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
+  const [aba, setAba] = useState<'oficinas' | 'solicitacoes' | 'recursos'>('oficinas')
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -107,6 +109,10 @@ export default function Admin() {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-7 px-4 py-7 md:px-8">
+        <nav className="flex flex-wrap gap-2 rounded-2xl border border-white/[0.08] bg-[#101925] p-2">
+          {[{id:'oficinas',label:'Oficinas'},{id:'solicitacoes',label:'Solicitações'},{id:'recursos',label:'Recursos exclusivos'}].map(item => <button key={item.id} onClick={() => setAba(item.id as typeof aba)} className={"rounded-xl px-4 py-2.5 text-sm font-semibold transition "+(aba===item.id?"bg-orange-500 text-[#17130f]":"text-slate-300 hover:bg-white/5")}>{item.label}</button>)}
+        </nav>
+        {aba === 'oficinas' ? <>
         <section className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
           <div>
             <p className="text-sm font-medium text-orange-400">Resumo da operação</p>
@@ -217,6 +223,7 @@ export default function Admin() {
           <span>Ofício do Motor · Central de administração</span>
           <span>Ambiente restrito a administradores autorizados</span>
         </footer>
+        </> : <AdminExtras embedded section={aba} />}
       </main>
     </div>
   )
