@@ -1,9 +1,11 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+﻿import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Painel from './pages/Painel'
 import EmBreve from './pages/EmBreve'
+import Clientes from './pages/Clientes'
+import ClienteDetalhe from './pages/ClienteDetalhe'
 
 function Rotas() {
   const { session, perfil, carregando } = useAuth()
@@ -19,7 +21,8 @@ function Rotas() {
       <Route element={<Layout />}>
         <Route index element={<Painel />} />
         <Route path="os" element={<EmBreve titulo="Ordens de Serviço" />} />
-        <Route path="clientes" element={<EmBreve titulo="Clientes" />} />
+        <Route path="clientes" element={<Clientes />} />
+        <Route path="clientes/:id" element={<ClienteDetalhe />} />
         <Route path="lembretes" element={<EmBreve titulo="Lembretes" />} />
         <Route path="financeiro" element={<EmBreve titulo="Financeiro" />} />
         <Route path="configuracoes" element={<EmBreve titulo="Configurações" />} />
@@ -38,3 +41,4 @@ export default function App() {
     </BrowserRouter>
   )
 }
+
