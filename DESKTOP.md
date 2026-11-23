@@ -1,4 +1,4 @@
-# DESKTOP.md: programa para Windows e Mac (Ofício do motor)
+﻿# DESKTOP.md: programa para Windows e Mac (Ofício do motor)
 
 Repo: C:\Users\iaras\oficiodomotor.github.io (GitHub: oficiodomotor/oficiodomotor.github.io, branch main).
 Sistema atual: web (Vite + React + TypeScript + Supabase). O programa desktop é o mesmo sistema dentro de uma janela (Electron). O Supabase continua sendo o banco (precisa de internet).
@@ -24,7 +24,7 @@ Use o Remote Desktop Commander. Leia C:\Users\iaras\oficiodomotor.github.io\DESK
 - Alternativa barata e imediata: PWA (instalar pelo navegador no Windows/Mac). Fazer na etapa 1.
 
 ## Checklist
-- [ ] 1. PWA: manifest, ícones, service worker simples. Teste de "Instalar app" no Chrome/Edge.
+- [x] 1. PWA: manifest, ícones, service worker simples. Teste de "Instalar app" no Chrome/Edge.
 - [ ] 2. Verificar compatibilidade com janela desktop: o roteador (BrowserRouter x HashRouter), `base` do Vite, caminhos `/img/...`. Ajustar sem quebrar o site web.
 - [ ] 3. Estrutura Electron: pasta `electron/` (main.cjs, preload.cjs), scripts `desktop:dev` e `desktop:build` no package.json, janela com ícone e menu enxuto.
 - [ ] 4. Build local do instalador Windows (.exe NSIS) e teste de abrir, logar e usar.
@@ -34,4 +34,5 @@ Use o Remote Desktop Commander. Leia C:\Users\iaras\oficiodomotor.github.io\DESK
 - [ ] 8. (Opcional) Assinatura de código Windows e Mac + notarização.
 
 ## Diário
-- (preencher a cada etapa: data, o que foi feito, pendências)
+- 23/11/2026, etapa 1 (PWA): criados public/manifest.webmanifest, public/sw.js (cache só do próprio site, rede primeiro nas páginas), public/icons/* (192, 512, maskable, apple-touch), links no index.html e registro do service worker em src/main.tsx (só em produção). Pendência: testar 'Instalar app' no Chrome/Edge com o site publicado e conferir se o deploy serve /sw.js e /manifest.webmanifest (não podem cair no redirect para index.html).
+
