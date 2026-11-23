@@ -102,6 +102,9 @@ jobs:
       - name: Deploy website with official APK
         id: deployment
         uses: actions/deploy-pages@v4
+        environment:
+          name: github-pages
+          url: ${{ steps.deployment.outputs.page_url }}
 
       - name: Remove temporary signing key
         if: always()
