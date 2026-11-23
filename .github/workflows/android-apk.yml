@@ -103,7 +103,7 @@ jobs:
 
       - name: Remove temporary signing key
         if: always()
-        run: rm -f android/app/release-key.jks
+        run: rm -f android/app/release-key.p12
 
   deploy:
     name: Deploy official APK website
