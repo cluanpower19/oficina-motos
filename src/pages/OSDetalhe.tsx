@@ -5,6 +5,7 @@ import { formatarMoeda, formatarPlaca, formatarTelefone, lerNumero, mensagemErro
 import { COR, ROTULO, STATUS, type StatusOS } from '../lib/status'
 import { botao, campo } from './Clientes'
 import { reduzirImagem } from '../lib/imagem'
+import { linkWhatsApp, msgOrcamento, msgPronta } from '../lib/whatsapp'
 
 type OS = {
   id: string
@@ -169,6 +170,28 @@ export default function OSDetalhe() {
     }
   }
 
+  function dadosMsg() {
+    if (!os) return null
+    return { cliente: os.clientes?.nome ?? '', marca: os.motos?.marca, modelo: os.motos?.modelo, placa: os.motos?.placa ?? '' }
+  }
+
+  function enviarOrcamentoWhats() {
+    const d = dadosMsg()
+    if (!os || !d) return
+    const link = linkWhatsApp(os.clientes?.telefone, msgOrcamento(d, `${window.location.origin}/orcamento/${os.token_publico}`))
+    if (!link) return setErro('O cliente não tem um telefone válido com DDD. Corrija no cadastro do cliente.')
+    window.open(link, '_blank', 'noopener')
+    if (os.status === 'orcamento') mudarStatus('aguardando_aprovacao')
+  }
+
+  function avisarProntaWhats() {
+    const d = dadosMsg()
+    if (!os || !d) return
+    const link = linkWhatsApp(os.clientes?.telefone, msgPronta(d, Number(os.valor_total)))
+    if (!link) return setErro('O cliente não tem um telefone válido com DDD. Corrija no cadastro do cliente.')
+    window.open(link, '_blank', 'noopener')
+  }
+
   if (carregando) return <p className="text-gray-600">Carregando...</p>
   if (!os) return <p className="rounded-lg bg-red-100 p-3 text-red-700">{erro || 'OS não encontrada.'}</p>
 
@@ -295,7 +318,15 @@ export default function OSDetalhe() {
 
       <div className="space-y-2 rounded-xl bg-white p-4 shadow">
         <h2 className="text-lg font-bold text-gray-800">Orçamento para o cliente</h2>
-        <p className="text-sm text-gray-600">Link com botões Aprovar/Recusar. O envio por WhatsApp vem na Etapa 6.</p>
+        <p className="text-sm text-gray-600">Link com botões Aprovar/Recusar. Ao enviar, o status vai para "Aguardando aprovação".</p>
+        <button className="w-full rounded-lg bg-green-600 px-4 py-3 font-semibold text-white" onClick={enviarOrcamentoWhats}>
+          Enviar orçamento por WhatsApp
+        </button>
+        {(os.status === 'pronto' || os.status === 'entregue') && (
+          <button className="w-full rounded-lg bg-green-100 px-4 py-3 font-semibold text-green-800" onClick={avisarProntaWhats}>
+            Avisar cliente: moto pronta
+          </button>
+        )}
         <div className="flex gap-2">
           <button className={botao + ' flex-1'} onClick={copiarLink}>{copiado ? 'Link copiado!' : 'Copiar link'}</button>
           <a className="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-800" href={`/orcamento/${os.token_publico}`} target="_blank" rel="noreferrer">Abrir</a>
