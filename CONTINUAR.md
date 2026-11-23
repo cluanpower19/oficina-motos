@@ -26,6 +26,6 @@ Use o Remote Desktop Commander. Leia C:\Users\iaras\oficina-moto\CONTINUAR.md e 
 4. `npm install`, depois colar o comando único acima (ajustando o caminho).
 
 ## Estado resumido (23/11/2026)
-- Repo: https://github.com/cluanpower19/oficina-motos (privado), branch main, tag etapa-02.
-- Supabase: projeto layuhmhkzqttgfhawpsh; migracoes 0001, 0002 e 0003 aplicadas; .env local existe (nao vai para o Git).
-- Proximo passo: Etapa 3 (catalogo de servicos e pecas).
+- Repo: https://github.com/cluanpower19/oficina-motos (privado), branch main, tag etapa-03.
+- Supabase: projeto layuhmhkzqttgfhawpsh; migracoes 0001 a 0004 aplicadas; .env local existe (nao vai para o Git).
+- Proximo passo: Etapa 4 (Nova OS e detalhe da OS).
