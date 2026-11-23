@@ -24,3 +24,8 @@ Use o Remote Desktop Commander. Leia C:\Users\iaras\oficina-moto\CONTINUAR.md e 
 2. `git clone <URL do repositório privado> C:\Users\<usuario>\oficina-moto`
 3. Recriar o `.env` (copiar `.env.example` e preencher com `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`, do gerenciador de senhas ou Supabase → Project Settings → API).
 4. `npm install`, depois colar o comando único acima (ajustando o caminho).
+
+## Estado resumido (23/11/2026)
+- Repo: https://github.com/cluanpower19/oficina-motos (privado), branch main, tag etapa-01.
+- Supabase: projeto layuhmhkzqttgfhawpsh; migração 0001 aplicada; .env local existe (não vai para o Git).
+- Próximo passo: testar login (npm run dev) e fazer a Etapa 2.

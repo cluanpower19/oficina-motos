@@ -144,5 +144,6 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 - **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
 - **Última tag:** `etapa-01`
 - **Git:** identidade local do repo = cluanpower19 / cluanpower19@users.noreply.github.com
-- **Pendências:** (1) no Supabase, Authentication > Sign In / Providers > Email, desligar "Confirm email" para testes (hoje está ligado, então o cadastro não entra direto); (2) testar cadastro e login no app (`npm run dev`); (3) existe um usuário de teste sem confirmação, criado por script (teste.<número>@gmail.com), pode ser apagado em Authentication > Users.
+- **Pendências:** (1) "Confirm email" já foi DESLIGADO no Supabase (23/11/2026). (2) Testar cadastro e login no app com `npm run dev`; um teste por script bateu no limite de e-mails do Supabase (erro 429), então esperar cerca de 1 hora ou testar pela tela. (3) Usuário falso `teste.<número>@gmail.com` pode ser apagado em Authentication > Users. (4) Depois do teste, começar a Etapa 2.
 - **Nota:** em 22/11/2026 o PROJETO.md, .gitignore e .env.example anteriores foram sobrescritos por versões novas antes do primeiro commit.
+
