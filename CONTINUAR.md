@@ -1,4 +1,4 @@
-# CONTINUAR.md: como retomar o projeto em qualquer conta do Claude
+﻿# CONTINUAR.md: como retomar o projeto em qualquer conta do Claude
 
 ## Comando único (colar numa conversa nova, com o Remote Desktop Commander conectado)
 
@@ -26,6 +26,6 @@ Use o Remote Desktop Commander. Leia C:\Users\iaras\oficina-moto\CONTINUAR.md e 
 4. `npm install`, depois colar o comando único acima (ajustando o caminho).
 
 ## Estado resumido (23/11/2026)
-- Repo: https://github.com/cluanpower19/oficina-motos (privado), branch main, tag etapa-01.
-- Supabase: projeto layuhmhkzqttgfhawpsh; migração 0001 aplicada; .env local existe (não vai para o Git).
-- Próximo passo: testar login (npm run dev) e fazer a Etapa 2.
+- Repo: https://github.com/cluanpower19/oficina-motos (privado), branch main, tag etapa-02.
+- Supabase: projeto layuhmhkzqttgfhawpsh; migracoes 0001, 0002 e 0003 aplicadas; .env local existe (nao vai para o Git).
+- Proximo passo: Etapa 3 (catalogo de servicos e pecas).

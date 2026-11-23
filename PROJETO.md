@@ -101,7 +101,7 @@ Teste grátis de 14 dias, sem cartão. No MVP, cobrança manual (Pix). Depois, g
 ## 9. Etapas de construção
 
 - [x] **Etapa 1:** Projeto base (Vite, React, Tailwind), layout responsivo com menu, login com Supabase Auth, criação da oficina no cadastro
-- [ ] **Etapa 2:** Tabelas `oficinas`, `usuarios`, `clientes`, `motos` com RLS. Telas de clientes e motos
+- [x] **Etapa 2:** Tabelas `oficinas`, `usuarios`, `clientes`, `motos` com RLS. Telas de clientes e motos
 - [ ] **Etapa 3:** Catálogo de serviços e peças
 - [ ] **Etapa 4:** Nova OS e detalhe da OS (itens, status, número sequencial)
 - [ ] **Etapa 5:** Fotos da OS (Supabase Storage) e página pública do orçamento com aprovar/recusar
@@ -134,17 +134,14 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
-- **Etapa concluída mais recente:** Etapa 1 (código + migração 0001 aplicada; build OK). **Falta só testar cadastro/login na tela** (ver pendências).
-- **Etapa atual:** 2 (código pronto e compilando; FALTA aplicar a migração 0002 no Supabase e testar as telas)
+- **Etapa concluída mais recente:** Etapa 2 (clientes e motos, testada e funcionando; cadastro/login testados OK). Tag `etapa-02`.
+- **Etapa atual:** 3 (catálogo de serviços e peças). Ainda não iniciada.
 - **Pasta local:** `C:\Users\iaras\oficina-moto`
 - **Ambiente:** Windows + PowerShell, Node v26.13.0, npm 11.20.0, git 2.56.1. `gh` não instalado.
 - **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`, `Clientes` (lista, busca por nome/placa, novo cliente+moto), `ClienteDetalhe` (editar, motos, remover), `lib/formatos.ts`
-- **Migrações:** aplicada `0001_base.sql`; `0002_clientes_motos.sql` está no repo mas NÃO aplicada ainda (colar no SQL Editor e rodar UMA vez). Já aplicada:  `0001_base.sql` (oficinas, usuarios, RLS, função `criar_oficina`)
-- **Supabase:** projeto `layuhmhkzqttgfhawpsh` (https://layuhmhkzqttgfhawpsh.supabase.co), região us-east-2. `.env` local criado (ignorado pelo Git). Chave usada: publishable/anon. Em outro PC: recriar `.env` a partir do `.env.example`.
+- **Migrações aplicadas no Supabase (NÃO rodar de novo):** `0001_base.sql`, `0002_clientes_motos.sql`, `0003_grants.sql`. Próxima: `0004_...` (nova tabela precisa de RLS + grants para `authenticated`, como na 0003).
+- **Supabase:** projeto `layuhmhkzqttgfhawpsh` (https://layuhmhkzqttgfhawpsh.supabase.co), região us-east-2. `.env` local criado (ignorado pelo Git). Chave usada: publishable/anon. Em outro PC: recriar `.env` a partir do `.env.example`. "Confirm email" está DESLIGADO.
 - **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
-- **Última tag:** `etapa-01`
+- **Última tag:** `etapa-02`
 - **Git:** identidade local do repo = cluanpower19 / cluanpower19@users.noreply.github.com
-- **Pendências:** (1) "Confirm email" já foi DESLIGADO no Supabase (23/11/2026). (2) Testar cadastro e login no app com `npm run dev`; um teste por script bateu no limite de e-mails do Supabase (erro 429), então esperar cerca de 1 hora ou testar pela tela. (3) Usuário falso `teste.<número>@gmail.com` pode ser apagado em Authentication > Users. (4) Depois do teste, começar a Etapa 2.
-- **Nota:** em 22/11/2026 o PROJETO.md, .gitignore e .env.example anteriores foram sobrescritos por versões novas antes do primeiro commit.
-
-
+- **Pendências:** (1) Usuários de teste `teste.<número>@gmail.com` podem ser apagados em Authentication > Users. (2) Começar a Etapa 3 (migração 0004: `servicos_catalogo` e `pecas`, com RLS e grants; telas de catálogo e peças com estoque mínimo).
