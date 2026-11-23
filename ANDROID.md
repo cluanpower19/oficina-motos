@@ -2,39 +2,37 @@
 
 O aplicativo Android é gerado com Capacitor a partir do mesmo projeto React/Vite. O site continua sendo a versão principal; não é necessário manter uma segunda aplicação.
 
-## Requisitos para gerar o APK
+## Gerar a versão oficial pelo GitHub Actions
 
-- Node.js compatível com o projeto.
-- Android Studio instalado.
-- JDK 21 (pode ser o JDK incluído no Android Studio).
-- Android SDK instalado pelo Android Studio, incluindo a plataforma e as ferramentas de build indicadas pelo projeto Gradle.
+A compilação oficial roda na nuvem. Não é necessário instalar Android Studio ou Android SDK no computador.
 
-## Preparar e abrir o projeto
+Antes do primeiro lançamento, crie uma chave de assinatura permanente (keystore) em um local seguro. Nunca envie o arquivo keystore ou as senhas para o repositório.
 
-```bash
-npm install
-npm run android:sync
-npm run android:open
+O workflow `.github/workflows/android-apk.yml` espera estes quatro **Repository secrets**:
+
+- `ANDROID_KEYSTORE_BASE64`: conteúdo do keystore codificado em Base64.
+- `ANDROID_KEYSTORE_PASSWORD`: senha do keystore.
+- `ANDROID_KEY_ALIAS`: alias da chave.
+- `ANDROID_KEY_PASSWORD`: senha da chave.
+
+Para criar uma chave com JDK 21, execute em um terminal local (ajuste o caminho de destino e defina suas próprias senhas fortes):
+
+```powershell
+keytool -genkeypair -v -keystore "$HOME\oficio-do-motor-release.jks" -alias oficio-do-motor -keyalg RSA -keysize 4096 -validity 10000
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\oficio-do-motor-release.jks")) | Set-Content "$HOME\oficio-do-motor-release-base64.txt" -NoNewline
 ```
 
-Sempre que houver alterações no sistema web, execute `npm run android:sync` para atualizar os arquivos usados pelo aplicativo.
+No GitHub, abra **Settings > Secrets and variables > Actions > New repository secret** e cadastre os quatro valores. Para `ANDROID_KEYSTORE_BASE64`, use o conteúdo do arquivo `oficio-do-motor-release-base64.txt`. Use o mesmo alias e as senhas definidos na criação da chave.
 
-## Gerar APK para distribuição
+Depois, abra **Actions > Build and publish official Android APK > Run workflow**. O workflow compila a variante `release`, verifica a assinatura e publica o arquivo em `public/downloads/OficioDoMotor.apk`. O deploy do site disponibiliza então o link:
 
-No Android Studio:
+`https://oficiodomotor.github.io/downloads/OficioDoMotor.apk`
 
-1. Abra o projeto `android`.
-2. Aguarde a sincronização do Gradle.
-3. Selecione **Build > Generate Signed Bundle / APK**.
-4. Escolha **APK**.
-5. Crie ou selecione uma chave de assinatura (keystore) de lançamento.
-6. Selecione a variante `release` e conclua a geração.
+O botão Android na tela de login do site só aparece quando esse arquivo já estiver publicado. O workflow não publica APK de depuração nem usa a chave em arquivos versionados.
 
-O APK de lançamento costuma ficar em `android/app/release/`.
+**Importante:** mantenha o keystore e suas senhas em backup seguro. Perder a chave pode impedir a publicação de atualizações compatíveis para quem já instalou esta versão. Não compartilhe esses dados no chat ou no repositório.
 
-**Importante:** guarde o arquivo keystore e suas senhas em local seguro e com backup. Eles serão necessários para assinar futuras atualizações do aplicativo. Nunca envie a chave ou as senhas para o repositório.
-
-Antes de publicar o APK no site, teste instalação, login, navegação, seleção/tirada de fotos, envio de imagens, links do WhatsApp e retorno do Android. O APK de depuração não deve ser usado como versão oficial de distribuição.
+Antes de divulgar amplamente, teste instalação, login, navegação, seleção/tirada de fotos, envio de imagens, links do WhatsApp e retorno do Android. A assinatura não elimina necessariamente os avisos do Android para instalações fora da Play Store.
 
 ## Versão do aplicativo
 
