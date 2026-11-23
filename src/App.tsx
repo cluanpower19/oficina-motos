@@ -45,7 +45,7 @@ function Rotas() {
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
   if (!session) return <Login />
 
-  if (location.pathname.endsWith('/admin')) {
+  if (/\/admin\/?$/.test(location.pathname)) {
     if (verificandoAdmin) return <div className="min-h-screen bg-[#0b1016] p-8 text-gray-300">Verificando acesso administrativo...</div>
     if (ehAdmin) return <Admin />
     return (
