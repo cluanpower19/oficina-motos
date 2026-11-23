@@ -5,7 +5,6 @@ import { supabase } from './lib/supabase'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
-import AdminExtras from './pages/AdminExtras'
 import Suporte from './pages/Suporte'
 import Painel from './pages/Painel'
 import Configuracoes from './pages/Configuracoes'
@@ -49,7 +48,7 @@ function Rotas() {
 
   if (/\/admin(?:\/(?:solicitacoes|recursos))?\/?$/.test(location.pathname)) {
     if (verificandoAdmin) return <div className="min-h-screen bg-[#0b1016] p-8 text-gray-300">Verificando acesso administrativo...</div>
-    if (ehAdmin) return /\/admin\/?$/.test(location.pathname) ? <Admin /> : <AdminExtras />
+    if (ehAdmin) return <Admin />
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0b1016] p-6 text-center text-white">
         <div className="max-w-md">
