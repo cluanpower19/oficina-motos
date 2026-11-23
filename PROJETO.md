@@ -135,7 +135,7 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
 - **Etapa concluída mais recente:** Etapa 2 (clientes e motos, testada e funcionando; cadastro/login testados OK). Tag `etapa-02`.
-- **Etapa atual:** 3 (catálogo de serviços e peças). Ainda não iniciada.
+- **Etapa atual:** 3 (codigo pronto e compilando; FALTA aplicar a migracao 0004 no Supabase e testar a tela Catalogo)
 - **Pasta local:** `C:\Users\iaras\oficina-moto`
 - **Ambiente:** Windows + PowerShell, Node v26.13.0, npm 11.20.0, git 2.56.1. `gh` não instalado.
 - **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`, `Clientes` (lista, busca por nome/placa, novo cliente+moto), `ClienteDetalhe` (editar, motos, remover), `lib/formatos.ts`
@@ -144,4 +144,4 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 - **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
 - **Última tag:** `etapa-02`
 - **Git:** identidade local do repo = cluanpower19 / cluanpower19@users.noreply.github.com
-- **Pendências:** (1) Usuários de teste `teste.<número>@gmail.com` podem ser apagados em Authentication > Users. (2) Começar a Etapa 3 (migração 0004: `servicos_catalogo` e `pecas`, com RLS e grants; telas de catálogo e peças com estoque mínimo).
+- **Pendências:** (1) Colar `0004_catalogo_pecas.sql` no SQL Editor e rodar UMA vez. (2) Testar tela Catálogo (serviços e peças: criar, editar, remover, alerta de estoque baixo). (3) Fechar a Etapa 3 (atualizar seção 15, commit, tag etapa-03, push). (4) Usuários de teste podem ser apagados em Authentication > Users.

@@ -5,6 +5,7 @@ const itens = [
   { to: '/', label: 'Painel', icone: '🏠' },
   { to: '/os', label: 'OS', icone: '🔧' },
   { to: '/clientes', label: 'Clientes', icone: '👤' },
+  { to: '/catalogo', label: 'Catálogo', icone: '📦' },
   { to: '/lembretes', label: 'Lembretes', icone: '🔔' },
   { to: '/financeiro', label: 'Financeiro', icone: '💰' },
   { to: '/configuracoes', label: 'Config.', icone: '⚙️' },
@@ -49,7 +50,7 @@ export default function Layout() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-6 bg-gray-800 text-white md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-7 bg-gray-800 text-white md:hidden">
         {itens.map((i) => (
           <NavLink
             key={i.to}

@@ -15,6 +15,16 @@ export function formatarPlaca(v: string): string {
 }
 
 export function mensagemErro(e: { code?: string; message: string }): string {
-  if (e.code === '23505') return 'Já existe uma moto com essa placa.'
+  if (e.code === '23505') {
+    if (e.message.includes('codigo')) return 'Já existe uma peça com esse código.'
+    return 'Já existe uma moto com essa placa.'
+  }
   return e.message
+}
+
+export const formatarMoeda = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+export function lerNumero(v: string): number {
+  const n = Number(v.trim().replace(/\./g, '').replace(',', '.'))
+  return Number.isFinite(n) ? n : 0
 }
