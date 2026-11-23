@@ -19,13 +19,11 @@ export default function Login() {
   const [enviando, setEnviando] = useState(false)
   const [linkWindows, setLinkWindows] = useState<string | null>(null)
   const [linkMac, setLinkMac] = useState<string | null>(null)
-  const [androidDisponivel, setAndroidDisponivel] = useState(false)
 
   useEffect(() => {
     if (!noSite) return
     urlInstalador('-win-x64.exe').then(setLinkWindows)
     urlInstalador(navigator.userAgent.includes('Mac') ? '-mac-arm64.dmg' : '-mac-x64.dmg').then(setLinkMac)
-    fetch('/downloads/OficioDoMotor.apk', { method: 'HEAD', cache: 'no-store' }).then((r) => setAndroidDisponivel(r.ok)).catch(() => setAndroidDisponivel(false))
   }, [])
 
   async function enviar(e: FormEvent) {
@@ -158,11 +156,9 @@ export default function Login() {
                 >
                   Baixar para Mac
                 </a>
-                {androidDisponivel && (
-                  <a href="/downloads/OficioDoMotor.apk" download className="download-app">
-                    Baixar para Android
-                  </a>
-                )}
+                <a href="/downloads/OficioDoMotor.apk" download className="download-app">
+                  Baixar aplicativo para Android (APK)
+                </a>
               </div>
             </div>
           )}
