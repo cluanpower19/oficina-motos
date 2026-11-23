@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatarPlaca, lerNumero, mensagemErro } from '../lib/formatos'
 import { botao, campo } from './Clientes'
 import { linkWhatsApp, msgLembrete } from '../lib/whatsapp'
+import { useAuth } from '../hooks/useAuth'
 import { TIPOS, TIPO_ROTULO, TIPO_TEXTO, dataBR, hojeISO, somarDias, type TipoLembrete } from '../lib/lembretes'
 
 type Lembrete = {
@@ -22,6 +23,7 @@ type MotoOpc = { id: string; placa: string; modelo: string | null; clientes: { n
 const vazio = { motoId: '', tipo: 'oleo' as TipoLembrete, data: '', km: '' }
 
 export default function Lembretes() {
+  const { perfil } = useAuth()
   const [lista, setLista] = useState<Lembrete[]>([])
   const [motos, setMotos] = useState<MotoOpc[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -75,7 +77,7 @@ export default function Lembretes() {
     const m = l.motos
     const link = linkWhatsApp(
       m?.clientes?.telefone,
-      msgLembrete({ cliente: m?.clientes?.nome ?? '', marca: m?.marca, modelo: m?.modelo, placa: m?.placa ?? '' }, TIPO_TEXTO[l.tipo]),
+      msgLembrete({ cliente: m?.clientes?.nome ?? '', marca: m?.marca, modelo: m?.modelo, placa: m?.placa ?? '' }, TIPO_TEXTO[l.tipo], perfil?.oficina.msg_lembrete),
     )
     if (!link) return setErro('O cliente não tem um telefone válido com DDD. Corrija no cadastro do cliente.')
     setErro('')

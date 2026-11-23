@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatarMoeda, formatarPlaca, formatarTelefone } from '../lib/formatos'
 
 type Dados = {
-  oficina: { nome: string; telefone: string | null; endereco: string | null }
+  oficina: { nome: string; telefone: string | null; endereco: string | null; logo?: string | null }
   os: { numero: number; status: string; valor_total: number; defeito_relatado: string | null; km_entrada: number | null; criado_em: string; aprovado_em: string | null }
   cliente: string
   moto: { placa: string; marca: string | null; modelo: string | null }
@@ -47,7 +47,7 @@ export default function OrcamentoPublico() {
   return (
     <div className="mx-auto max-w-xl space-y-4 p-4">
       <div className="rounded-xl bg-gray-800 p-4 text-white">
-        <div className="text-xl font-bold text-orange-400">🏍️ {d.oficina.nome}</div>
+        <div className="text-xl font-bold text-orange-400">{d.oficina.logo ? <img src={d.oficina.logo} alt="" className="mr-2 inline h-10 w-10 rounded object-cover align-middle" /> : '\u{1F3CD}\u{FE0F} '}{d.oficina.nome}</div>
         <div className="text-sm text-gray-300">
           {[formatarTelefone(d.oficina.telefone), d.oficina.endereco].filter(Boolean).join(' · ')}
         </div>

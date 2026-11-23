@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
-const itens = [
+const todos = [
   { to: '/', label: 'Painel', icone: '🏠' },
   { to: '/os', label: 'OS', icone: '🔧' },
   { to: '/clientes', label: 'Clientes', icone: '👤' },
@@ -13,6 +13,7 @@ const itens = [
 
 export default function Layout() {
   const { perfil, sair } = useAuth()
+  const itens = todos.filter((i) => i.to !== '/financeiro' || perfil?.papel === 'dono')
 
   return (
     <div className="min-h-full md:flex">
@@ -50,14 +51,14 @@ export default function Layout() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-7 bg-gray-800 text-white md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-10 flex justify-around bg-gray-800 pb-[env(safe-area-inset-bottom)] text-white md:hidden">
         {itens.map((i) => (
           <NavLink
             key={i.to}
             to={i.to}
             end={i.to === '/'}
             className={({ isActive }) =>
-              `flex flex-col items-center py-2 text-[11px] ${isActive ? 'text-orange-400' : 'text-gray-300'}`
+              `flex min-w-0 flex-1 flex-col items-center py-2 text-[11px] ${isActive ? 'text-orange-400' : 'text-gray-300'}`
             }
           >
             <span className="text-xl">{i.icone}</span>

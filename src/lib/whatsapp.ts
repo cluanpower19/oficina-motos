@@ -13,12 +13,24 @@ type Dados = { cliente: string; marca?: string | null; modelo?: string | null; p
 const nomeMoto = (d: Dados) => [d.marca, d.modelo].filter(Boolean).join(' ') || 'moto'
 const primeiroNome = (n: string) => n.trim().split(/\s+/)[0] || n
 
-// Mensagens padrão (a edição pelas Configurações vem na Etapa 9)
-export const msgOrcamento = (d: Dados, link: string) =>
-  `Olá, ${primeiroNome(d.cliente)}! O orçamento da sua ${nomeMoto(d)} (${formatarPlaca(d.placa)}) está pronto. Veja os detalhes e aprove por aqui: ${link}`
+// Modelos padrão. Variáveis: {cliente} {moto} {placa} {link} {total} {tipo}
+export const MODELO_ORCAMENTO =
+  'Olá, {cliente}! O orçamento da sua {moto} ({placa}) está pronto. Veja os detalhes e aprove por aqui: {link}'
+export const MODELO_PRONTA = 'Olá, {cliente}! Sua {moto} ({placa}) está pronta para retirada. Valor: {total}.'
+export const MODELO_LEMBRETE =
+  'Olá, {cliente}! Está chegando a hora da {tipo} da sua {moto}. Quer agendar um horário?'
 
-export const msgPronta = (d: Dados, total: number) =>
-  `Olá, ${primeiroNome(d.cliente)}! Sua ${nomeMoto(d)} (${formatarPlaca(d.placa)}) está pronta para retirada. Valor: ${formatarMoeda(total)}.`
+export function aplicarModelo(modelo: string, vars: Record<string, string>): string {
+  return modelo.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m))
+}
 
-export const msgLembrete = (d: Dados, tipo: string) =>
-  `Olá, ${primeiroNome(d.cliente)}! Está chegando a hora da ${tipo} da sua ${nomeMoto(d)}. Quer agendar um horário?`
+const base = (d: Dados) => ({ cliente: primeiroNome(d.cliente), moto: nomeMoto(d), placa: formatarPlaca(d.placa) })
+
+export const msgOrcamento = (d: Dados, link: string, modelo?: string | null) =>
+  aplicarModelo(modelo?.trim() || MODELO_ORCAMENTO, { ...base(d), link })
+
+export const msgPronta = (d: Dados, total: number, modelo?: string | null) =>
+  aplicarModelo(modelo?.trim() || MODELO_PRONTA, { ...base(d), total: formatarMoeda(total) })
+
+export const msgLembrete = (d: Dados, tipo: string, modelo?: string | null) =>
+  aplicarModelo(modelo?.trim() || MODELO_LEMBRETE, { ...base(d), tipo })

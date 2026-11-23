@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Painel from './pages/Painel'
-import EmBreve from './pages/EmBreve'
+import Configuracoes from './pages/Configuracoes'
 import Clientes from './pages/Clientes'
 import ClienteDetalhe from './pages/ClienteDetalhe'
 import Catalogo from './pages/Catalogo'
@@ -35,7 +35,7 @@ function Rotas() {
         <Route path="catalogo" element={<Catalogo />} />
         <Route path="lembretes" element={<Lembretes />} />
         <Route path="financeiro" element={<Financeiro />} />
-        <Route path="configuracoes" element={<EmBreve titulo="Configurações" />} />
+        <Route path="configuracoes" element={<Configuracoes />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

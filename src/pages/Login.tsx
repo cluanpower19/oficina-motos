@@ -5,7 +5,8 @@ const campo =
   'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-orange-500 focus:outline-none'
 
 export default function Login() {
-  const [modo, setModo] = useState<'entrar' | 'cadastrar'>('entrar')
+  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico'>('entrar')
+  const [codigo, setCodigo] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [nome, setNome] = useState('')
@@ -29,11 +30,10 @@ export default function Login() {
           email,
           password: senha,
           options: {
-            data: {
-              nome,
-              oficina_nome: oficinaNome,
-              telefone: telefone.replace(/\D/g, ''),
-            },
+            data:
+              modo === 'mecanico'
+                ? { nome, codigo_oficina: codigo.trim().toLowerCase() }
+                : { nome, oficina_nome: oficinaNome, telefone: telefone.replace(/\D/g, '') },
           },
         })
         if (error) setErro(error.message)
@@ -55,6 +55,12 @@ export default function Login() {
           </p>
         )}
 
+        {modo === 'mecanico' && (
+          <>
+            <input className={campo} placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
+            <input className={campo} placeholder="Código da oficina (peça ao dono)" value={codigo} onChange={(e) => setCodigo(e.target.value)} required />
+          </>
+        )}
         {modo === 'cadastrar' && (
           <>
             <input className={campo} placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
@@ -69,7 +75,7 @@ export default function Login() {
         {aviso && <p className="text-sm text-green-700">{aviso}</p>}
 
         <button disabled={enviando} className="w-full rounded-lg bg-orange-500 py-4 text-lg font-semibold text-white hover:bg-orange-600 disabled:opacity-60">
-          {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : 'Criar minha oficina'}
+          {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Entrar na oficina' : 'Criar minha oficina'}
         </button>
 
         <button
@@ -79,6 +85,15 @@ export default function Login() {
         >
           {modo === 'entrar' ? 'Ainda não tenho conta' : 'Já tenho conta'}
         </button>
+        {modo !== 'mecanico' && (
+          <button
+            type="button"
+            onClick={() => { setModo('mecanico'); setErro(''); setAviso('') }}
+            className="w-full text-center text-sm text-gray-700 underline"
+          >
+            Sou mecânico (tenho um código)
+          </button>
+        )}
       </form>
     </div>
   )

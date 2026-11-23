@@ -6,6 +6,7 @@ import { COR, ROTULO, STATUS, type StatusOS } from '../lib/status'
 import { botao, campo } from './Clientes'
 import { reduzirImagem } from '../lib/imagem'
 import { linkWhatsApp, msgOrcamento, msgPronta } from '../lib/whatsapp'
+import { useAuth } from '../hooks/useAuth'
 import { hojeISO, somarDias } from '../lib/lembretes'
 
 type OS = {
@@ -30,6 +31,7 @@ type Foto = { id: string; path: string }
 const vazio = { tipo: 'servico' as 'servico' | 'peca', catId: '', descricao: '', qtd: '1', valor: '' }
 
 export default function OSDetalhe() {
+  const { perfil } = useAuth()
   const { id } = useParams()
   const [os, setOs] = useState<OS | null>(null)
   const [itens, setItens] = useState<Item[]>([])
@@ -189,7 +191,7 @@ export default function OSDetalhe() {
   function enviarOrcamentoWhats() {
     const d = dadosMsg()
     if (!os || !d) return
-    const link = linkWhatsApp(os.clientes?.telefone, msgOrcamento(d, `${window.location.origin}/orcamento/${os.token_publico}`))
+    const link = linkWhatsApp(os.clientes?.telefone, msgOrcamento(d, `${window.location.origin}/orcamento/${os.token_publico}`, perfil?.oficina.msg_orcamento))
     if (!link) return setErro('O cliente não tem um telefone válido com DDD. Corrija no cadastro do cliente.')
     window.open(link, '_blank', 'noopener')
     if (os.status === 'orcamento') mudarStatus('aguardando_aprovacao')
@@ -198,7 +200,7 @@ export default function OSDetalhe() {
   function avisarProntaWhats() {
     const d = dadosMsg()
     if (!os || !d) return
-    const link = linkWhatsApp(os.clientes?.telefone, msgPronta(d, Number(os.valor_total)))
+    const link = linkWhatsApp(os.clientes?.telefone, msgPronta(d, Number(os.valor_total), perfil?.oficina.msg_pronta))
     if (!link) return setErro('O cliente não tem um telefone válido com DDD. Corrija no cadastro do cliente.')
     window.open(link, '_blank', 'noopener')
   }

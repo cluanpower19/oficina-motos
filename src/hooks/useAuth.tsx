@@ -1,11 +1,20 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 export type Perfil = {
   nome: string
   papel: 'dono' | 'mecanico'
-  oficina: { id: string; nome: string; telefone: string | null }
+  oficina: {
+    id: string
+    nome: string
+    telefone: string | null
+    endereco: string | null
+    logo_url: string | null
+    msg_orcamento: string | null
+    msg_pronta: string | null
+    msg_lembrete: string | null
+  }
 }
 
 type AuthCtx = {
@@ -13,6 +22,7 @@ type AuthCtx = {
   perfil: Perfil | null
   carregando: boolean
   sair: () => Promise<void>
+  recarregarPerfil: () => Promise<void>
 }
 
 const Ctx = createContext<AuthCtx>({
@@ -20,22 +30,26 @@ const Ctx = createContext<AuthCtx>({
   perfil: null,
   carregando: true,
   sair: async () => {},
+  recarregarPerfil: async () => {},
 })
 
 async function buscarPerfil(session: Session): Promise<Perfil | null> {
   const ler = () =>
     supabase
       .from('usuarios')
-      .select('nome, papel, oficinas(id, nome, telefone)')
+      .select('nome, papel, oficinas(id, nome, telefone, endereco, logo_url, msg_orcamento, msg_pronta, msg_lembrete)')
       .eq('id', session.user.id)
       .maybeSingle()
 
   let { data } = await ler()
 
-  // Primeiro login após confirmar o e-mail: cria a oficina com os dados do cadastro
+  // Primeiro login após cadastro: cria a oficina (dono) ou entra com o código (mecânico)
   if (!data) {
     const meta = session.user.user_metadata ?? {}
-    if (meta.oficina_nome) {
+    if (meta.codigo_oficina) {
+      await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
+      ;({ data } = await ler())
+    } else if (meta.oficina_nome) {
       await supabase.rpc('criar_oficina', {
         p_nome: meta.oficina_nome,
         p_telefone: meta.telefone ?? '',
@@ -76,7 +90,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
-  return <Ctx.Provider value={{ session, perfil, carregando, sair }}>{children}</Ctx.Provider>
+  const recarregarPerfil = useCallback(async () => {
+    if (session) setPerfil(await buscarPerfil(session))
+  }, [session])
+
+  return <Ctx.Provider value={{ session, perfil, carregando, sair, recarregarPerfil }}>{children}</Ctx.Provider>
 }
 
 export const useAuth = () => useContext(Ctx)
