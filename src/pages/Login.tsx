@@ -156,7 +156,7 @@ export default function Login() {
                 >
                   Baixar para Mac
                 </a>
-                <a href="/downloads/OficioDoMotor.apk" download className="download-app">
+                <a href="/downloads/OficioDoMotor.apk" download className="download-app" aria-label="Baixar aplicativo Ofício do Motor para Android">
                   Baixar aplicativo para Android (APK)
                 </a>
               </div>
