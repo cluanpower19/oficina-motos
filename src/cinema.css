@@ -1,0 +1,121 @@
+/* ===== Camada de cinema: flare anamorfico, reflexo molhado, poeira, neblina, dolly e paralaxe =====
+   Carregada depois do oficina.css. Tudo em CSS/SVG, sem imagens externas. */
+
+/* ---------- Câmera: lento "push-in" em toda a cena ---------- */
+.camera { position: absolute; inset: 0; z-index: 0; transform-origin: 68% 72%;
+  animation: dolly 28s ease-in-out 1.6s infinite alternate; }
+@keyframes dolly { from { transform: scale(1); } to { transform: scale(1.07); } }
+
+/* ---------- Paralaxe com o mouse (--mx / --my vão de -0.5 a 0.5) ---------- */
+.parede, .portao, .painel-ferramentas, .moto-cena, .atmosfera, .neon {
+  transition: translate 0.35s ease-out; }
+.parede { translate: calc(var(--mx, 0) * -8px) calc(var(--my, 0) * -4px); }
+.portao { translate: calc(var(--mx, 0) * -14px) calc(var(--my, 0) * -6px); }
+.painel-ferramentas { translate: calc(var(--mx, 0) * -20px) calc(var(--my, 0) * -8px); }
+.neon { translate: calc(var(--mx, 0) * -18px) calc(var(--my, 0) * -8px); }
+.moto-cena { translate: calc(var(--mx, 0) * 16px) calc(var(--my, 0) * 6px); }
+.atmosfera { translate: calc(var(--mx, 0) * 26px) calc(var(--my, 0) * 10px); }
+
+/* ---------- Moto: palco com flare e reflexo no chão molhado ---------- */
+.moto-cena .moto-svg { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
+.moto-reflexo { position: absolute; left: 0; right: 0; top: 98.5%; z-index: 0; pointer-events: none;
+  transform: scaleY(-1); opacity: 0.24; filter: blur(1.6px) saturate(0.9);
+  -webkit-mask-image: linear-gradient(0deg, #000 0%, transparent 62%);
+  mask-image: linear-gradient(0deg, #000 0%, transparent 62%); }
+.moto-reflexo svg { display: block; width: 100%; height: auto; }
+
+/* O ponto do farol no SVG fica em 452/620 x 128/330 */
+.flare { position: absolute; left: 72.9%; top: 38.8%; width: 0; height: 0; z-index: 2; pointer-events: none;
+  mix-blend-mode: screen; animation: flare-vive 4s ease-in-out 2.4s infinite both; }
+/* brilho (bloom) */
+.flare::before { content: ''; position: absolute; width: 13rem; height: 13rem; left: -6.5rem; top: -6.5rem; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 246, 224, 0.95) 0 4%, rgba(255, 214, 140, 0.55) 10%, rgba(255, 170, 80, 0.18) 34%, transparent 66%); }
+/* fantasmas de lente espalhados no eixo do flare */
+.flare::after { content: ''; position: absolute; width: 34rem; height: 8rem; left: -34rem; top: -4rem;
+  background:
+    radial-gradient(circle at 78% 50%, rgba(80, 190, 205, 0.30) 0 5%, transparent 6%),
+    radial-gradient(circle at 56% 50%, rgba(255, 170, 90, 0.22) 0 8%, transparent 9%),
+    radial-gradient(circle at 34% 50%, rgba(120, 170, 255, 0.20) 0 3.4%, transparent 4.4%),
+    radial-gradient(circle at 12% 50%, rgba(255, 220, 170, 0.14) 0 11%, transparent 12%);
+  filter: blur(2px); }
+/* risco horizontal anamorfico */
+.flare i { position: absolute; left: -26rem; width: 52rem; top: -1px; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(120, 190, 255, 0.0) 8%, rgba(150, 205, 255, 0.85) 50%, rgba(120, 190, 255, 0.0) 92%, transparent 100%);
+  box-shadow: 0 0 16px 3px rgba(120, 180, 255, 0.35), 0 0 46px 8px rgba(90, 150, 255, 0.16); }
+@keyframes flare-vive { 0%, 46%, 54%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (max-width: 899px) { .flare i { width: 30rem; left: -15rem; } .flare::after { display: none; } }
+
+/* ---------- Atmosfera: neblina, vazamento de luz, poeira ---------- */
+.atmosfera { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+.nevoa { position: absolute; left: -20%; width: 140%; height: 38%; filter: blur(38px); opacity: 0.5; mix-blend-mode: screen;
+  background:
+    radial-gradient(ellipse at 28% 55%, rgba(150, 195, 205, 0.24), transparent 62%),
+    radial-gradient(ellipse at 76% 42%, rgba(255, 190, 120, 0.17), transparent 62%);
+  animation: nevoa-vai 34s ease-in-out infinite alternate; }
+.nevoa.n1 { bottom: 4%; }
+.nevoa.n2 { bottom: 24%; opacity: 0.34; animation-duration: 46s; animation-direction: alternate-reverse; }
+@keyframes nevoa-vai { from { transform: translateX(-7%); } to { transform: translateX(7%); } }
+
+.vazamento { position: absolute; inset: 0; mix-blend-mode: screen; opacity: 0.9;
+  background: linear-gradient(112deg, transparent 38%, rgba(255, 160, 70, 0.10) 48%, rgba(255, 210, 150, 0.07) 52%, transparent 62%) 0 0 / 260% 100%;
+  animation: vazamento-vai 15s ease-in-out infinite alternate; }
+@keyframes vazamento-vai { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+.poeira { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%;
+  background: rgba(255, 228, 176, 0.95); box-shadow: 0 0 6px 1px rgba(255, 200, 120, 0.55); opacity: 0;
+  animation: poeira-flutua var(--d) ease-in-out var(--t) infinite; }
+@keyframes poeira-flutua {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: 0.9; } 80% { opacity: 0.55; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+}
+
+/* ---------- Título: revela como se entrasse em foco ---------- */
+.manchete { animation: revela-foco 1.9s cubic-bezier(0.2, 0.7, 0.2, 1) 1.2s both; }
+@keyframes revela-foco {
+  from { opacity: 0; filter: blur(14px); letter-spacing: 0.08em; transform: translateY(10px); }
+  to { opacity: 1; filter: blur(0); letter-spacing: 0.01em; transform: none; }
+}
+
+/* ---------- Painel: brilho de luz passando no herói e entrada das telas ---------- */
+.heroi::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; transform: translateX(-120%);
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 226, 170, 0.09) 50%, transparent 60%);
+  animation: brilho-passa 9s ease-in-out 2s infinite; }
+@keyframes brilho-passa { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+
+main { animation: tela-entra 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes tela-entra {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* ---------- Respeita quem prefere menos movimento ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .camera, .flare, .nevoa, .vazamento, .poeira, .manchete, .heroi::after, main { animation: none !important; }
+  .poeira { opacity: 0.5; }
+  .manchete, main { opacity: 1; filter: none; }
+  .parede, .portao, .painel-ferramentas, .moto-cena, .atmosfera, .neon { translate: none; }
+}
+
+/* ===== Foto real (Unsplash License, ver CREDITOS.md) como fundo da cena ===== */
+.foto-cena { position: absolute; inset: -3%; z-index: 0; background: url('/img/oficina-moto.jpg') 38% 45% / cover no-repeat;
+  filter: contrast(1.1) saturate(1.1) brightness(1.08);
+  translate: calc(var(--mx, 0) * -14px) calc(var(--my, 0) * -7px); transition: translate 0.35s ease-out; }
+.foto-cena::after { content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 8, 12, 0.82) 0%, rgba(5, 8, 12, 0.42) 40%, rgba(5, 8, 12, 0.04) 75%),
+    linear-gradient(0deg, rgba(5, 8, 12, 0.7), transparent 38%),
+    linear-gradient(180deg, rgba(5, 8, 12, 0.6), transparent 30%); }
+.luz-foto { position: absolute; inset: 0; z-index: 1; mix-blend-mode: screen; pointer-events: none;
+  background:
+    radial-gradient(60% 60% at 86% 96%, rgba(242, 160, 61, 0.26), transparent 65%),
+    radial-gradient(50% 60% at 8% 8%, rgba(31, 111, 120, 0.32), transparent 70%); }
+.credito-foto { position: absolute; z-index: 6; right: 1rem; bottom: calc(7% + 0.4rem); font-size: 0.68rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.45); }
+@media (max-width: 899px) {
+  .foto-cena::after { background: linear-gradient(180deg, rgba(5, 8, 12, 0.55), rgba(5, 8, 12, 0.82)); }
+}
+@media (prefers-reduced-motion: reduce) { .foto-cena { translate: none; } }
+
+/* textura da mesma foto, bem sutil, no cartão principal do painel */
+.heroi::before { content: ''; position: absolute; inset: 0; z-index: 0; opacity: 0.2; mix-blend-mode: luminosity;
+  background: url('/img/oficina-moto.jpg') 60% 40% / cover no-repeat; }

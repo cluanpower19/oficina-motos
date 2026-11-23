@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type MouseEvent as MouseReact } from 'react'
 import { supabase, supabaseConfigurado } from '../lib/supabase'
-import { Chave, Emblema, MotoSilhueta } from '../components/Cenario'
+import { Emblema } from '../components/Cenario'
+import { Atmosfera } from '../components/Atmosfera'
 
 const campo = 'campo'
 
@@ -44,31 +45,23 @@ export default function Login() {
     }
   }
 
+  function mover(e: MouseReact<HTMLElement>) {
+    const r = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.style.setProperty('--mx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3))
+    e.currentTarget.style.setProperty('--my', ((e.clientY - r.top) / r.height - 0.5).toFixed(3))
+  }
+
   const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'mecanico' ? 'Entrar como mecânico' : 'Criar minha oficina'
 
   return (
     <div className="cena">
-      <section className="cena-visual" aria-hidden="false">
-        <div className="parede" aria-hidden="true" />
-        <div className="portao" aria-hidden="true" />
-        <div className="painel-ferramentas" aria-hidden="true">
-          <Chave className="chave" style={{ width: '70%', left: '8%', top: '14%' }} />
-          <Chave className="chave" style={{ width: '56%', left: '14%', top: '42%', transform: 'rotate(-4deg)' }} />
-          <Chave className="chave" style={{ width: '64%', left: '6%', top: '70%', transform: 'rotate(3deg)' }} />
+      <section className="cena-visual" aria-hidden="false" onMouseMove={mover}>
+        <div className="camera">
+          <div className="foto-cena" aria-hidden="true" />
+          <div className="luz-foto" aria-hidden="true" />
+          <Atmosfera />
         </div>
-        <div className="pendente" style={{ left: '30%', height: '16%' }} aria-hidden="true" />
-        <div className="pendente" style={{ left: '62%', height: '11%', animationDelay: '-3s' }} aria-hidden="true" />
-        <div className="neon" aria-hidden="true">Aberto</div>
-        <div className="piso" aria-hidden="true" />
-        <div className="poca-oleo" aria-hidden="true" />
-        <MotoSilhueta className="moto-cena" />
-        {[
-          ['78%', '30%', '60px', '-70px', '0s'], ['79%', '31%', '-50px', '-90px', '0.5s'], ['77%', '30%', '90px', '-40px', '1.1s'],
-          ['78%', '30%', '30px', '-110px', '1.7s'], ['80%', '31%', '-20px', '-60px', '2.1s'],
-        ].map(([l, b, dx, dy, d], i) => (
-          <span key={i} className="faisca" aria-hidden="true" style={{ left: l, bottom: b, animationDelay: d, ['--dx' as string]: dx, ['--dy' as string]: dy }} />
-        ))}
-        <div className="chao-listra" aria-hidden="true" />
+        <span className="credito-foto">Foto: Angry._.Kat / Unsplash</span>
         <div className="barra-cine topo" aria-hidden="true" />
         <div className="barra-cine base" aria-hidden="true" />
         <div className="cena-texto">
