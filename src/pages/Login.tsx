@@ -6,8 +6,8 @@ import { URL_DOWNLOAD, noSite, urlInstalador, urlSite } from '../lib/urlSite'
 
 const campo = 'campo'
 
-export default function Login() {
-  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
+export default function Login({ redefinir = false }: { redefinir?: boolean } = {}) {
+  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
   const [codigo, setCodigo] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
