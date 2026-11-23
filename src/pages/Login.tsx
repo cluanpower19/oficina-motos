@@ -61,7 +61,6 @@ export default function Login() {
           <div className="luz-foto" aria-hidden="true" />
           <Atmosfera />
         </div>
-        <span className="credito-foto">Foto: Angry._.Kat / Unsplash</span>
         <div className="barra-cine topo" aria-hidden="true" />
         <div className="barra-cine base" aria-hidden="true" />
         <div className="cena-texto">

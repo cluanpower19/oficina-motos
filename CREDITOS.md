@@ -1,3 +1,3 @@
-# Créditos
+﻿# Créditos
 
-- public/img/oficina-moto.jpg: foto de Angry._.Kat (@_ks_) no Unsplash, https://unsplash.com/photos/KlOw94HiuGc. Licença Unsplash (uso gratuito, inclusive comercial; atribuição não obrigatória, mas mantida).
+Fotos em public/img (oficina-noite, moto-cafe, bancada): Unsplash, licença Unsplash (uso gratuito, inclusive comercial, sem atribuição obrigatória). Não exibir crédito no site.

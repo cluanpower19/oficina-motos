@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { formatarMoeda } from '../lib/formatos'
 import { hojeISO } from '../lib/lembretes'
 import { ROTULO, STATUS, type StatusOS } from '../lib/status'
-import { Chave, Engrenagem, MotoSilhueta, Velocimetro } from '../components/Cenario'
+import { Chave, Engrenagem, Velocimetro } from '../components/Cenario'
 import { botao } from './Clientes'
 
 type Resumo = {
@@ -58,7 +58,7 @@ export default function Painel() {
       <section className="heroi">
         <Engrenagem className="engrenagem-fundo" />
         <Chave className="chave-fundo" />
-        <MotoSilhueta className="moto" />
+        <div className="heroi-veu" aria-hidden="true" />
         <div className="heroi-conteudo">
           <p className="saudacao">Olá, {perfil?.nome}</p>
           <h1>{perfil?.oficina.nome}</h1>
@@ -112,3 +112,4 @@ export default function Painel() {
     </div>
   )
 }
+

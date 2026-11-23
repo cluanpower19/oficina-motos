@@ -1,4 +1,4 @@
-/* ===== Camada de cinema: flare anamorfico, reflexo molhado, poeira, neblina, dolly e paralaxe =====
+﻿/* ===== Camada de cinema: flare anamorfico, reflexo molhado, poeira, neblina, dolly e paralaxe =====
    Carregada depois do oficina.css. Tudo em CSS/SVG, sem imagens externas. */
 
 /* ---------- Câmera: lento "push-in" em toda a cena ---------- */
@@ -97,8 +97,8 @@ main { animation: tela-entra 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   .parede, .portao, .painel-ferramentas, .moto-cena, .atmosfera, .neon { translate: none; }
 }
 
-/* ===== Foto real (Unsplash License, ver CREDITOS.md) como fundo da cena ===== */
-.foto-cena { position: absolute; inset: -3%; z-index: 0; background: url('/img/oficina-moto.jpg') 38% 45% / cover no-repeat;
+/* ===== Fotos reais como fundo da cena, do painel e do menu ===== */
+.foto-cena { position: absolute; inset: -3%; z-index: 0; background: url('/img/oficina-noite.jpg') 62% 50% / cover no-repeat;
   filter: contrast(1.1) saturate(1.1) brightness(1.08);
   translate: calc(var(--mx, 0) * -14px) calc(var(--my, 0) * -7px); transition: translate 0.35s ease-out; }
 .foto-cena::after { content: ''; position: absolute; inset: 0;
@@ -110,12 +110,27 @@ main { animation: tela-entra 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   background:
     radial-gradient(60% 60% at 86% 96%, rgba(242, 160, 61, 0.26), transparent 65%),
     radial-gradient(50% 60% at 8% 8%, rgba(31, 111, 120, 0.32), transparent 70%); }
-.credito-foto { position: absolute; z-index: 6; right: 1rem; bottom: calc(7% + 0.4rem); font-size: 0.68rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.45); }
 @media (max-width: 899px) {
   .foto-cena::after { background: linear-gradient(180deg, rgba(5, 8, 12, 0.55), rgba(5, 8, 12, 0.82)); }
 }
 @media (prefers-reduced-motion: reduce) { .foto-cena { translate: none; } }
 
-/* textura da mesma foto, bem sutil, no cartão principal do painel */
-.heroi::before { content: ''; position: absolute; inset: 0; z-index: 0; opacity: 0.2; mix-blend-mode: luminosity;
-  background: url('/img/oficina-moto.jpg') 60% 40% / cover no-repeat; }
+/* herói do painel: foto cinematográfica à direita, esmaecendo para o cartão */
+.heroi::before { content: ''; position: absolute; inset: 0; z-index: 0;
+  background: url('/img/moto-cafe.jpg') 70% 55% / cover no-repeat; filter: contrast(1.08) saturate(1.05); }
+.heroi .heroi-veu { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(10, 15, 20, 0.96) 0%, rgba(10, 15, 20, 0.78) 38%, rgba(10, 15, 20, 0.12) 78%),
+    linear-gradient(0deg, rgba(10, 15, 20, 0.6), transparent 40%),
+    radial-gradient(60% 90% at 90% 100%, rgba(242, 160, 61, 0.2), transparent 65%); }
+.heroi { min-height: 17rem; }
+@media (max-width: 640px) {
+  .heroi .heroi-veu { background: linear-gradient(180deg, rgba(10, 15, 20, 0.55), rgba(10, 15, 20, 0.9)); }
+}
+
+/* menu lateral: bancada de oficina bem escura ao fundo */
+.menu-lateral { position: relative; isolation: isolate; }
+.menu-lateral::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0.5;
+  background:
+    linear-gradient(180deg, rgba(15, 21, 28, 0.9) 0%, rgba(10, 15, 20, 0.55) 45%, rgba(10, 15, 20, 0.96) 100%),
+    url('/img/bancada.jpg') 30% 60% / cover no-repeat; }
