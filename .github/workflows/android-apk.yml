@@ -5,6 +5,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: android-official-release
@@ -83,6 +85,23 @@ jobs:
           git add public/downloads/OficioDoMotor.apk
           git commit -m "Publica APK oficial assinado"
           git push
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build website including the official APK
+        run: |
+          npm run build
+          cp dist/index.html dist/404.html
+
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy website with official APK
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Remove temporary signing key
         if: always()
