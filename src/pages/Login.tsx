@@ -2,15 +2,17 @@ import { useEffect, useState, type FormEvent, type MouseEvent as MouseReact } fr
 import { supabase, supabaseConfigurado } from '../lib/supabase'
 import { Emblema } from '../components/Cenario'
 import { Atmosfera } from '../components/Atmosfera'
-import { URL_DOWNLOAD, noSite, urlInstalador } from '../lib/urlSite'
+import { URL_DOWNLOAD, noSite, urlInstalador, urlSite } from '../lib/urlSite'
 
 const campo = 'campo'
 
 export default function Login() {
-  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico'>('entrar')
+  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
   const [codigo, setCodigo] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+  const [senhaNova, setSenhaNova] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
   const [nome, setNome] = useState('')
   const [oficinaNome, setOficinaNome] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -32,23 +34,48 @@ export default function Login() {
     setAviso('')
     setEnviando(true)
     try {
-      if (modo === 'entrar') {
+      if (modo === 'recuperar') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlSite() })
+        if (error) setErro(error.message)
+        else setAviso('Se houver uma conta vinculada a esse e-mail, enviaremos um link para redefinir a senha. Confira sua caixa de entrada e o spam.')
+      } else if (modo === 'redefinir') {
+        if (senhaNova.length < 6) {
+          setErro('A nova senha precisa ter pelo menos 6 caracteres.')
+        } else if (senhaNova !== confirmarSenha) {
+          setErro('As senhas não conferem.')
+        } else {
+          const { error } = await supabase.auth.updateUser({ password: senhaNova })
+          if (error) setErro(error.message)
+          else {
+            await supabase.auth.signOut()
+            window.history.replaceState(null, '', window.location.pathname)
+            setModo('entrar')
+            setSenhaNova('')
+            setConfirmarSenha('')
+            setAviso('Senha alterada com sucesso! Entre usando sua nova senha.')
+          }
+        }
+      } else if (modo === 'entrar') {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
-        if (error) setErro('E-mail ou senha incorretos.')
+        if (error) setErro('E-mail ou senha incorretos. Se acabou de se cadastrar, confirme seu e-mail primeiro.')
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
           password: senha,
           options: {
+            emailRedirectTo: urlSite(),
             data:
               modo === 'mecanico'
                 ? { nome, codigo_oficina: codigo.trim().toLowerCase() }
-                : { nome, oficina_nome: oficinaNome, telefone: telefone.replace(/\D/g, '') },
+                : { nome, oficina_nome: oficinaNome, telefone: telefone.replace(/\\D/g, '') },
           },
         })
         if (error) setErro(error.message)
-        else if (!data.session) setAviso('Cadastro feito! Confirme o e-mail que enviamos e depois entre.')
+        else if (!data.session) setAviso('Cadastro iniciado! Enviamos um link de confirmação para seu e-mail. Confirme o endereço antes de entrar. Verifique também o spam.')
+        else setAviso('Cadastro concluído. Você já pode entrar.')
       }
+    } catch {
+      setErro('Não foi possível concluir a solicitação. Verifique sua conexão e tente novamente.')
     } finally {
       setEnviando(false)
     }
@@ -60,7 +87,7 @@ export default function Login() {
     e.currentTarget.style.setProperty('--my', ((e.clientY - r.top) / r.height - 0.5).toFixed(3))
   }
 
-  const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'mecanico' ? 'Entrar como mecânico' : 'Criar minha oficina'
+  const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'mecanico' ? 'Entrar como mecânico' : modo === 'cadastrar' ? 'Criar minha oficina' : modo === 'recuperar' ? 'Recuperar senha' : 'Criar nova senha'
 
   return (
     <div className="cena">
@@ -116,24 +143,42 @@ export default function Login() {
               <input className={campo} placeholder="Telefone com DDD" inputMode="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
             </>
           )}
-          <input className={campo} type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <input className={campo} type="password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
+          {modo !== 'redefinir' && (
+            <input className={campo} type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          )}
+          {(modo === 'entrar' || modo === 'cadastrar' || modo === 'mecanico') && (
+            <input className={campo} type="password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
+          )}
+          {modo === 'redefinir' && (
+            <>
+              <input className={campo} type="password" placeholder="Nova senha (mín. 6 caracteres)" minLength={6} value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} required />
+              <input className={campo} type="password" placeholder="Confirme a nova senha" minLength={6} value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} required />
+            </>
+          )}
 
           {erro && <p className="text-sm text-red-600">{erro}</p>}
           {aviso && <p className="text-sm text-green-700">{aviso}</p>}
 
           <button disabled={enviando} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
-            {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Entrar na oficina' : 'Criar minha oficina'}
+            {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Entrar na oficina' : modo === 'cadastrar' ? 'Criar minha oficina' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
           </button>
 
-          <button
-            type="button"
-            onClick={() => { setModo(modo === 'entrar' ? 'cadastrar' : 'entrar'); setErro(''); setAviso('') }}
-            className="link"
-          >
-            {modo === 'entrar' ? 'Quero cadastrar minha oficina' : 'Já tenho conta, quero entrar'}
-          </button>
-          {modo !== 'mecanico' && (
+          {modo === 'entrar' && (
+            <>
+              <button type="button" onClick={() => { setModo('recuperar'); setErro(''); setAviso('') }} className="link">
+                Esqueci minha senha
+              </button>
+              <button type="button" onClick={() => { setModo('cadastrar'); setErro(''); setAviso('') }} className="link">
+                Quero cadastrar minha oficina
+              </button>
+            </>
+          )}
+          {(modo === 'cadastrar' || modo === 'mecanico' || modo === 'recuperar' || modo === 'redefinir') && (
+            <button type="button" onClick={() => { setModo('entrar'); setErro(''); setAviso('') }} className="link">
+              Voltar para entrar
+            </button>
+          )}
+          {modo === 'entrar' && (
             <button type="button" onClick={() => { setModo('mecanico'); setErro(''); setAviso('') }} className="link">
               Sou mecânico e tenho o código da oficina
             </button>
