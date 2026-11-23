@@ -1,5 +1,7 @@
 # DEPLOY.md: publicar o sistema e gerir assinaturas
 
+> Já publicado em https://oficina-moto-gestao.netlify.app (projeto Netlify `oficina-moto-gestao`). Os passos abaixo servem para refazer em outra conta ou ligar o GitHub para publicar a cada push.
+
 ## 1. Publicar (Netlify, grátis; Vercel funciona igual)
 
 1. Entre em netlify.com com sua conta, "Add new site" > "Import an existing project" > GitHub > repositório `oficina-motos`.
