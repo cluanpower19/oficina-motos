@@ -25,7 +25,7 @@ export default function Login() {
     if (!noSite) return
     urlInstalador('-win-x64.exe').then(setLinkWindows)
     urlInstalador(navigator.userAgent.includes('Mac') ? '-mac-arm64.dmg' : '-mac-x64.dmg').then(setLinkMac)
-    fetch('/downloads/OficioDoMotor.apk', { method: 'HEAD' }).then((r) => setAndroidDisponivel(r.ok)).catch(() => setAndroidDisponivel(false))
+    fetch('/downloads/OficioDoMotor.apk', { method: 'HEAD', cache: 'no-store' }).then((r) => setAndroidDisponivel(r.ok)).catch(() => setAndroidDisponivel(false))
   }, [])
 
   async function enviar(e: FormEvent) {
