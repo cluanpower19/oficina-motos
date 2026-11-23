@@ -4,6 +4,7 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Emblema oficial: engrenagem e chave em âmbar sobre fundo grafite. -->
     <group>
         <path android:fillColor="#F2A03D" android:pathData="M49,6h10v17h-10z"/>
         <path android:fillColor="#F2A03D" android:pathData="M49,85h10v17h-10z"/>
