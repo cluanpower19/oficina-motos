@@ -31,7 +31,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Gerar instalador
-        run: npm run ${{ matrix.script }}
+        run: npm run ${{ matrix.script }} -- --publish never
         env:
           # Sem certificado de assinatura por enquanto (etapa opcional do DESKTOP.md).
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
