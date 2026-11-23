@@ -7,6 +7,9 @@ import EmBreve from './pages/EmBreve'
 import Clientes from './pages/Clientes'
 import ClienteDetalhe from './pages/ClienteDetalhe'
 import Catalogo from './pages/Catalogo'
+import OrdensServico from './pages/OrdensServico'
+import NovaOS from './pages/NovaOS'
+import OSDetalhe from './pages/OSDetalhe'
 
 function Rotas() {
   const { session, perfil, carregando } = useAuth()
@@ -21,10 +24,13 @@ function Rotas() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Painel />} />
-        <Route path="os" element={<EmBreve titulo="Ordens de Serviço" />} />
+        <Route path="os" element={<OrdensServico />} />
+        <Route path="os/nova" element={<NovaOS />} />
+        <Route path="os/:id" element={<OSDetalhe />} />
         <Route path="clientes" element={<Clientes />} />
         <Route path="clientes/:id" element={<ClienteDetalhe />} />
-        <Route path="catalogo" element={<Catalogo />} />`n        <Route path="lembretes" element={<EmBreve titulo="Lembretes" />} />
+        <Route path="catalogo" element={<Catalogo />} />
+        <Route path="lembretes" element={<EmBreve titulo="Lembretes" />} />
         <Route path="financeiro" element={<EmBreve titulo="Financeiro" />} />
         <Route path="configuracoes" element={<EmBreve titulo="Configurações" />} />
         <Route path="*" element={<Navigate to="/" replace />} />

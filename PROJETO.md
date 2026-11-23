@@ -135,7 +135,7 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
 - **Etapa concluída mais recente:** Etapa 3 (catálogo de serviços e peças com alerta de estoque baixo, testada e funcionando). Tag `etapa-03`.
-- **Etapa atual:** 4 (Nova OS e detalhe da OS: itens, status, número sequencial). Ainda não iniciada.
+- **Etapa atual:** 4 (código pronto e compilando: telas OS lista/nova/detalhe; FALTA aplicar a migração 0005 no Supabase e testar)
 - **Pasta local:** `C:\Users\iaras\oficina-moto`
 - **Ambiente:** Windows + PowerShell, Node v26.13.0, npm 11.20.0, git 2.56.1. `gh` não instalado.
 - **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`, `Catalogo` (abas `CatalogoServicos` e `CatalogoPecas`), `Clientes` (lista, busca por nome/placa, novo cliente+moto), `ClienteDetalhe` (editar, motos, remover), `lib/formatos.ts`
@@ -144,4 +144,4 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 - **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
 - **Última tag:** `etapa-03`
 - **Git:** identidade local do repo = cluanpower19 / cluanpower19@users.noreply.github.com
-- **Pendências:** (1) Começar a Etapa 4: migração 0005 (`ordens_servico`, `os_itens`, número sequencial por oficina, `token_publico`), telas Nova OS (busca moto por placa, serviços/peças do catálogo ou livres) e Detalhe da OS (status, itens). Baixa de estoque só ao marcar `em_andamento`. (2) Usuários de teste podem ser apagados em Authentication > Users.
+- **Pendências:** (1) Colar `0005_ordens_servico.sql` no SQL Editor e rodar UMA vez. (2) Testar: Nova OS por placa (e cadastro novo), adicionar itens (serviço/peça, catálogo e livre), total, mudar status, baixa de estoque ao marcar Em andamento. (3) Fechar a Etapa 4 (marcar seção 9, atualizar seção 15, commit, tag etapa-04, push). (4) Usuários de teste podem ser apagados em Authentication > Users.
