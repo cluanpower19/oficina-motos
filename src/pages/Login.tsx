@@ -141,18 +141,24 @@ export default function Login() {
         </form>
 
         {noSite && (
-          <div className="cartao-entrada mt-4 space-y-2 text-center">
-            <p className="text-sm text-gray-600">Prefere usar no computador?</p>
-            <a
-              href={linkWindows ?? URL_DOWNLOAD}
-              {...(linkWindows ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
-              className="block w-full rounded-lg border-2 border-orange-500 py-3 font-semibold text-orange-600 hover:bg-orange-50"
-            >
-              Baixar para Windows
-            </a>
-            <a href={linkMac ?? URL_DOWNLOAD} {...(linkMac ? { download: true } : { target: '_blank', rel: 'noreferrer' })} className="link">
-              Baixar para Mac
-            </a>
+          <div className="cartao-entrada mt-4 text-center">
+            <p className="mb-3 text-sm text-gray-600">Prefere usar no computador?</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <a
+                href={linkWindows ?? URL_DOWNLOAD}
+                {...(linkWindows ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
+                className="flex min-h-12 w-full items-center justify-center rounded-lg border-2 border-orange-500 px-3 py-3 text-center font-semibold leading-tight text-orange-600 transition-colors hover:bg-orange-50"
+              >
+                Baixar para Windows
+              </a>
+              <a
+                href={linkMac ?? URL_DOWNLOAD}
+                {...(linkMac ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
+                className="flex min-h-12 w-full items-center justify-center rounded-lg border-2 border-orange-500 px-3 py-3 text-center font-semibold leading-tight text-orange-600 transition-colors hover:bg-orange-50"
+              >
+                Baixar para Mac
+              </a>
+            </div>
           </div>
         )}
       </section>
