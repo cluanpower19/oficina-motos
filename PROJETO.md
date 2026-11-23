@@ -103,7 +103,7 @@ Teste grátis de 14 dias, sem cartão. No MVP, cobrança manual (Pix). Depois, g
 - [x] **Etapa 1:** Projeto base (Vite, React, Tailwind), layout responsivo com menu, login com Supabase Auth, criação da oficina no cadastro
 - [x] **Etapa 2:** Tabelas `oficinas`, `usuarios`, `clientes`, `motos` com RLS. Telas de clientes e motos
 - [x] **Etapa 3:** Catálogo de serviços e peças
-- [ ] **Etapa 4:** Nova OS e detalhe da OS (itens, status, número sequencial)
+- [x] **Etapa 4:** Nova OS e detalhe da OS (itens, status, número sequencial)
 - [ ] **Etapa 5:** Fotos da OS (Supabase Storage) e página pública do orçamento com aprovar/recusar
 - [ ] **Etapa 6:** Botões de WhatsApp com mensagens padrão (wa.me)
 - [ ] **Etapa 7:** Lembretes de retorno
@@ -134,14 +134,14 @@ Nota fiscal, integração com fornecedores de peças, app nativo, automação de
 
 ## 15. Estado atual do projeto (atualizar a cada etapa)
 
-- **Etapa concluída mais recente:** Etapa 3 (catálogo de serviços e peças com alerta de estoque baixo, testada e funcionando). Tag `etapa-03`.
-- **Etapa atual:** 4 (código pronto e compilando: telas OS lista/nova/detalhe; FALTA aplicar a migração 0005 no Supabase e testar)
+- **Etapa concluída mais recente:** Etapa 4 (OS: lista, nova OS por placa, detalhe com itens/status/total). Migração 0005 aplicada pelo conector Supabase e lógica validada no banco (numeração, total, baixa de estoque única). Telas ainda sem teste manual no navegador. Tag `etapa-04`.
+- **Etapa atual:** 5 (fotos da OS no Storage e página pública do orçamento com aprovar/recusar). Ainda não iniciada.
 - **Pasta local:** `C:\Users\iaras\oficina-moto`
 - **Ambiente:** Windows + PowerShell, Node v26.13.0, npm 11.20.0, git 2.56.1. `gh` não instalado.
 - **O que já existe no código:** Vite + React + TS + Tailwind; react-router; `useAuth`, `supabase.ts`, `Layout` (menu), páginas `Login`, `Painel`, `EmBreve`, `Catalogo` (abas `CatalogoServicos` e `CatalogoPecas`), `Clientes` (lista, busca por nome/placa, novo cliente+moto), `ClienteDetalhe` (editar, motos, remover), `lib/formatos.ts`
-- **Migrações aplicadas no Supabase (NÃO rodar de novo):** `0001_base.sql`, `0002_clientes_motos.sql`, `0003_grants.sql`, `0004_catalogo_pecas.sql`. Próxima: `0005_...` (nova tabela precisa de RLS + grants para `authenticated`).
+- **Migrações aplicadas no Supabase (NÃO rodar de novo):** `0001_base.sql`, `0002_clientes_motos.sql`, `0003_grants.sql`, `0004_catalogo_pecas.sql`, `0005_ordens_servico.sql`. Próxima: `0006_...`. O conector Supabase (MCP) está ligado: aplicar migrações com `apply_migration` no projeto `layuhmhkzqttgfhawpsh` e conferir `list_migrations` antes.
 - **Supabase:** projeto `layuhmhkzqttgfhawpsh` (https://layuhmhkzqttgfhawpsh.supabase.co), região us-east-2. `.env` local criado (ignorado pelo Git). Chave usada: publishable/anon. Em outro PC: recriar `.env` a partir do `.env.example`. "Confirm email" está DESLIGADO.
 - **Repositório GitHub:** https://github.com/cluanpower19/oficina-motos (privado). Branch `main` rastreando `origin/main`.
-- **Última tag:** `etapa-03`
+- **Última tag:** `etapa-04`
 - **Git:** identidade local do repo = cluanpower19 / cluanpower19@users.noreply.github.com
-- **Pendências:** (1) Colar `0005_ordens_servico.sql` no SQL Editor e rodar UMA vez. (2) Testar: Nova OS por placa (e cadastro novo), adicionar itens (serviço/peça, catálogo e livre), total, mudar status, baixa de estoque ao marcar Em andamento. (3) Fechar a Etapa 4 (marcar seção 9, atualizar seção 15, commit, tag etapa-04, push). (4) Usuários de teste podem ser apagados em Authentication > Users.
+- **Pendências:** (1) Teste manual das telas de OS no navegador (Nova OS, itens, status); se houver bug, corrigir antes/junto da Etapa 5. (2) Etapa 5: migração 0006 com bucket Storage `os-fotos` + tabela `os_fotos`, função segura para a página pública por `token_publico` (anon só lê/aprova pela função, nunca tabela aberta). (3) Usuários de teste podem ser apagados em Authentication > Users.
