@@ -163,15 +163,27 @@ export default function OSDetalhe() {
     setErro('')
     setEnviandoFoto(true)
     for (const arq of Array.from(lista)) {
+      let caminhoEnviado: string | null = null
       try {
+        if (!arq.type.startsWith('image/')) throw new Error('Selecione somente arquivos de imagem.')
+        if (arq.size > 15 * 1024 * 1024) throw new Error('A foto deve ter no máximo 15 MB.')
         const blob = await reduzirImagem(arq)
         const path = `${os.oficina_id}/${os.id}/${crypto.randomUUID()}.jpg`
         const up = await supabase.storage.from('os-fotos').upload(path, blob, { contentType: 'image/jpeg' })
         if (up.error) throw up.error
+        caminhoEnviado = path
         const ins = await supabase.from('os_fotos').insert({ os_id: os.id, path })
         if (ins.error) throw ins.error
       } catch (e) {
-        setErro(mensagemErro(e as { message: string }))
+        const erroOriginal = mensagemErro(e as { message: string })
+        if (caminhoEnviado) {
+          const limpeza = await supabase.storage.from('os-fotos').remove([caminhoEnviado])
+          setErro(limpeza.error
+            ? `${erroOriginal} O arquivo ficou no armazenamento e precisa de limpeza manual.`
+            : erroOriginal)
+        } else {
+          setErro(erroOriginal)
+        }
       }
     }
     setEnviandoFoto(false)
@@ -180,10 +192,12 @@ export default function OSDetalhe() {
 
   async function removerFoto(fo: Foto) {
     if (!window.confirm('Remover esta foto?')) return
-    await supabase.storage.from('os-fotos').remove([fo.path])
+    setErro('')
+    const arquivo = await supabase.storage.from('os-fotos').remove([fo.path])
+    if (arquivo.error) return setErro('Não foi possível remover o arquivo: ' + mensagemErro(arquivo.error))
     const { error } = await supabase.from('os_fotos').delete().eq('id', fo.id)
-    if (error) setErro(mensagemErro(error))
-    else carregar()
+    if (error) return setErro('O arquivo foi removido, mas o registro da foto não: ' + mensagemErro(error))
+    carregar()
   }
 
   async function copiarLink() {
