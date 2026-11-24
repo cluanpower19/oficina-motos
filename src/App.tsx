@@ -17,12 +17,14 @@ import OSDetalhe from './pages/OSDetalhe'
 import OrcamentoPublico from './pages/OrcamentoPublico'
 import Lembretes from './pages/Lembretes'
 import Financeiro from './pages/Financeiro'
+import RecursoPlano from './components/RecursoPlano'
 
 function Rotas() {
   const { session, perfil, carregando, recuperacao } = useAuth()
   const location = useLocation()
   const [ehAdmin, setEhAdmin] = useState(false)
   const [verificandoAdmin, setVerificandoAdmin] = useState(true)
+  const planoCompleto = perfil?.oficina.plano === 'completo' && perfil.oficina.status_assinatura === 'ativo'
 
   useEffect(() => {
     let ativo = true
@@ -74,8 +76,8 @@ function Rotas() {
         <Route path="clientes" element={<Clientes />} />
         <Route path="clientes/:id" element={<ClienteDetalhe />} />
         <Route path="catalogo" element={<Catalogo />} />
-        <Route path="lembretes" element={<Lembretes />} />
-        <Route path="financeiro" element={<Financeiro />} />
+        <Route path="lembretes" element={planoCompleto ? <Lembretes /> : <RecursoPlano />} />
+        <Route path="financeiro" element={planoCompleto ? <Financeiro /> : <RecursoPlano />} />
         <Route path="configuracoes" element={<Configuracoes />} />
         <Route path="suporte" element={<Suporte />} />
         <Route path="*" element={<Navigate to="/" replace />} />
