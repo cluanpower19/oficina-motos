@@ -5,6 +5,7 @@ import { Atmosfera } from '../components/Atmosfera'
 import { URL_DOWNLOAD, noSite, urlInstalador, urlSite } from '../lib/urlSite'
 
 const campo = 'campo'
+const urlRedirecionamentoAuth = () => import.meta.env.MODE === 'test' ? window.location.origin : urlSite()
 
 export default function Login({ redefinir = false }: { redefinir?: boolean } = {}) {
   const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
@@ -35,7 +36,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
     setEnviando(true)
     try {
       if (modo === 'recuperar') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlSite() })
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlRedirecionamentoAuth() })
         if (error) setErro(error.message)
         else setAviso('Se houver uma conta vinculada a esse e-mail, enviaremos um link para redefinir a senha. Confira sua caixa de entrada e o spam.')
       } else if (modo === 'redefinir') {
@@ -63,7 +64,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           email,
           password: senha,
           options: {
-            emailRedirectTo: urlSite(),
+            emailRedirectTo: urlRedirecionamentoAuth(),
             data:
               modo === 'mecanico'
                 ? { nome, codigo_oficina: codigo.trim().toLowerCase() }
