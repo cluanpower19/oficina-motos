@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { formatarPlaca, mensagemErro, normalizarPlaca } from '../lib/formatos'
+import { formatarPlaca, mensagemErro, normalizarPlaca, validarKmEntrada } from '../lib/formatos'
 import { botao, campo } from './Clientes'
 
 type MotoBusca = {
@@ -52,6 +52,12 @@ export default function NovaOS() {
     e.preventDefault()
     setErro('')
     setSalvando(true)
+    const kmNum = km ? Number(km) : null
+    const erroKm = validarKmEntrada(kmNum, moto?.km_atual ?? null)
+    if (erroKm) {
+      setSalvando(false)
+      return setErro(erroKm)
+    }
     let clienteId = moto?.cliente_id ?? ''
     let motoId = moto?.id ?? ''
     let clienteNovo = false
@@ -91,15 +97,6 @@ export default function NovaOS() {
       motoId = mt.id
     }
 
-    const kmNum = km ? Number(km) : null
-    if (kmNum !== null && (!Number.isSafeInteger(kmNum) || kmNum < 0)) {
-      setSalvando(false)
-      return setErro('Informe uma quilometragem válida.')
-    }
-    if (moto?.km_atual !== null && moto?.km_atual !== undefined && kmNum !== null && kmNum < moto.km_atual) {
-      setSalvando(false)
-      return setErro(`A quilometragem de entrada não pode ser menor que a última registrada (${moto.km_atual} km).`)
-    }
     const { data: os, error: e3 } = await supabase
       .from('ordens_servico')
       .insert({
