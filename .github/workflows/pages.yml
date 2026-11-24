@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Testes automatizados
+        run: npm test
       - run: npm run build
       - name: Fallback SPA (rotas diretas como /orcamento/...)
         run: cp dist/index.html dist/404.html
