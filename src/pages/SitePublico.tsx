@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import TourGuiado from './TourGuiado'
 import './site-publico.css'
 
 const recursos = [
@@ -32,11 +33,12 @@ export default function SitePublico() {
         </a>
         <nav className="sp-nav" aria-label="Navegação principal">
           <a href="#visao">A proposta</a>
+          <a href="#tour">Tour guiado</a>
           <a href="#recursos">Funcionalidades</a>
           <a href="#planos">Planos</a>
           <a href="#duvidas">Dúvidas</a>
         </nav>
-        <Link to="/entrar" className="sp-header-cta">Acessar sistema <Seta /></Link>
+        <Link to="/entrar" className="sp-header-cta" aria-label="Já sou cliente? Entrar">Entrar <Seta /></Link>
       </header>
 
       <main>
@@ -49,7 +51,7 @@ export default function SitePublico() {
             <h1>Sua oficina tem muito trabalho.<br /><em>A gente ajuda a organizar.</em></h1>
             <p className="sp-hero-lead">Você cuida das motos e dos clientes. O Ofício do Motor ajuda a deixar o resto em ordem, sem complicar seu dia.</p>
             <div className="sp-hero-actions">
-              <Link to="/entrar" className="sp-button sp-button-primary">Conhecer o sistema <Seta /></Link>
+              <a href="#tour" className="sp-button sp-button-primary">Fazer um tour pelo sistema <Seta /></a>
               <a href="#recursos" className="sp-button sp-button-ghost">Explorar funcionalidades <span aria-hidden="true">↓</span></a>
             </div>
             <div className="sp-hero-foot"><span>01 / SUA OFICINA, MAIS ORGANIZADA</span><span>CLIENTES · MOTOS · SERVIÇOS</span></div>
@@ -70,8 +72,10 @@ export default function SitePublico() {
           <div className="sp-editorial-copy"><div className="sp-section-kicker"><span>02</span> PARA FACILITAR SUA ROTINA</div><h2>Você já tem trabalho demais.<br /><em>Deixe a organização mais leve.</em></h2><p>Chega de procurar informação em papel, conversa de WhatsApp e caderno. Deixe os dados dos clientes, as motos e os serviços reunidos para encontrar tudo mais fácil.</p><div className="sp-proof-list"><div><b>01</b><span>O histórico de cada cliente e moto</span></div><div><b>02</b><span>Cada serviço no seu lugar</span></div><div><b>03</b><span>Orçamentos para enviar pelo WhatsApp</span></div></div></div>
         </section>
 
+        <TourGuiado />
+
         <section id="recursos" className="sp-features">
-          <div className="sp-section-kicker"><span>03</span> O QUE VOCÊ PRECISA NO DIA A DIA</div>
+          <div className="sp-section-kicker"><span>04</span> O QUE VOCÊ PRECISA NO DIA A DIA</div>
           <div className="sp-section-heading"><h2>Do primeiro atendimento<br /><em>até a entrega da moto.</em></h2><p>O que você precisa para cuidar dos clientes, acompanhar os serviços e manter a oficina em ordem.</p></div>
           <div className="sp-feature-grid">
             {recursos.map((r) => <article className="sp-feature" key={r.numero}><div className="sp-feature-top"><span>{r.numero}</span><small>{r.detalhe}</small></div><h3>{r.titulo}</h3><p>{r.texto}</p><div className="sp-feature-rule" /></article>)}
@@ -86,25 +90,25 @@ export default function SitePublico() {
         </section>
 
         <section id="planos" className="sp-pricing">
-          <div className="sp-section-kicker"><span>04</span> ESCOLHA O QUE FAZ SENTIDO</div>
+          <div className="sp-section-kicker"><span>05</span> ESCOLHA O QUE FAZ SENTIDO</div>
           <div className="sp-section-heading"><h2>Um plano para o momento<br /><em>da sua oficina.</em></h2><p>Você paga por oficina e pode incluir sua equipe, sem cobrança por funcionário.</p></div>
           <div className="sp-plan-grid">
-            <article className="sp-plan"><div className="sp-plan-label">ESSENCIAL</div><h3>Básico</h3><p className="sp-plan-price">R$ 49,90 <small>/ mês</small></p><p className="sp-plan-desc">Para colocar os atendimentos e serviços em ordem.</p><ul><li>Cadastro de clientes e motos</li><li>Ordens de serviço</li><li>Orçamentos por link</li><li>Catálogo de serviços</li><li>Acesso para equipe incluído</li></ul><Link to="/entrar" className="sp-button sp-button-outline">Quero conhecer o Básico <Seta /></Link></article>
-            <article className="sp-plan sp-plan-featured"><div className="sp-plan-label">GESTÃO AMPLIADA</div><h3>Completo</h3><p className="sp-plan-price">R$ 79,90 <small>/ mês</small></p><p className="sp-plan-desc">Para quem quer cuidar também das peças e do financeiro.</p><ul><li>Tudo do plano Básico</li><li>Controle de peças e estoque</li><li>Lembretes de manutenção</li><li>Controle financeiro</li><li>Fotos nas ordens de serviço</li><li>Acesso para equipe incluído</li></ul><Link to="/entrar" className="sp-button sp-button-primary">Quero conhecer o Completo <Seta /></Link></article>
+            <article className="sp-plan"><div className="sp-plan-label">ESSENCIAL</div><h3>Básico</h3><p className="sp-plan-price">R$ 49,90 <small>/ mês</small></p><p className="sp-plan-desc">Para colocar os atendimentos e serviços em ordem.</p><ul><li>Cadastro de clientes e motos</li><li>Ordens de serviço</li><li>Orçamentos por link</li><li>Catálogo de serviços</li><li>Acesso para equipe incluído</li></ul><a href="#tour" className="sp-button sp-button-outline">Conhecer o plano Básico <Seta /></a></article>
+            <article className="sp-plan sp-plan-featured"><div className="sp-plan-label">GESTÃO AMPLIADA</div><h3>Completo</h3><p className="sp-plan-price">R$ 79,90 <small>/ mês</small></p><p className="sp-plan-desc">Para quem quer cuidar também das peças e do financeiro.</p><ul><li>Tudo do plano Básico</li><li>Controle de peças e estoque</li><li>Lembretes de manutenção</li><li>Controle financeiro</li><li>Fotos nas ordens de serviço</li><li>Acesso para equipe incluído</li></ul><a href="#tour" className="sp-button sp-button-primary">Conhecer o plano Completo <Seta /></a></article>
           </div>
           <p className="sp-pricing-note">Preços sugeridos de lançamento. A contratação e ativação são confirmadas pela equipe. Recursos e condições podem ser ajustados antes da publicação comercial definitiva.</p>
-          <p className="sp-custom">Ficou com alguma dúvida ou precisa de algo diferente? <Link to="/entrar">Fale com a gente. Vamos entender o que sua oficina precisa.</Link></p>
+          <p className="sp-custom">Quer tirar uma dúvida antes de decidir? <a href="#duvidas">Veja as respostas mais comuns.</a></p>
         </section>
 
         <section id="duvidas" className="sp-faq">
-          <div className="sp-section-kicker"><span>05</span> AINDA TEM DÚVIDAS?</div>
+          <div className="sp-section-kicker"><span>06</span> AINDA TEM DÚVIDAS?</div>
           <div className="sp-faq-grid"><h2>Vamos conversar<br /><em>antes de começar?</em></h2><div className="sp-faq-list">{duvidas.map(([q, a]) => <details key={q}><summary>{q}<span>＋</span></summary><p>{a}</p></details>)}</div></div>
         </section>
 
         <section className="sp-final">
           <img src="/img/moto-cafe.jpg" alt="" loading="lazy" />
           <div className="sp-final-overlay" />
-          <div className="sp-final-content"><div className="sp-section-kicker"><span>06</span> VAMOS COMEÇAR?</div><h2>Você cuida das motos.<br /><em>A gente ajuda com a organização.</em></h2><p>Dê uma olhada no sistema e veja se ele combina com o jeito que sua oficina trabalha. Se precisar, estamos por aqui.</p><div className="sp-hero-actions"><Link to="/entrar" className="sp-button sp-button-primary">Entrar ou criar minha conta <Seta /></Link><a className="sp-button sp-button-ghost" href="/downloads/OficioDoMotor.apk">Baixar o app para Android ↓</a></div></div>
+          <div className="sp-final-content"><div className="sp-section-kicker"><span>07</span> VAMOS COMEÇAR?</div><h2>Você cuida das motos.<br /><em>A gente ajuda com a organização.</em></h2><p>Dê uma olhada no sistema e veja se ele combina com o jeito que sua oficina trabalha. Se precisar, estamos por aqui.</p><div className="sp-hero-actions"><a href="#tour" className="sp-button sp-button-primary">Conhecer o sistema por dentro <Seta /></a><Link to="/entrar" className="sp-button sp-button-ghost">Já tenho cadastro · Entrar <Seta /></Link></div></div>
         </section>
       </main>
 
