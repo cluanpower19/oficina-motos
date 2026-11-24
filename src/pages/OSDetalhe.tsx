@@ -33,6 +33,7 @@ const vazio = { tipo: 'servico' as 'servico' | 'peca', catId: '', descricao: '',
 
 export default function OSDetalhe() {
   const { perfil } = useAuth()
+  const completo = perfil?.oficina.plano === 'completo' && perfil.oficina.status_assinatura === 'ativo'
   const { id } = useParams()
   const [os, setOs] = useState<OS | null>(null)
   const [itens, setItens] = useState<Item[]>([])
@@ -240,7 +241,7 @@ export default function OSDetalhe() {
             ))}
           </select>
         </label>
-        <p className="text-xs text-gray-500">As peças saem do estoque ao marcar "Em andamento" (uma vez só).</p>
+        {completo && <p className="text-xs text-gray-500">As peças saem do estoque ao marcar "Em andamento" (uma vez só).</p>}
       </div>
 
       <div className="flex items-center justify-between gap-3">
@@ -252,7 +253,7 @@ export default function OSDetalhe() {
         <form onSubmit={salvarItem} className="space-y-3 rounded-xl bg-white p-4 shadow">
           <div className="flex gap-2">
             <button type="button" className={tab(f.tipo === 'servico')} onClick={() => setF({ ...vazio, tipo: 'servico' })}>Serviço</button>
-            <button type="button" className={tab(f.tipo === 'peca')} onClick={() => setF({ ...vazio, tipo: 'peca' })}>Peça</button>
+            {completo && <button type="button" className={tab(f.tipo === 'peca')} onClick={() => setF({ ...vazio, tipo: 'peca' })}>Peça</button>}
           </div>
           <select className={campo} value={f.catId} onChange={(e) => escolherCatalogo(e.target.value)}>
             <option value="">Digitar livre (fora do catálogo)</option>
@@ -308,6 +309,7 @@ export default function OSDetalhe() {
         <span className="text-2xl font-bold text-orange-400">{formatarMoeda(Number(os.valor_total))}</span>
       </div>
 
+      {completo ? (
       <div className="space-y-3 rounded-xl bg-white p-4 shadow">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-bold text-gray-800">Fotos</h2>
@@ -329,6 +331,9 @@ export default function OSDetalhe() {
           </div>
         )}
       </div>
+      ) : (
+        <div className="rounded-xl border border-[#364152] bg-[#101925] p-4 text-sm text-slate-300">Fotos da ordem de serviço estão disponíveis no Plano Completo.</div>
+      )}
 
       <div className="space-y-2 rounded-xl bg-white p-4 shadow">
         <h2 className="text-lg font-bold text-gray-800">Orçamento para o cliente</h2>
