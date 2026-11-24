@@ -92,6 +92,14 @@ export default function NovaOS() {
     }
 
     const kmNum = km ? Number(km) : null
+    if (kmNum !== null && (!Number.isSafeInteger(kmNum) || kmNum < 0)) {
+      setSalvando(false)
+      return setErro('Informe uma quilometragem válida.')
+    }
+    if (moto?.km_atual !== null && moto?.km_atual !== undefined && kmNum !== null && kmNum < moto.km_atual) {
+      setSalvando(false)
+      return setErro(`A quilometragem de entrada não pode ser menor que a última registrada (${moto.km_atual} km).`)
+    }
     const { data: os, error: e3 } = await supabase
       .from('ordens_servico')
       .insert({
@@ -104,8 +112,19 @@ export default function NovaOS() {
       .single()
     if (e3 || !os) {
       setSalvando(false)
-      if (clienteNovo) setErro('Cliente e moto salvos, mas a OS não: ' + (e3?.message ?? ''))
-      else setErro(e3?.message ?? 'Erro ao criar OS')
+      if (clienteNovo) {
+        const apagarMoto = await supabase.from('motos').delete().eq('id', motoId)
+        const apagarCliente = apagarMoto.error
+          ? null
+          : await supabase.from('clientes').delete().eq('id', clienteId)
+        if (apagarMoto.error || apagarCliente?.error) {
+          setErro('A OS não foi criada e não foi possível desfazer todo o cadastro. Confira o cliente e a moto antes de tentar novamente. ' + (e3?.message ?? ''))
+        } else {
+          setErro('A OS não foi criada. O cadastro provisório de cliente e moto foi desfeito. ' + (e3?.message ?? ''))
+        }
+      } else {
+        setErro(e3?.message ?? 'Erro ao criar OS')
+      }
       return
     }
     if (kmNum) await supabase.from('motos').update({ km_atual: kmNum }).eq('id', motoId)
