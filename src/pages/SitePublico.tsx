@@ -1,105 +1,114 @@
 import { Link } from 'react-router-dom'
-import { Emblema, MotoSilhueta } from '../components/Cenario'
+import './site-publico.css'
 
 const recursos = [
-  { numero: '01', titulo: 'Clientes e motos', texto: 'Encontre rapidamente o cadastro, os dados e o histórico de cada veículo.' },
-  { numero: '02', titulo: 'Ordens de serviço', texto: 'Organize os serviços, acompanhe etapas e mantenha cada atendimento registrado.' },
-  { numero: '03', titulo: 'Orçamentos por link', texto: 'Compartilhe o orçamento pelo WhatsApp para o cliente consultar e responder.' },
-  { numero: '04', titulo: 'Catálogo de serviços', texto: 'Padronize os serviços e agilize a preparação dos orçamentos.' },
-  { numero: '05', titulo: 'Peças e estoque', texto: 'Controle produtos, quantidades e utilização de peças nas ordens de serviço.' },
-  { numero: '06', titulo: 'Financeiro e lembretes', texto: 'Acompanhe valores a receber e facilite o contato de retorno com seus clientes.' },
+  { numero: '01', titulo: 'Clientes e motocicletas', texto: 'Encontre os dados de cada cliente e de cada moto quando precisar.', detalhe: 'Relacionamento' },
+  { numero: '02', titulo: 'Ordens de serviço', texto: 'Veja o que já foi feito, o que está em andamento e o que falta entregar.', detalhe: 'Operação' },
+  { numero: '03', titulo: 'Orçamentos por link', texto: 'Mande o link pelo WhatsApp. Seu cliente abre e confere o orçamento sem complicação.', detalhe: 'Atendimento' },
+  { numero: '04', titulo: 'Catálogo de serviços', texto: 'Deixe os serviços que você mais faz salvos e monte orçamentos mais rápido.', detalhe: 'Produtividade' },
+  { numero: '05', titulo: 'Peças e estoque', texto: 'Saiba o que tem na prateleira e quais peças foram usadas em cada serviço.', detalhe: 'Estoque' },
+  { numero: '06', titulo: 'Financeiro e lembretes', texto: 'Confira o que tem para receber e não deixe passar a hora de falar com um cliente.', detalhe: 'Gestão' },
 ]
 
 const duvidas = [
-  ['O sistema é para oficina de motos?', 'Sim. O Ofício do Motor foi pensado para a rotina de oficinas de motocicletas.'],
-  ['Preciso instalar no computador?', 'O sistema funciona pelo navegador. Também existe aplicativo Android para acesso pelo celular.'],
-  ['Posso cadastrar meus mecânicos?', 'Sim. A cobrança é por oficina, não por funcionário. A equipe utiliza o acesso vinculado à oficina.'],
-  ['O cliente precisa criar uma conta para ver o orçamento?', 'Não. O orçamento pode ser compartilhado por um link para consulta do cliente.'],
-  ['Posso mudar de plano depois?', 'Você pode solicitar a mudança de plano pelo atendimento do Ofício do Motor.'],
+  ['O sistema é feito para oficina de motos?', 'Sim! O sistema foi pensado para a rotina de quem trabalha com motos.'],
+  ['Preciso instalar no computador?', 'Não precisa instalar no computador. É só abrir pelo navegador. Também temos aplicativo Android para usar no celular.'],
+  ['Posso cadastrar meus mecânicos?', 'Pode, sim. Você paga por oficina, não por funcionário. Assim, sua equipe também pode usar o sistema.'],
+  ['O cliente precisa criar uma conta para ver o orçamento?', 'Não precisa criar conta. É só enviar o link do orçamento para ele consultar.'],
+  ['Posso mudar de plano depois?', 'Claro. É só chamar a nossa equipe que a gente orienta você na mudança.'],
 ]
+
+function Seta() {
+  return <span aria-hidden="true" className="sp-arrow">↗</span>
+}
 
 export default function SitePublico() {
   return (
-    <div className="min-h-screen overflow-hidden bg-[#080d14] text-slate-100">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#080d14]/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:px-8">
-          <a href="#inicio" className="flex items-center gap-3">
-            <Emblema tamanho={44} />
-            <span className="leading-tight"><strong className="block text-lg tracking-wide">OFÍCIO DO MOTOR</strong><small className="text-[10px] uppercase tracking-[.22em] text-orange-400">Gestão para oficinas</small></span>
-          </a>
-          <nav className="hidden items-center gap-7 text-sm text-slate-300 md:flex">
-            <a href="#beneficios" className="hover:text-orange-300">Benefícios</a>
-            <a href="#funcionalidades" className="hover:text-orange-300">Funcionalidades</a>
-            <a href="#planos" className="hover:text-orange-300">Planos</a>
-            <a href="#duvidas" className="hover:text-orange-300">Dúvidas</a>
-          </nav>
-          <Link to="/entrar" className="rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-[#17130f]">Acessar sistema</Link>
-        </div>
+    <div className="site-publico">
+      <header className="sp-header">
+        <a href="#inicio" className="sp-brand" aria-label="Ofício do Motor — início">
+          <span className="sp-brand-mark">OM<span>·</span></span>
+          <span className="sp-brand-copy"><strong>OFÍCIO DO MOTOR</strong><small>GESTÃO PARA OFICINAS DE MOTOS</small></span>
+        </a>
+        <nav className="sp-nav" aria-label="Navegação principal">
+          <a href="#visao">A proposta</a>
+          <a href="#recursos">Funcionalidades</a>
+          <a href="#planos">Planos</a>
+          <a href="#duvidas">Dúvidas</a>
+        </nav>
+        <Link to="/entrar" className="sp-header-cta">Acessar sistema <Seta /></Link>
       </header>
 
       <main>
-        <section id="inicio" className="relative isolate border-b border-white/5">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_75%_30%,rgba(242,160,61,.15),transparent_42%),radial-gradient(ellipse_at_15%_75%,rgba(31,111,120,.18),transparent_40%)]" />
-          <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 py-16 md:grid-cols-[1.02fr_.98fr] md:px-8 md:py-24">
-            <div className="space-y-7">
-              <p className="inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-400/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[.16em] text-orange-300"><span className="h-2 w-2 rounded-full bg-orange-400" /> Gestão feita para oficina de motos</p>
-              <h1 className="max-w-2xl text-4xl font-black leading-[1.04] tracking-tight text-white md:text-6xl">Sua oficina organizada. <span className="text-orange-400">Seus serviços sob controle.</span></h1>
-              <p className="max-w-xl text-lg leading-8 text-slate-300">Chega de depender de papel, conversas perdidas e anotações espalhadas. Organize clientes, motos, orçamentos e ordens de serviço em um só lugar.</p>
-              <div className="flex flex-wrap gap-3">
-                <Link to="/entrar" className="rounded-xl bg-orange-500 px-6 py-3.5 font-bold text-[#17130f] shadow-lg shadow-orange-950/30">Quero conhecer o sistema <span aria-hidden="true">→</span></Link>
-                <a href="#funcionalidades" className="rounded-xl border border-white/15 px-6 py-3.5 font-semibold text-white hover:bg-white/5">Ver funcionalidades</a>
-                <a href="/downloads/OficioDoMotor.apk" className="rounded-xl border border-orange-400/30 px-6 py-3.5 font-semibold text-orange-200 hover:bg-orange-400/10">Baixar Android ↓</a>
-              </div>
-              <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-slate-400"><span>✓ Cobrança por oficina</span><span>✓ Equipe incluída</span><span>✓ Acesso pelo navegador</span></div>
+        <section id="inicio" className="sp-hero">
+          <img className="sp-hero-photo" src="/img/moto-cafe.jpg" alt="Motocicleta clássica em uma garagem, sob iluminação dramática" fetchPriority="high" />
+          <div className="sp-hero-shade" />
+          <div className="sp-hero-grain" aria-hidden="true" />
+          <div className="sp-hero-content">
+            <p className="sp-eyebrow"><span /> FEITO PARA QUEM VIVE A OFICINA</p>
+            <h1>Sua oficina tem muito trabalho.<br /><em>A gente ajuda a organizar.</em></h1>
+            <p className="sp-hero-lead">Você cuida das motos e dos clientes. O Ofício do Motor ajuda a deixar o resto em ordem, sem complicar seu dia.</p>
+            <div className="sp-hero-actions">
+              <Link to="/entrar" className="sp-button sp-button-primary">Conhecer o sistema <Seta /></Link>
+              <a href="#recursos" className="sp-button sp-button-ghost">Explorar funcionalidades <span aria-hidden="true">↓</span></a>
             </div>
-            <div className="relative">
-              <div className="absolute inset-8 rounded-full bg-orange-500/10 blur-3xl" />
-              <div className="relative rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#1a2632] to-[#0c121a] p-4 shadow-2xl shadow-black/50 md:p-7">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4"><div className="flex items-center gap-2"><Emblema tamanho={30}/><span className="text-xs font-bold tracking-wider">OFÍCIO DO MOTOR</span></div><span className="rounded-full bg-emerald-400/10 px-3 py-1 text-[10px] font-bold text-emerald-300">GESTÃO EM DIA</span></div>
-                <MotoSilhueta className="my-4 w-full drop-shadow-[0_15px_30px_rgba(0,0,0,.55)]" />
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="rounded-xl border border-white/10 bg-black/20 p-3"><span className="block text-[10px] text-slate-400">Clientes</span><strong className="mt-1 block text-xl text-white">Organizados</strong></div>
-                  <div className="rounded-xl border border-white/10 bg-black/20 p-3"><span className="block text-[10px] text-slate-400">Serviços</span><strong className="mt-1 block text-xl text-white">Acompanhados</strong></div>
-                  <div className="rounded-xl border border-white/10 bg-black/20 p-3"><span className="block text-[10px] text-slate-400">Orçamentos</span><strong className="mt-1 block text-xl text-white">Compartilhados</strong></div>
-                </div>
-              </div>
-            </div>
+            <div className="sp-hero-foot"><span>01 / SUA OFICINA, MAIS ORGANIZADA</span><span>CLIENTES · MOTOS · SERVIÇOS</span></div>
+          </div>
+          <div className="sp-hero-side-note"><span className="sp-side-line" /> FEITO PARA QUEM CUIDA DE MOTOS</div>
+        </section>
+
+        <section className="sp-intro" id="visao">
+          <div className="sp-section-kicker"><span>01</span> MAIS TEMPO PARA O QUE IMPORTA</div>
+          <div className="sp-intro-grid">
+            <h2>Menos tempo atrás de informação.<br /><em>Mais tempo na oficina.</em></h2>
+            <div className="sp-intro-copy"><p>A gente sabe: oficina tem serviço chegando, cliente perguntando e prazo para cumprir. Organizar tudo isso não deveria dar ainda mais trabalho.</p><p>Por isso, reunimos clientes, motos, orçamentos e ordens de serviço em um só lugar. Assim, fica mais fácil saber o que está acontecendo em cada atendimento.</p><a className="sp-text-link" href="#recursos">Veja como funciona na prática <Seta /></a></div>
           </div>
         </section>
 
-        <section id="beneficios" className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-20">
-          <div className="max-w-3xl"><p className="text-xs font-bold uppercase tracking-[.2em] text-orange-400">Menos improviso. Mais controle.</p><h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">A rotina da oficina não precisa ficar na sua cabeça.</h2><p className="mt-4 leading-7 text-slate-400">Quando as informações ficam espalhadas, é fácil perder tempo procurando dados, esquecer retornos ou não saber em que etapa está cada serviço. O sistema reúne os registros para você acompanhar o trabalho com mais clareza.</p></div>
-          <div className="mt-9 grid gap-4 md:grid-cols-3">
-            {[['Chega de procurar informação','Consulte clientes, motos e histórico em um só lugar.'],['Orçamentos mais claros','Registre o que será feito e compartilhe o orçamento por link.'],['Acompanhe cada serviço','Tenha as ordens de serviço organizadas e saiba o que está em andamento.']].map(([t,d],i)=><article key={t} className="rounded-2xl border border-white/10 bg-[#111a25] p-6"><span className="text-sm font-black text-orange-400">0{i+1}</span><h3 className="mt-4 text-xl font-bold text-white">{t}</h3><p className="mt-2 text-sm leading-6 text-slate-400">{d}</p></article>)}
+        <section className="sp-editorial">
+          <div className="sp-editorial-photo"><img src="/img/oficina-noite.jpg" alt="Mecânico trabalhando na manutenção de uma motocicleta em uma oficina" loading="lazy" /><span className="sp-photo-caption">A ROTINA REAL DA OFICINA, COM MAIS CONTROLE.</span></div>
+          <div className="sp-editorial-copy"><div className="sp-section-kicker"><span>02</span> PARA FACILITAR SUA ROTINA</div><h2>Você já tem trabalho demais.<br /><em>Deixe a organização mais leve.</em></h2><p>Chega de procurar informação em papel, conversa de WhatsApp e caderno. Deixe os dados dos clientes, as motos e os serviços reunidos para encontrar tudo mais fácil.</p><div className="sp-proof-list"><div><b>01</b><span>O histórico de cada cliente e moto</span></div><div><b>02</b><span>Cada serviço no seu lugar</span></div><div><b>03</b><span>Orçamentos para enviar pelo WhatsApp</span></div></div></div>
+        </section>
+
+        <section id="recursos" className="sp-features">
+          <div className="sp-section-kicker"><span>03</span> O QUE VOCÊ PRECISA NO DIA A DIA</div>
+          <div className="sp-section-heading"><h2>Do primeiro atendimento<br /><em>até a entrega da moto.</em></h2><p>O que você precisa para cuidar dos clientes, acompanhar os serviços e manter a oficina em ordem.</p></div>
+          <div className="sp-feature-grid">
+            {recursos.map((r) => <article className="sp-feature" key={r.numero}><div className="sp-feature-top"><span>{r.numero}</span><small>{r.detalhe}</small></div><h3>{r.titulo}</h3><p>{r.texto}</p><div className="sp-feature-rule" /></article>)}
           </div>
+          <div className="sp-feature-bottom"><span>TUDO JUNTO, SEM COMPLICAÇÃO.</span><a href="#planos">Veja os planos <Seta /></a></div>
         </section>
 
-        <section id="funcionalidades" className="border-y border-white/5 bg-[#0d141d]">
-          <div className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-20">
-            <div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[.2em] text-orange-400">O que você consegue fazer</p><h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">As ferramentas essenciais para cuidar da oficina.</h2><p className="mt-4 leading-7 text-slate-400">Recursos para organizar o atendimento, acompanhar os serviços e ter uma visão melhor da operação.</p></div>
-            <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {recursos.map((r)=><article key={r.numero} className="rounded-2xl border border-white/10 bg-[#121c28] p-5 transition hover:-translate-y-1 hover:border-orange-400/30"><span className="text-xs font-bold tracking-widest text-orange-400">{r.numero}</span><h3 className="mt-3 text-lg font-bold text-white">{r.titulo}</h3><p className="mt-2 text-sm leading-6 text-slate-400">{r.texto}</p></article>)}
-            </div>
+        <section className="sp-photo-break" aria-label="Oficina e motocicleta">
+          <img src="/img/bancada.jpg" alt="Profissional preparando uma motocicleta em uma oficina" loading="lazy" />
+          <div className="sp-photo-break-overlay" />
+          <div className="sp-photo-break-copy"><span>OFÍCIO DO MOTOR / FILOSOFIA</span><p>O trabalho é artesanal.<br /><em>A organização pode ser extraordinária.</em></p></div>
+        </section>
+
+        <section id="planos" className="sp-pricing">
+          <div className="sp-section-kicker"><span>04</span> ESCOLHA O QUE FAZ SENTIDO</div>
+          <div className="sp-section-heading"><h2>Um plano para o momento<br /><em>da sua oficina.</em></h2><p>Você paga por oficina e pode incluir sua equipe, sem cobrança por funcionário.</p></div>
+          <div className="sp-plan-grid">
+            <article className="sp-plan"><div className="sp-plan-label">ESSENCIAL</div><h3>Básico</h3><p className="sp-plan-price">R$ 49,90 <small>/ mês</small></p><p className="sp-plan-desc">Para colocar os atendimentos e serviços em ordem.</p><ul><li>Cadastro de clientes e motos</li><li>Ordens de serviço</li><li>Orçamentos por link</li><li>Catálogo de serviços</li><li>Acesso para equipe incluído</li></ul><Link to="/entrar" className="sp-button sp-button-outline">Quero conhecer o Básico <Seta /></Link></article>
+            <article className="sp-plan sp-plan-featured"><div className="sp-plan-label">GESTÃO AMPLIADA</div><h3>Completo</h3><p className="sp-plan-price">R$ 79,90 <small>/ mês</small></p><p className="sp-plan-desc">Para quem quer cuidar também das peças e do financeiro.</p><ul><li>Tudo do plano Básico</li><li>Controle de peças e estoque</li><li>Lembretes de manutenção</li><li>Controle financeiro</li><li>Fotos nas ordens de serviço</li><li>Acesso para equipe incluído</li></ul><Link to="/entrar" className="sp-button sp-button-primary">Quero conhecer o Completo <Seta /></Link></article>
           </div>
+          <p className="sp-pricing-note">Preços sugeridos de lançamento. A contratação e ativação são confirmadas pela equipe. Recursos e condições podem ser ajustados antes da publicação comercial definitiva.</p>
+          <p className="sp-custom">Ficou com alguma dúvida ou precisa de algo diferente? <Link to="/entrar">Fale com a gente. Vamos entender o que sua oficina precisa.</Link></p>
         </section>
 
-        <section id="planos" className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-20">
-          <div className="mx-auto max-w-2xl text-center"><p className="text-xs font-bold uppercase tracking-[.2em] text-orange-400">Planos simples</p><h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">Um plano que acompanha o tamanho da sua oficina.</h2><p className="mt-4 text-slate-400">Uma mensalidade por oficina. Cadastre sua equipe sem pagar por cada funcionário.</p></div>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-2">
-            <article className="rounded-2xl border border-white/10 bg-[#111a25] p-7"><p className="text-sm font-bold text-slate-300">Básico</p><p className="mt-3 text-4xl font-black text-white">R$ 49,90<span className="text-sm font-medium text-slate-400"> / mês</span></p><p className="mt-2 text-sm text-slate-400">Para organizar o atendimento e os serviços do dia a dia.</p><ul className="mt-6 space-y-3 text-sm text-slate-300"><li>✓ Cadastro de clientes e motos</li><li>✓ Ordens de serviço</li><li>✓ Orçamentos por link</li><li>✓ Catálogo de serviços</li><li>✓ Acesso para equipe incluído</li></ul><Link to="/entrar" className="mt-7 block rounded-xl border border-white/15 px-4 py-3 text-center font-bold hover:bg-white/5">Conhecer o Básico</Link></article>
-            <article className="relative rounded-2xl border border-orange-400/50 bg-gradient-to-b from-[#252016] to-[#111a25] p-7 shadow-xl shadow-orange-950/10"><span className="absolute -top-3 right-6 rounded-full bg-orange-500 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#17130f]">Mais recursos</span><p className="text-sm font-bold text-orange-300">Completo</p><p className="mt-3 text-4xl font-black text-white">R$ 79,90<span className="text-sm font-medium text-slate-400"> / mês</span></p><p className="mt-2 text-sm text-slate-400">Para quem também precisa acompanhar estoque e financeiro.</p><ul className="mt-6 space-y-3 text-sm text-slate-300"><li>✓ Tudo do Básico</li><li>✓ Controle de peças e estoque</li><li>✓ Lembretes de manutenção</li><li>✓ Controle financeiro</li><li>✓ Fotos nas ordens de serviço</li><li>✓ Acesso para equipe incluído</li></ul><Link to="/entrar" className="mt-7 block rounded-xl bg-orange-500 px-4 py-3 text-center font-bold text-[#17130f]">Conhecer o Completo</Link></article>
-          </div>
-          <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-slate-500">Preços sugeridos de lançamento. A contratação e ativação são confirmadas pela equipe. Recursos e condições podem ser ajustados antes da publicação comercial definitiva.</p>
-          <p className="mt-5 text-center text-sm text-slate-400">Precisa de uma função específica? <Link to="/entrar" className="font-semibold text-orange-300 underline underline-offset-4">Converse com a nossa equipe</Link> sobre uma implementação personalizada.</p>
+        <section id="duvidas" className="sp-faq">
+          <div className="sp-section-kicker"><span>05</span> AINDA TEM DÚVIDAS?</div>
+          <div className="sp-faq-grid"><h2>Vamos conversar<br /><em>antes de começar?</em></h2><div className="sp-faq-list">{duvidas.map(([q, a]) => <details key={q}><summary>{q}<span>＋</span></summary><p>{a}</p></details>)}</div></div>
         </section>
 
-        <section id="duvidas" className="border-y border-white/5 bg-[#0d141d]">
-          <div className="mx-auto max-w-4xl px-5 py-16 md:px-8 md:py-20"><p className="text-xs font-bold uppercase tracking-[.2em] text-orange-400">Perguntas frequentes</p><h2 className="mt-3 text-3xl font-bold text-white">Antes de começar</h2><div className="mt-7 divide-y divide-white/10">{duvidas.map(([q,a])=><details key={q} className="group py-5"><summary className="cursor-pointer list-none font-semibold text-white marker:hidden">{q}<span className="float-right text-orange-400 transition group-open:rotate-45">＋</span></summary><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">{a}</p></details>)}</div></div>
+        <section className="sp-final">
+          <img src="/img/moto-cafe.jpg" alt="" loading="lazy" />
+          <div className="sp-final-overlay" />
+          <div className="sp-final-content"><div className="sp-section-kicker"><span>06</span> VAMOS COMEÇAR?</div><h2>Você cuida das motos.<br /><em>A gente ajuda com a organização.</em></h2><p>Dê uma olhada no sistema e veja se ele combina com o jeito que sua oficina trabalha. Se precisar, estamos por aqui.</p><div className="sp-hero-actions"><Link to="/entrar" className="sp-button sp-button-primary">Entrar ou criar minha conta <Seta /></Link><a className="sp-button sp-button-ghost" href="/downloads/OficioDoMotor.apk">Baixar o app para Android ↓</a></div></div>
         </section>
-
-        <section className="mx-auto max-w-7xl px-5 py-16 md:px-8"><div className="rounded-3xl border border-orange-400/20 bg-[radial-gradient(ellipse_at_90%_10%,rgba(242,160,61,.16),transparent_45%),linear-gradient(120deg,#182432,#101721)] p-8 text-center md:p-12"><Emblema tamanho={52}/><h2 className="mt-5 text-3xl font-bold text-white md:text-4xl">Dê o próximo passo para organizar sua oficina.</h2><p className="mx-auto mt-4 max-w-2xl text-slate-300">Conheça o Ofício do Motor e veja como simplificar o controle dos seus atendimentos.</p><Link to="/entrar" className="mt-7 inline-flex rounded-xl bg-orange-500 px-7 py-3.5 font-bold text-[#17130f]">Acessar / criar minha conta</Link></div></section>
       </main>
-      <footer className="border-t border-white/10 bg-[#070b10]"><div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-xs text-slate-500 md:flex-row md:items-center md:justify-between md:px-8"><span>© {new Date().getFullYear()} Ofício do Motor. Gestão para oficinas de motocicletas.</span><span>Organização, clareza e controle para o dia a dia.</span></div></footer>
+
+      <footer className="sp-footer"><a href="#inicio" className="sp-brand"><span className="sp-brand-mark">OM<span>·</span></span><span className="sp-brand-copy"><strong>OFÍCIO DO MOTOR</strong><small>GESTÃO PARA OFICINAS DE MOTOS</small></span></a><p>© {new Date().getFullYear()} Ofício do Motor. Feito para facilitar a rotina da sua oficina.</p><a href="#inicio">VOLTAR AO TOPO ↑</a></footer>
     </div>
   )
 }
