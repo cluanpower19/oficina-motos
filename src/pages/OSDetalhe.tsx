@@ -27,7 +27,7 @@ type OS = {
 }
 type Item = { id: string; tipo: 'servico' | 'peca'; descricao: string; quantidade: number; valor_unitario: number; peca_id: string | null }
 type Cat = { id: string; nome: string; preco: number }
-type Foto = { id: string; path: string }
+type Foto = { id: string; path: string; url: string }
 
 const vazio = { tipo: 'servico' as 'servico' | 'peca', catId: '', descricao: '', qtd: '1', valor: '' }
 
@@ -67,7 +67,14 @@ export default function OSDetalhe() {
     if (b.data) setItens(b.data as Item[])
     if (completo) {
       const c = await supabase.from('os_fotos').select('id, path').eq('os_id', id).order('criado_em')
-      if (c.data) setFotos(c.data as Foto[])
+      if (c.data?.length) {
+        const { data: assinadas, error: erroAssinadas } = await supabase.storage.from('os-fotos').createSignedUrls(c.data.map((foto) => foto.path), 300)
+        if (erroAssinadas) setErro(mensagemErro(erroAssinadas))
+        const urls = new Map((assinadas ?? []).map((foto) => [foto.path, foto.signedUrl]))
+        setFotos(c.data.map((foto) => ({ ...foto, url: urls.get(foto.path) ?? '' })))
+      } else {
+        setFotos([])
+      }
     } else {
       setFotos([])
     }
@@ -150,8 +157,6 @@ export default function OSDetalhe() {
     if (error) setErro(mensagemErro(error))
     else carregar()
   }
-
-  const urlFoto = (p: string) => supabase.storage.from('os-fotos').getPublicUrl(p).data.publicUrl
 
   async function enviarFotos(lista: FileList | null) {
     if (!os || !lista?.length) return
@@ -332,7 +337,7 @@ export default function OSDetalhe() {
           <div className="grid grid-cols-2 gap-2">
             {fotos.map((fo) => (
               <div key={fo.id} className="relative">
-                <img src={urlFoto(fo.path)} alt="Foto da OS" className="h-32 w-full rounded-lg object-cover" />
+                <img src={fo.url} alt="Foto da OS" className="h-32 w-full rounded-lg object-cover" />
                 <button onClick={() => removerFoto(fo)} className="absolute right-1 top-1 rounded-full bg-red-600 px-2 py-1 text-xs text-white" aria-label="Remover foto">✕</button>
               </div>
             ))}
