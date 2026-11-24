@@ -1,0 +1,33 @@
+name: Ambiente de testes
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Instalar dependências
+        run: npm ci
+      - name: Executar testes automatizados
+        run: npm test
+      - name: Gerar aplicativo conectado ao Supabase de testes
+        run: npm run build:test
+      - name: Guardar aplicativo de testes (sem publicar no site oficial)
+        uses: actions/upload-artifact@v4
+        with:
+          name: oficio-do-motor-app-testes
+          path: dist/
+          retention-days: 7
