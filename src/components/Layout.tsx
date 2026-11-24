@@ -39,7 +39,8 @@ export default function Layout() {
   const faixa = !assin.ativa
     ? 'Assinatura inativa: você pode consultar os dados, mas não pode salvar alterações.'
     : ''
-  const itens = todos.filter((i) => i.to !== '/financeiro' || perfil?.papel === 'dono')
+  const planoCompleto = perfil!.oficina.plano === 'completo' && perfil!.oficina.status_assinatura === 'ativo'
+  const itens = todos.filter((i) => (i.to !== '/financeiro' || perfil?.papel === 'dono') && (planoCompleto || !['/financeiro', '/lembretes'].includes(i.to)))
 
   return (
     <div className="min-h-full md:flex">
