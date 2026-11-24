@@ -11,6 +11,7 @@ type Dados = {
   itens: { tipo: string; descricao: string; quantidade: number; valor_unitario: number }[]
   fotos: { path: string; legenda: string | null }[]
 }
+type FotoPublica = { path: string; legenda: string | null; url: string }
 
 export default function OrcamentoPublico() {
   const { token } = useParams()
@@ -18,10 +19,18 @@ export default function OrcamentoPublico() {
   const [carregando, setCarregando] = useState(true)
   const [enviando, setEnviando] = useState(false)
   const [msg, setMsg] = useState('')
+  const [fotosAssinadas, setFotosAssinadas] = useState<FotoPublica[]>([])
 
   const carregar = useCallback(async () => {
     const { data } = await supabase.rpc('orcamento_publico', { p_token: token })
-    setD((data as Dados | null) ?? null)
+    const dados = (data as Dados | null) ?? null
+    setD(dados)
+    if (dados?.fotos?.length) {
+      const { data: respostaFotos, error: erroFotos } = await supabase.functions.invoke('orcamento-fotos', { body: { token } })
+      setFotosAssinadas(!erroFotos && Array.isArray(respostaFotos?.fotos) ? respostaFotos.fotos as FotoPublica[] : [])
+    } else {
+      setFotosAssinadas([])
+    }
     setCarregando(false)
   }, [token])
   useEffect(() => {
@@ -42,8 +51,6 @@ export default function OrcamentoPublico() {
   if (!d) return <div className="p-8 text-center text-gray-700">Orçamento não encontrado. Confira o link com a oficina.</div>
 
   const aberto = d.os.status === 'orcamento' || d.os.status === 'aguardando_aprovacao'
-  const foto = (p: string) => supabase.storage.from('os-fotos').getPublicUrl(p).data.publicUrl
-
   return (
     <div className="mx-auto max-w-xl space-y-4 p-4">
       <div className="rounded-xl bg-gray-800 p-4 text-white">
@@ -86,11 +93,11 @@ export default function OrcamentoPublico() {
         </div>
       </div>
 
-      {d.fotos.length > 0 && (
+      {fotosAssinadas.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          {d.fotos.map((f, k) => (
-            <a key={k} href={foto(f.path)} target="_blank" rel="noreferrer">
-              <img src={foto(f.path)} alt={f.legenda ?? 'Foto da moto'} className="h-36 w-full rounded-lg object-cover" />
+          {fotosAssinadas.map((f, k) => (
+            <a key={f.path || k} href={f.url} target="_blank" rel="noreferrer">
+              <img src={f.url} alt={f.legenda ?? 'Foto da moto'} className="h-36 w-full rounded-lg object-cover" />
             </a>
           ))}
         </div>
