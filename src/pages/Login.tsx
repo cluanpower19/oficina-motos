@@ -8,7 +8,7 @@ const campo = 'campo'
 const urlRedirecionamentoAuth = () => import.meta.env.MODE === 'test' ? window.location.origin : urlSite()
 
 export default function Login({ redefinir = false }: { redefinir?: boolean } = {}) {
-  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
+  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : new URLSearchParams(window.location.search).get('cadastro') === '1' ? 'cadastrar' : 'entrar')
   const [codigo, setCodigo] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -128,6 +128,13 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
             <p className="rounded bg-yellow-100 p-3 text-sm text-yellow-800">
               Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env.
             </p>
+          )}
+
+          {modo === 'cadastrar' && (
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm leading-6 text-orange-950">
+              <strong>Cadastro inicial da oficina</strong>
+              <p>Depois de confirmar seu e-mail, a equipe conclui a ativação da assinatura contratada.</p>
+            </div>
           )}
 
           {modo === 'mecanico' && (
