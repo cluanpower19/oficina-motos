@@ -12,7 +12,8 @@
     "desktop:mac": "npm run build && electron-builder --mac",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android",
-    "android:apk": "npm run android:sync && cd android && gradlew.bat assembleDebug"
+    "android:apk": "npm run android:sync && cd android && gradlew.bat assembleDebug",
+    "test": "npx --yes vitest@3.2.4 run"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",
