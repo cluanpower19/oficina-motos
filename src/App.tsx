@@ -18,6 +18,7 @@ import OrcamentoPublico from './pages/OrcamentoPublico'
 import Lembretes from './pages/Lembretes'
 import Financeiro from './pages/Financeiro'
 import RecursoPlano from './components/RecursoPlano'
+import SitePublico from './pages/SitePublico'
 
 function Rotas() {
   const { session, perfil, carregando, recuperacao } = useAuth()
@@ -46,7 +47,7 @@ function Rotas() {
   if (recuperacao || window.location.hash.includes('type=recovery')) return <Login redefinir />
 
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
-  if (!session) return <Login />
+  if (!session) return location.pathname === '/' ? <SitePublico /> : <Login />
 
   if (/\/admin(?:\/(?:solicitacoes|recursos))?\/?$/.test(location.pathname)) {
     if (verificandoAdmin) return <div className="min-h-screen bg-[#0b1016] p-8 text-gray-300">Verificando acesso administrativo...</div>
