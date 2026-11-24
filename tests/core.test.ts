@@ -13,8 +13,8 @@ import { dataBR, somarDias, TIPOS } from '../src/lib/lembretes'
 describe('cadastro de motos e clientes', () => {
   it('normaliza e formata placas antigas e padrão Mercosul', () => {
     expect(normalizarPlaca('abc-1d23')).toBe('ABC1D23')
-    expect(formatarPlaca('abc1d23')).toBe('ABC-1D23')
-    expect(formatarPlaca('ABC1234')).toBe('ABC1234')
+    expect(formatarPlaca('abc1d23')).toBe('ABC1D23')
+    expect(formatarPlaca('ABC1234')).toBe('ABC-1234')
   })
 
   it('formata telefones brasileiros com DDD', () => {
