@@ -50,7 +50,7 @@ describe('orçamento e comunicação por WhatsApp', () => {
     const texto = msgOrcamento(moto, 'https://exemplo.com/orcamento/abc')
     expect(texto).toContain('Olá, Carlos!')
     expect(texto).toContain('Honda CG 160')
-    expect(texto).toContain('ABC-1D23')
+    expect(texto).toContain('ABC1D23')
     expect(texto).toContain('https://exemplo.com/orcamento/abc')
   })
 
