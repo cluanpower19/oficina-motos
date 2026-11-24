@@ -48,6 +48,7 @@ export default function SitePublico() {
               <div className="flex flex-wrap gap-3">
                 <Link to="/entrar" className="rounded-xl bg-orange-500 px-6 py-3.5 font-bold text-[#17130f] shadow-lg shadow-orange-950/30">Quero conhecer o sistema <span aria-hidden="true">→</span></Link>
                 <a href="#funcionalidades" className="rounded-xl border border-white/15 px-6 py-3.5 font-semibold text-white hover:bg-white/5">Ver funcionalidades</a>
+                <a href="/downloads/OficioDoMotor.apk" className="rounded-xl border border-orange-400/30 px-6 py-3.5 font-semibold text-orange-200 hover:bg-orange-400/10">Baixar Android ↓</a>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-slate-400"><span>✓ Cobrança por oficina</span><span>✓ Equipe incluída</span><span>✓ Acesso pelo navegador</span></div>
             </div>
