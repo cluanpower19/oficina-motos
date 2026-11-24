@@ -28,3 +28,14 @@ export function lerNumero(v: string): number {
   const n = Number(v.trim().replace(/\./g, '').replace(',', '.'))
   return Number.isFinite(n) ? n : 0
 }
+
+
+/** Valida a quilometragem informada antes de iniciar qualquer gravação da OS. */
+export function validarKmEntrada(km: number | null, kmAnterior: number | null): string | null {
+  if (km === null) return null
+  if (!Number.isSafeInteger(km) || km < 0) return 'Informe uma quilometragem válida.'
+  if (kmAnterior !== null && km < kmAnterior) {
+    return `A quilometragem de entrada não pode ser menor que a última registrada (${kmAnterior} km).`
+  }
+  return null
+}
