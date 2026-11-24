@@ -65,27 +65,35 @@ export default function OSDetalhe() {
     if (a.error) setErro(a.error.message)
     else setOs(a.data as unknown as OS)
     if (b.data) setItens(b.data as Item[])
-    const c = await supabase.from('os_fotos').select('id, path').eq('os_id', id).order('criado_em')
-    if (c.data) setFotos(c.data as Foto[])
+    if (completo) {
+      const c = await supabase.from('os_fotos').select('id, path').eq('os_id', id).order('criado_em')
+      if (c.data) setFotos(c.data as Foto[])
+    } else {
+      setFotos([])
+    }
     setCarregando(false)
-  }, [id])
+  }, [id, completo])
 
   useEffect(() => {
     carregar()
     supabase.from('servicos_catalogo').select('id, nome, valor_padrao').order('nome').then(({ data }) =>
       setServicos((data ?? []).map((s) => ({ id: s.id, nome: s.nome, preco: Number(s.valor_padrao) }))),
     )
-    supabase.from('pecas').select('id, nome, preco_venda').order('nome').then(({ data }) =>
-      setPecas((data ?? []).map((p) => ({ id: p.id, nome: p.nome, preco: Number(p.preco_venda) }))),
-    )
-  }, [carregar])
+    if (completo) {
+      supabase.from('pecas').select('id, nome, preco_venda').order('nome').then(({ data }) =>
+        setPecas((data ?? []).map((p) => ({ id: p.id, nome: p.nome, preco: Number(p.preco_venda) }))),
+      )
+    } else {
+      setPecas([])
+    }
+  }, [carregar, completo])
 
   async function mudarStatus(status: StatusOS) {
     if (!os || status === os.status) return
     setErro('')
     const { error } = await supabase.from('ordens_servico').update({ status }).eq('id', os.id)
     if (error) return setErro(mensagemErro(error))
-    if (status === 'entregue' && window.confirm('Criar lembrete de retorno (troca de óleo em 90 dias ou +1.500 km)? Você pode editar depois em Lembretes.')) {
+    if (completo && status === 'entregue' && window.confirm('Criar lembrete de retorno (troca de óleo em 90 dias ou +1.500 km)? Você pode editar depois em Lembretes.')) {
       const r = await supabase.from('lembretes').insert({
         moto_id: os.moto_id,
         tipo: 'oleo',
