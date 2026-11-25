@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
-import { formatarMoeda, lerNumero, mensagemErro } from '../lib/formatos'
+import { formatarMoeda, lerNumeroEstrito, mensagemErro } from '../lib/formatos'
 import { botao, campo } from './Clientes'
 
 type Servico = { id: string; nome: string; valor_padrao: number }
@@ -47,7 +47,12 @@ export default function CatalogoServicos() {
     e.preventDefault()
     setErro('')
     setSalvando(true)
-    const dados = { nome: f.nome.trim(), valor_padrao: lerNumero(f.valor) }
+    const valor = lerNumeroEstrito(f.valor)
+    if (f.valor.trim() && (valor === null || valor < 0)) {
+      setSalvando(false)
+      return setErro('Informe um valor válido e igual ou maior que zero.')
+    }
+    const dados = { nome: f.nome.trim(), valor_padrao: valor ?? 0 }
     const { error } = editId
       ? await supabase.from('servicos_catalogo').update(dados).eq('id', editId)
       : await supabase.from('servicos_catalogo').insert(dados)

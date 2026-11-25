@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { formatarPlaca, formatarTelefone, mensagemErro, normalizarPlaca } from '../lib/formatos'
+import { formatarPlaca, formatarTelefone, mensagemErro, normalizarPlaca, validarAnoFabricacao, validarPlaca } from '../lib/formatos'
 
 type Moto = { id: string; placa: string; marca: string | null; modelo: string | null }
 type Cliente = { id: string; nome: string; telefone: string | null; motos: Moto[] }
@@ -47,6 +47,16 @@ export default function Clientes() {
     e.preventDefault()
     setErro('')
     setSalvando(true)
+    if (f.placa.trim() && !validarPlaca(f.placa)) {
+      setSalvando(false)
+      return setErro('Informe uma placa válida (ABC1234 ou ABC1D23).')
+    }
+    const ano = f.ano.trim() ? Number(f.ano) : null
+    const erroAno = validarAnoFabricacao(ano)
+    if (erroAno) {
+      setSalvando(false)
+      return setErro(erroAno)
+    }
     const { data: cli, error } = await supabase
       .from('clientes')
       .insert({ nome: f.nome.trim(), telefone: f.telefone })
@@ -60,10 +70,10 @@ export default function Clientes() {
     if (f.placa.trim()) {
       const { error: e2 } = await supabase.from('motos').insert({
         cliente_id: cli.id,
-        placa: f.placa,
+        placa: normalizarPlaca(f.placa),
         marca: f.marca.trim() || null,
         modelo: f.modelo.trim() || null,
-        ano: f.ano ? Number(f.ano) : null,
+        ano,
       })
       if (e2) {
         setErro('Cliente salvo, mas a moto não: ' + mensagemErro(e2))

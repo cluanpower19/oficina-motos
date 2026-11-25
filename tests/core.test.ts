@@ -3,18 +3,35 @@ import {
   formatarPlaca,
   formatarTelefone,
   lerNumero,
+  mensagemErro,
+  lerNumeroEstrito,
   normalizarPlaca,
+  validarAnoFabricacao,
   validarKmEntrada,
+  validarPlaca,
 } from '../src/lib/formatos'
 import { linkWhatsApp, msgLembrete, msgOrcamento, msgPronta } from '../src/lib/whatsapp'
 import { ROTULO, STATUS } from '../src/lib/status'
 import { dataBR, somarDias, TIPOS } from '../src/lib/lembretes'
+
+describe('mensagens de erro do banco', () => {
+  it('distingue conflito de código de peça, placa e outros registros', () => {
+    expect(mensagemErro({ code: '23505', message: 'duplicate key codigo' })).toBe('Já existe uma peça com esse código.')
+    expect(mensagemErro({ code: '23505', message: 'duplicate key placa' })).toBe('Já existe uma moto com essa placa.')
+    expect(mensagemErro({ code: '23505', message: 'duplicate key nome' })).toBe('Este registro já existe. Confira os dados e tente novamente.')
+    expect(mensagemErro({ code: '23503', message: 'foreign key' })).toBe('foreign key')
+  })
+})
 
 describe('cadastro de motos e clientes', () => {
   it('normaliza e formata placas antigas e padrão Mercosul', () => {
     expect(normalizarPlaca('abc-1d23')).toBe('ABC1D23')
     expect(formatarPlaca('abc1d23')).toBe('ABC1D23')
     expect(formatarPlaca('ABC1234')).toBe('ABC-1234')
+    expect(validarPlaca('ABC-1234')).toBe(true)
+    expect(validarPlaca('ABC1D23')).toBe(true)
+    expect(validarPlaca('AB12345')).toBe(false)
+    expect(validarPlaca('ABC12D34')).toBe(false)
   })
 
   it('formata telefones brasileiros com DDD', () => {
@@ -24,7 +41,23 @@ describe('cadastro de motos e clientes', () => {
 
   it('converte valores digitados no padrão brasileiro', () => {
     expect(lerNumero('1.250,75')).toBe(1250.75)
+    expect(lerNumero('49.90')).toBe(49.9)
+    expect(lerNumero('1.250')).toBe(1250)
+    expect(lerNumero('1234.56')).toBe(1234.56)
     expect(lerNumero('inválido')).toBe(0)
+    expect(lerNumeroEstrito('49,90')).toBe(49.9)
+    expect(lerNumeroEstrito('')).toBeNull()
+    expect(lerNumeroEstrito('inválido')).toBeNull()
+  })
+
+  it('valida anos de fabricação antes de cadastrar motos', () => {
+    expect(validarAnoFabricacao(null, 2026)).toBeNull()
+    expect(validarAnoFabricacao(2026, 2026)).toBeNull()
+    expect(validarAnoFabricacao(2027, 2026)).toBeNull()
+    expect(validarAnoFabricacao(1884, 2026)).toContain('ano de fabricação')
+    expect(validarAnoFabricacao(2028, 2026)).toContain('ano de fabricação')
+    expect(validarAnoFabricacao(2020.5, 2026)).toContain('ano de fabricação')
+    expect(validarAnoFabricacao(Number.NaN, 2026)).toContain('ano de fabricação')
   })
 
   it('valida quilometragem antes de criar cliente ou moto', () => {

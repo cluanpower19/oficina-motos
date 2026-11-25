@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { formatarPlaca, formatarTelefone, mensagemErro } from '../lib/formatos'
+import { formatarPlaca, formatarTelefone, mensagemErro, validarAnoFabricacao, validarPlaca } from '../lib/formatos'
 import { botao, campo } from './Clientes'
 
 type Moto = {
@@ -28,22 +28,40 @@ export default function ClienteDetalhe() {
   const [m, setM] = useState({ placa: '', marca: '', modelo: '', ano: '', cor: '', km: '' })
 
   async function carregar() {
-    const { data: c } = await supabase
-      .from('clientes')
-      .select('id, nome, telefone, observacoes')
-      .eq('id', id!)
-      .maybeSingle()
-    if (c) {
+    try {
+      const { data: c, error: erroCliente } = await supabase
+        .from('clientes')
+        .select('id, nome, telefone, observacoes')
+        .eq('id', id!)
+        .maybeSingle()
+      if (erroCliente) {
+        setErro(mensagemErro(erroCliente))
+        setCli(null)
+        return
+      }
+      if (!c) {
+        setCli(null)
+        setMotos([])
+        return
+      }
       setCli(c)
       setDados({ nome: c.nome, telefone: formatarTelefone(c.telefone), observacoes: c.observacoes ?? '' })
-      const { data: ms } = await supabase
+      const { data: ms, error: erroMotos } = await supabase
         .from('motos')
         .select('id, placa, marca, modelo, ano, cor, km_atual')
         .eq('cliente_id', c.id)
         .order('criado_em')
-      setMotos(ms ?? [])
+      if (erroMotos) {
+        setMotos([])
+        setErro(mensagemErro(erroMotos))
+      } else {
+        setMotos(ms ?? [])
+      }
+    } catch {
+      setErro('Não foi possível carregar o cliente e suas motos. Verifique sua conexão e tente novamente.')
+    } finally {
+      setCarregando(false)
     }
-    setCarregando(false)
   }
   useEffect(() => {
     carregar()
@@ -68,14 +86,24 @@ export default function ClienteDetalhe() {
   async function salvarMoto(e: FormEvent) {
     e.preventDefault()
     setErro('')
+    if (!validarPlaca(m.placa)) {
+      return setErro('Informe uma placa válida (ABC1234 ou ABC1D23).')
+    }
+    const ano = m.ano.trim() ? Number(m.ano) : null
+    const kmAtual = m.km.trim() ? Number(m.km) : null
+    const erroAno = validarAnoFabricacao(ano)
+    if (erroAno) return setErro(erroAno)
+    if (kmAtual !== null && (!Number.isSafeInteger(kmAtual) || kmAtual < 0)) {
+      return setErro('A quilometragem deve ser um número inteiro igual ou maior que zero.')
+    }
     const { error } = await supabase.from('motos').insert({
       cliente_id: id!,
-      placa: m.placa,
+      placa: m.placa.replace(/[^A-Za-z0-9]/g, '').toUpperCase(),
       marca: m.marca.trim() || null,
       modelo: m.modelo.trim() || null,
-      ano: m.ano ? Number(m.ano) : null,
+      ano,
       cor: m.cor.trim() || null,
-      km_atual: m.km ? Number(m.km) : null,
+      km_atual: kmAtual,
     })
     if (error) return setErro(mensagemErro(error))
     setM({ placa: '', marca: '', modelo: '', ano: '', cor: '', km: '' })

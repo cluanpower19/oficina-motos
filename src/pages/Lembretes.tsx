@@ -51,8 +51,16 @@ export default function Lembretes() {
   async function abrirForm() {
     setAberto(true)
     if (motos.length === 0) {
-      const { data } = await supabase.from('motos').select('id, placa, modelo, clientes(nome)').order('placa')
-      setMotos((data ?? []) as unknown as MotoOpc[])
+      try {
+        const { data, error } = await supabase.from('motos').select('id, placa, modelo, clientes(nome)').order('placa')
+        if (error) {
+          setErro(mensagemErro(error))
+          return
+        }
+        setMotos((data ?? []) as unknown as MotoOpc[])
+      } catch {
+        setErro('Não foi possível carregar as motos. Verifique sua conexão e tente novamente.')
+      }
     }
   }
 

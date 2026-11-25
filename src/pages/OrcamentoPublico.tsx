@@ -19,36 +19,70 @@ export default function OrcamentoPublico() {
   const [carregando, setCarregando] = useState(true)
   const [enviando, setEnviando] = useState(false)
   const [msg, setMsg] = useState('')
+  const [erroCarga, setErroCarga] = useState('')
+  const [erroFotos, setErroFotos] = useState('')
   const [fotosAssinadas, setFotosAssinadas] = useState<FotoPublica[]>([])
 
   const carregar = useCallback(async () => {
-    const { data } = await supabase.rpc('orcamento_publico', { p_token: token })
-    const dados = (data as Dados | null) ?? null
-    setD(dados)
-    if (dados?.fotos?.length) {
-      const { data: respostaFotos, error: erroFotos } = await supabase.functions.invoke('orcamento-fotos', { body: { token } })
-      setFotosAssinadas(!erroFotos && Array.isArray(respostaFotos?.fotos) ? respostaFotos.fotos as FotoPublica[] : [])
-    } else {
+    setErroCarga('')
+    setErroFotos('')
+    try {
+      const { data, error } = await supabase.rpc('orcamento_publico', { p_token: token })
+      if (error) throw error
+      const dados = (data as Dados | null) ?? null
+      setD(dados)
+
+      if (dados?.fotos?.length) {
+        try {
+          const { data: respostaFotos, error: erroRespostaFotos } = await supabase.functions.invoke('orcamento-fotos', { body: { token } })
+          if (erroRespostaFotos) {
+            setErroFotos('Não foi possível carregar as fotos deste orçamento.')
+            setFotosAssinadas([])
+          } else {
+            setFotosAssinadas(Array.isArray(respostaFotos?.fotos) ? respostaFotos.fotos as FotoPublica[] : [])
+          }
+        } catch {
+          setErroFotos('Não foi possível carregar as fotos deste orçamento.')
+          setFotosAssinadas([])
+        }
+      } else {
+        setFotosAssinadas([])
+      }
+    } catch {
+      setD(null)
       setFotosAssinadas([])
+      setErroCarga('Não foi possível carregar o orçamento agora. Verifique sua conexão e tente novamente.')
+    } finally {
+      setCarregando(false)
     }
-    setCarregando(false)
   }, [token])
+
   useEffect(() => {
-    carregar()
+    void carregar()
   }, [carregar])
 
   async function responder(aprovar: boolean) {
-    if (!window.confirm(aprovar ? 'Aprovar este orçamento?' : 'Recusar este orçamento?')) return
+    if (enviando || !window.confirm(aprovar ? 'Aprovar este orçamento?' : 'Recusar este orçamento?')) return
     setEnviando(true)
-    const { data, error } = await supabase.rpc('responder_orcamento', { p_token: token, p_aprovar: aprovar })
-    setEnviando(false)
-    if (error) return setMsg('Não foi possível enviar sua resposta. Tente de novo.')
-    if (data === 'ja_respondido') setMsg('Este orçamento já foi respondido.')
-    await carregar()
+    setMsg('')
+    try {
+      const { data, error } = await supabase.rpc('responder_orcamento', { p_token: token, p_aprovar: aprovar })
+      if (error) throw error
+      if (data === 'nao_encontrado') {
+        setMsg('Este orçamento não foi encontrado. Peça um novo link à oficina.')
+        return
+      }
+      if (data === 'ja_respondido') setMsg('Este orçamento já foi respondido.')
+      await carregar()
+    } catch {
+      setMsg('Não foi possível enviar sua resposta. Verifique sua conexão e tente novamente.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
-  if (!d) return <div className="p-8 text-center text-gray-700">Orçamento não encontrado. Confira o link com a oficina.</div>
+  if (!d) return <div className="space-y-3 p-8 text-center text-gray-700" role="alert">{erroCarga || 'Orçamento não encontrado. Confira o link com a oficina.'}<button className="mx-auto block rounded-lg bg-gray-800 px-4 py-2 text-white" onClick={() => { setCarregando(true); void carregar() }}>Tentar novamente</button></div>
 
   const aberto = d.os.status === 'orcamento' || d.os.status === 'aguardando_aprovacao'
   return (
@@ -93,6 +127,7 @@ export default function OrcamentoPublico() {
         </div>
       </div>
 
+      {erroFotos && <p className="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800" role="status">{erroFotos}</p>}
       {fotosAssinadas.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           {fotosAssinadas.map((f, k) => (

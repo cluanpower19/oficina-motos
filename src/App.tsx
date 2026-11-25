@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth, erroCriacao } from './hooks/useAuth'
 import { supabase } from './lib/supabase'
-import Layout from './components/Layout'
-import Login from './pages/Login'
-import Admin from './pages/Admin'
-import Suporte from './pages/Suporte'
-import Painel from './pages/Painel'
-import Configuracoes from './pages/Configuracoes'
-import Clientes from './pages/Clientes'
-import ClienteDetalhe from './pages/ClienteDetalhe'
-import Catalogo from './pages/Catalogo'
-import OrdensServico from './pages/OrdensServico'
-import NovaOS from './pages/NovaOS'
-import OSDetalhe from './pages/OSDetalhe'
-import OrcamentoPublico from './pages/OrcamentoPublico'
-import Lembretes from './pages/Lembretes'
-import Financeiro from './pages/Financeiro'
-import RecursoPlano from './components/RecursoPlano'
-import SitePublico from './pages/SitePublico'
-import Contratacao from './pages/Contratacao'
-import CadastroOficina from './pages/CadastroOficina'
+const Layout = lazy(() => import('./components/Layout'))
+const Login = lazy(() => import('./pages/Login'))
+const Admin = lazy(() => import('./pages/Admin'))
+const Suporte = lazy(() => import('./pages/Suporte'))
+const Painel = lazy(() => import('./pages/Painel'))
+const Configuracoes = lazy(() => import('./pages/Configuracoes'))
+const Clientes = lazy(() => import('./pages/Clientes'))
+const ClienteDetalhe = lazy(() => import('./pages/ClienteDetalhe'))
+const Catalogo = lazy(() => import('./pages/Catalogo'))
+const OrdensServico = lazy(() => import('./pages/OrdensServico'))
+const NovaOS = lazy(() => import('./pages/NovaOS'))
+const OSDetalhe = lazy(() => import('./pages/OSDetalhe'))
+const OrcamentoPublico = lazy(() => import('./pages/OrcamentoPublico'))
+const Lembretes = lazy(() => import('./pages/Lembretes'))
+const Financeiro = lazy(() => import('./pages/Financeiro'))
+const RecursoPlano = lazy(() => import('./components/RecursoPlano'))
+const SitePublico = lazy(() => import('./pages/SitePublico'))
+const Contratacao = lazy(() => import('./pages/Contratacao'))
+const CadastroOficina = lazy(() => import('./pages/CadastroOficina'))
 
 function Rotas() {
   const { session, perfil, carregando, recuperacao, recarregarPerfil } = useAuth()
@@ -105,19 +105,20 @@ function Rotas() {
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-      <Routes>
-        <Route path="/contratar" element={<Contratacao />} />
-        <Route path="/cadastro" element={<CadastroOficina />} />
-        <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
-        <Route
-          path="*"
-          element={
-            <AuthProvider>
-              <Rotas />
-            </AuthProvider>
-          }
-        />
-      </Routes>
+      <Suspense fallback={<div className="p-8 text-gray-600">Carregando módulo...</div>}>
+        <Routes>
+          <Route path="/contratar" element={<Contratacao />} />
+          <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
+          <Route
+            path="*"
+            element={
+              <AuthProvider>
+                <Rotas />
+              </AuthProvider>
+            }
+          />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }

@@ -33,12 +33,20 @@ export default function Configuracoes() {
   const [ocupado, setOcupado] = useState(false)
 
   const carregarDono = useCallback(async () => {
-    const [c, e] = await Promise.all([
-      supabase.from('oficinas').select('codigo_convite').eq('id', of.id).maybeSingle(),
-      supabase.from('usuarios').select('id, nome, papel').order('criado_em'),
-    ])
-    setCodigo(c.data?.codigo_convite ?? '')
-    setEquipe((e.data as Membro[]) ?? [])
+    try {
+      const [c, e] = await Promise.all([
+        supabase.from('oficinas').select('codigo_convite').eq('id', of.id).maybeSingle(),
+        supabase.from('usuarios').select('id, nome, papel').order('criado_em'),
+      ])
+      if (c.error || e.error) {
+        setErro('Não foi possível carregar os dados da equipe. Atualize a página e tente novamente.')
+        return
+      }
+      setCodigo(c.data?.codigo_convite ?? '')
+      setEquipe((e.data as Membro[]) ?? [])
+    } catch {
+      setErro('Não foi possível carregar os dados da equipe. Verifique sua conexão e tente novamente.')
+    }
   }, [of.id])
 
   useEffect(() => {

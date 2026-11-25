@@ -66,7 +66,11 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
       .eq('id', session.user.id)
       .maybeSingle()
 
-  let { data } = await ler()
+  const primeiraConsulta = await ler()
+  if (primeiraConsulta.error) {
+    throw new Error('Não foi possível consultar o cadastro da oficina: ' + primeiraConsulta.error.message)
+  }
+  let { data } = primeiraConsulta
 
   // Primeiro acesso do dono inicia o trial; mecânicos entram pelo código de convite.
   if (!data) {
@@ -79,11 +83,19 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
         p_plano: meta.plano,
       })
       erroCriacao = r.error?.message ?? ''
-      if (!r.error) ({ data } = await ler())
+      if (!r.error) {
+        const consulta = await ler()
+        if (consulta.error) throw new Error('O cadastro foi iniciado, mas não foi possível carregar a oficina: ' + consulta.error.message)
+        data = consulta.data
+      }
     } else if (meta.codigo_oficina) {
       const r = await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
       erroCriacao = r.error?.message ?? ''
-      ;({ data } = await ler())
+      if (!r.error) {
+        const consulta = await ler()
+        if (consulta.error) throw new Error('O acesso foi criado, mas não foi possível carregar a oficina: ' + consulta.error.message)
+        data = consulta.data
+      }
     }
   }
   if (!data) return null

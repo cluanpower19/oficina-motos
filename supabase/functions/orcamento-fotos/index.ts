@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2"
+import { planoPermiteFotos } from "../_shared/assinatura.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,12 +47,14 @@ Deno.serve(async (req: Request) => {
 
     const { data: oficina, error: erroOficina } = await admin
       .from("oficinas")
-      .select("plano, status_assinatura")
+      .select("plano")
       .eq("id", os.oficina_id)
       .maybeSingle()
 
     if (erroOficina) throw erroOficina
-    if (!oficina || oficina.plano !== "completo" || oficina.status_assinatura !== "ativo") {
+    // A leitura de dados existentes permanece permitida após o fim do trial ou bloqueio.
+    // O plano controla se a oficina pode ter fotos; a assinatura controla gravações via RLS.
+    if (!oficina || !planoPermiteFotos(oficina.plano)) {
       return json({ fotos: [] })
     }
 

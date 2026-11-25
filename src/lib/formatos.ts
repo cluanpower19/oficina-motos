@@ -9,6 +9,11 @@ export function formatarTelefone(v: string | null | undefined): string {
 
 export const normalizarPlaca = (v: string) => v.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
 
+export function validarPlaca(v: string): boolean {
+  const placa = normalizarPlaca(v)
+  return /^[A-Z]{3}\d{4}$/.test(placa) || /^[A-Z]{3}\d[A-Z]\d{2}$/.test(placa)
+}
+
 export function formatarPlaca(v: string): string {
   const p = normalizarPlaca(v)
   return /^[A-Z]{3}\d/.test(p) && p.length === 7 && /^\d$/.test(p[4]) ? `${p.slice(0, 3)}-${p.slice(3)}` : p
@@ -16,19 +21,45 @@ export function formatarPlaca(v: string): string {
 
 export function mensagemErro(e: { code?: string; message: string }): string {
   if (e.code === '23505') {
-    if (e.message.includes('codigo')) return 'Já existe uma peça com esse código.'
-    return 'Já existe uma moto com essa placa.'
+    const detalhe = e.message.toLowerCase()
+    if (detalhe.includes('codigo')) return 'Já existe uma peça com esse código.'
+    if (detalhe.includes('placa')) return 'Já existe uma moto com essa placa.'
+    return 'Este registro já existe. Confira os dados e tente novamente.'
   }
   return e.message
 }
 
 export const formatarMoeda = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-export function lerNumero(v: string): number {
-  const n = Number(v.trim().replace(/\./g, '').replace(',', '.'))
-  return Number.isFinite(n) ? n : 0
+export function lerNumeroEstrito(v: string): number | null {
+  const texto = v.trim().replace(/\s/g, '')
+  if (!texto) return null
+
+  // Com vírgula, interpreta o padrão brasileiro (1.234,56).
+  // Sem vírgula, preserva ponto decimal (49.90), mas reconhece milhares (1.250).
+  const normalizado = texto.includes(',')
+    ? texto.replace(/\./g, '').replace(',', '.')
+    : /^-?\d{1,3}(?:\.\d{3})+$/.test(texto)
+      ? texto.replace(/\./g, '')
+      : texto
+
+  const n = Number(normalizado)
+  return Number.isFinite(n) ? n : null
 }
 
+export function lerNumero(v: string): number {
+  return lerNumeroEstrito(v) ?? 0
+}
+
+
+/** Valida o ano de fabricação informado no cadastro da motocicleta. */
+export function validarAnoFabricacao(ano: number | null, anoAtual = new Date().getFullYear()): string | null {
+  if (ano === null) return null
+  if (!Number.isSafeInteger(ano) || ano < 1885 || ano > anoAtual + 1) {
+    return 'Informe um ano de fabricação válido.'
+  }
+  return null
+}
 
 /** Valida a quilometragem informada antes de iniciar qualquer gravação da OS. */
 export function validarKmEntrada(km: number | null, kmAnterior: number | null): string | null {

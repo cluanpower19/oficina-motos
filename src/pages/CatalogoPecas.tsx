@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
-import { formatarMoeda, lerNumero, mensagemErro } from '../lib/formatos'
+import { formatarMoeda, lerNumeroEstrito, mensagemErro } from '../lib/formatos'
 import { botao, campo } from './Clientes'
 
 type Peca = {
@@ -60,12 +60,27 @@ export default function CatalogoPecas() {
     e.preventDefault()
     setErro('')
     setSalvando(true)
+    const preco = lerNumeroEstrito(f.preco)
+    const quantidade = lerNumeroEstrito(f.qtd)
+    const minimo = lerNumeroEstrito(f.min)
+    if (f.preco.trim() && (preco === null || preco < 0)) {
+      setSalvando(false)
+      return setErro('Informe um preço válido e igual ou maior que zero.')
+    }
+    if (quantidade === null || !Number.isSafeInteger(quantidade) || quantidade < 0) {
+      setSalvando(false)
+      return setErro('A quantidade em estoque deve ser um número inteiro igual ou maior que zero.')
+    }
+    if (minimo === null || !Number.isSafeInteger(minimo) || minimo < 0) {
+      setSalvando(false)
+      return setErro('O estoque mínimo deve ser um número inteiro igual ou maior que zero.')
+    }
     const dados = {
       nome: f.nome.trim(),
       codigo: f.codigo.trim() || null,
-      preco_venda: lerNumero(f.preco),
-      quantidade_estoque: Math.trunc(lerNumero(f.qtd)),
-      estoque_minimo: Math.max(0, Math.trunc(lerNumero(f.min))),
+      preco_venda: preco ?? 0,
+      quantidade_estoque: quantidade,
+      estoque_minimo: minimo,
     }
     const { error } = editId
       ? await supabase.from('pecas').update(dados).eq('id', editId)

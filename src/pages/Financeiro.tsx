@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { formatarMoeda, lerNumero, mensagemErro } from '../lib/formatos'
+import { formatarMoeda, lerNumeroEstrito, mensagemErro } from '../lib/formatos'
 import { dataBR, hojeISO } from '../lib/lembretes'
 import { botao, campo } from './Clientes'
 
@@ -49,16 +49,24 @@ export default function Financeiro() {
   const [salvando, setSalvando] = useState(false)
 
   const carregar = useCallback(async () => {
-    const { inicio, fim } = limitesDoMes(mes)
-    const cols = 'id, tipo, descricao, valor, data, pago, os_id'
-    const [a, b] = await Promise.all([
-      supabase.from('financeiro').select(cols).gte('data', inicio).lt('data', fim).order('data', { ascending: false }).order('criado_em', { ascending: false }),
-      supabase.from('financeiro').select(cols).eq('tipo', 'entrada').eq('pago', false).order('data'),
-    ])
-    if (a.error) setErro(a.error.message)
-    else setLista((a.data ?? []) as Mov[])
-    if (b.data) setReceber(b.data as Mov[])
-    setCarregando(false)
+    setErro('')
+    setCarregando(true)
+    try {
+      const { inicio, fim } = limitesDoMes(mes)
+      const cols = 'id, tipo, descricao, valor, data, pago, os_id'
+      const [a, b] = await Promise.all([
+        supabase.from('financeiro').select(cols).gte('data', inicio).lt('data', fim).order('data', { ascending: false }).order('criado_em', { ascending: false }),
+        supabase.from('financeiro').select(cols).eq('tipo', 'entrada').eq('pago', false).order('data'),
+      ])
+      if (a.error) setErro(a.error.message)
+      else setLista((a.data ?? []) as Mov[])
+      if (b.error) setErro((anterior) => anterior || b.error.message)
+      else setReceber((b.data ?? []) as Mov[])
+    } catch {
+      setErro('Não foi possível carregar o financeiro. Verifique sua conexão e tente novamente.')
+    } finally {
+      setCarregando(false)
+    }
   }, [mes])
 
   useEffect(() => {
@@ -72,8 +80,8 @@ export default function Financeiro() {
   async function salvar(e: FormEvent) {
     e.preventDefault()
     setErro('')
-    const valor = lerNumero(f.valor)
-    if (valor <= 0) return setErro('Informe um valor maior que zero.')
+    const valor = lerNumeroEstrito(f.valor)
+    if (valor === null || valor <= 0) return setErro('Informe um valor válido maior que zero.')
     setSalvando(true)
     const { error } = await supabase
       .from('financeiro')

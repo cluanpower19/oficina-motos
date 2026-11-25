@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { formatarPlaca, mensagemErro, normalizarPlaca, validarKmEntrada } from '../lib/formatos'
+import { formatarPlaca, mensagemErro, normalizarPlaca, validarAnoFabricacao, validarKmEntrada, validarPlaca } from '../lib/formatos'
 import { botao, campo } from './Clientes'
 
 type MotoBusca = {
@@ -27,14 +27,27 @@ export default function NovaOS() {
   const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
+    let ativo = true
     const p = normalizarPlaca(placa)
-    if (moto || p.length < 2) return setAchadas([])
+    if (moto || p.length < 2) {
+      setAchadas([])
+      return () => { ativo = false }
+    }
     supabase
       .from('motos')
       .select('id, placa, marca, modelo, km_atual, cliente_id, clientes(nome)')
       .ilike('placa', `%${p}%`)
       .limit(8)
-      .then(({ data }) => setAchadas((data ?? []) as unknown as MotoBusca[]))
+      .then(({ data, error }) => {
+        if (!ativo) return
+        if (error) {
+          setAchadas([])
+          setErro(mensagemErro(error))
+        } else {
+          setAchadas((data ?? []) as unknown as MotoBusca[])
+        }
+      })
+    return () => { ativo = false }
   }, [placa, moto])
 
   function escolher(m: MotoBusca) {
@@ -63,9 +76,15 @@ export default function NovaOS() {
     let clienteNovo = false
 
     if (!moto) {
-      if (!normalizarPlaca(placa)) {
+      if (!validarPlaca(placa)) {
         setSalvando(false)
-        return setErro('Informe a placa.')
+        return setErro('Informe uma placa válida (ABC1234 ou ABC1D23).')
+      }
+      const ano = n.ano.trim() ? Number(n.ano) : null
+      const erroAno = validarAnoFabricacao(ano)
+      if (erroAno) {
+        setSalvando(false)
+        return setErro(erroAno)
       }
       const { data: cli, error } = await supabase
         .from('clientes')
@@ -82,10 +101,11 @@ export default function NovaOS() {
         .from('motos')
         .insert({
           cliente_id: cli.id,
-          placa,
+          placa: normalizarPlaca(placa),
           marca: n.marca.trim() || null,
           modelo: n.modelo.trim() || null,
-          ano: n.ano ? Number(n.ano) : null,
+          ano,
+          km_atual: kmNum,
         })
         .select('id')
         .single()
@@ -124,7 +144,15 @@ export default function NovaOS() {
       }
       return
     }
-    if (kmNum) await supabase.from('motos').update({ km_atual: kmNum }).eq('id', motoId)
+    if (moto && kmNum !== null) {
+      const { error: erroKmAtual } = await supabase.from('motos').update({ km_atual: kmNum }).eq('id', motoId)
+      nav(`/os/${os.id}`, {
+        state: erroKmAtual
+          ? { aviso: 'A OS foi criada, mas não foi possível atualizar a quilometragem atual da moto. Confira o cadastro antes da próxima OS.' }
+          : null,
+      })
+      return
+    }
     nav(`/os/${os.id}`)
   }
 

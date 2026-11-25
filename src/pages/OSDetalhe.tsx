@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { formatarMoeda, formatarPlaca, formatarTelefone, lerNumero, mensagemErro } from '../lib/formatos'
+import { formatarMoeda, formatarPlaca, formatarTelefone, lerNumero, lerNumeroEstrito, mensagemErro } from '../lib/formatos'
 import { COR, ROTULO, STATUS, type StatusOS } from '../lib/status'
 import { botao, campo } from './Clientes'
 import { reduzirImagem } from '../lib/imagem'
@@ -33,6 +33,8 @@ const vazio = { tipo: 'servico' as 'servico' | 'peca', catId: '', descricao: '',
 
 export default function OSDetalhe() {
   const { perfil } = useAuth()
+  const location = useLocation()
+  const avisoNavegacao = (location.state as { aviso?: string } | null)?.aviso ?? ''
   const completo = perfil?.oficina.plano === 'completo'
   const { id } = useParams()
   const [os, setOs] = useState<OS | null>(null)
@@ -50,46 +52,68 @@ export default function OSDetalhe() {
   const [copiado, setCopiado] = useState(false)
 
   const carregar = useCallback(async () => {
-    const [a, b] = await Promise.all([
-      supabase
-        .from('ordens_servico')
-        .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, moto_id, oficina_id, token_publico, clientes(nome, telefone), motos(placa, marca, modelo)')
-        .eq('id', id)
-        .single(),
-      supabase
-        .from('os_itens')
-        .select('id, tipo, descricao, quantidade, valor_unitario, peca_id')
-        .eq('os_id', id)
-        .order('criado_em'),
-    ])
-    if (a.error) setErro(a.error.message)
-    else setOs(a.data as unknown as OS)
-    if (b.data) setItens(b.data as Item[])
-    if (completo) {
-      const c = await supabase.from('os_fotos').select('id, path').eq('os_id', id).order('criado_em')
-      if (c.data?.length) {
-        const { data: assinadas, error: erroAssinadas } = await supabase.storage.from('os-fotos').createSignedUrls(c.data.map((foto) => foto.path), 300)
-        if (erroAssinadas) setErro(mensagemErro(erroAssinadas))
-        const urls = new Map((assinadas ?? []).map((foto) => [foto.path, foto.signedUrl]))
-        setFotos(c.data.map((foto) => ({ ...foto, url: urls.get(foto.path) ?? '' })))
+    try {
+      const [a, b] = await Promise.all([
+        supabase
+          .from('ordens_servico')
+          .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, moto_id, oficina_id, token_publico, clientes(nome, telefone), motos(placa, marca, modelo)')
+          .eq('id', id)
+          .single(),
+        supabase
+          .from('os_itens')
+          .select('id, tipo, descricao, quantidade, valor_unitario, peca_id')
+          .eq('os_id', id)
+          .order('criado_em'),
+      ])
+
+      if (a.error) {
+        setOs(null)
+        setErro(mensagemErro(a.error))
+      } else {
+        setOs(a.data as unknown as OS)
+      }
+
+      if (b.error) {
+        setItens([])
+        setErro((anterior) => anterior || mensagemErro(b.error))
+      } else {
+        setItens((b.data ?? []) as Item[])
+      }
+
+      if (completo) {
+        const c = await supabase.from('os_fotos').select('id, path').eq('os_id', id).order('criado_em')
+        if (c.error) {
+          setFotos([])
+          setErro((anterior) => anterior || mensagemErro(c.error))
+        } else if (c.data?.length) {
+          const { data: assinadas, error: erroAssinadas } = await supabase.storage.from('os-fotos').createSignedUrls(c.data.map((foto) => foto.path), 300)
+          if (erroAssinadas) setErro((anterior) => anterior || mensagemErro(erroAssinadas))
+          const urls = new Map((assinadas ?? []).map((foto) => [foto.path, foto.signedUrl]))
+          setFotos(c.data.map((foto) => ({ ...foto, url: urls.get(foto.path) ?? '' })))
+        } else {
+          setFotos([])
+        }
       } else {
         setFotos([])
       }
-    } else {
-      setFotos([])
+    } catch {
+      setErro((anterior) => anterior || 'Não foi possível consultar esta ordem de serviço. Verifique sua conexão e tente novamente.')
+    } finally {
+      setCarregando(false)
     }
-    setCarregando(false)
   }, [id, completo])
 
   useEffect(() => {
     carregar()
-    supabase.from('servicos_catalogo').select('id, nome, valor_padrao').order('nome').then(({ data }) =>
-      setServicos((data ?? []).map((s) => ({ id: s.id, nome: s.nome, preco: Number(s.valor_padrao) }))),
-    )
+    supabase.from('servicos_catalogo').select('id, nome, valor_padrao').order('nome').then(({ data, error }) => {
+      if (error) setErro((anterior) => anterior || mensagemErro(error))
+      else setServicos((data ?? []).map((s) => ({ id: s.id, nome: s.nome, preco: Number(s.valor_padrao) })))
+    })
     if (completo) {
-      supabase.from('pecas').select('id, nome, preco_venda').order('nome').then(({ data }) =>
-        setPecas((data ?? []).map((p) => ({ id: p.id, nome: p.nome, preco: Number(p.preco_venda) }))),
-      )
+      supabase.from('pecas').select('id, nome, preco_venda').order('nome').then(({ data, error }) => {
+        if (error) setErro((anterior) => anterior || mensagemErro(error))
+        else setPecas((data ?? []).map((p) => ({ id: p.id, nome: p.nome, preco: Number(p.preco_venda) })))
+      })
     } else {
       setPecas([])
     }
@@ -135,11 +159,25 @@ export default function OSDetalhe() {
     if (!os) return
     setErro('')
     setSalvando(true)
+    const quantidade = lerNumeroEstrito(f.qtd)
+    const valorUnitario = lerNumeroEstrito(f.valor)
+    if (!f.descricao.trim()) {
+      setSalvando(false)
+      return setErro('Informe a descrição do item.')
+    }
+    if (quantidade === null || !Number.isSafeInteger(quantidade) || quantidade < 1) {
+      setSalvando(false)
+      return setErro('A quantidade deve ser um número inteiro maior que zero.')
+    }
+    if (valorUnitario === null || valorUnitario < 0) {
+      setSalvando(false)
+      return setErro('Informe um valor unitário válido e igual ou maior que zero.')
+    }
     const dados = {
       tipo: f.tipo,
       descricao: f.descricao.trim(),
-      quantidade: Math.max(1, Math.trunc(lerNumero(f.qtd))),
-      valor_unitario: lerNumero(f.valor),
+      quantidade,
+      valor_unitario: valorUnitario,
       peca_id: f.tipo === 'peca' && f.catId ? f.catId : null,
     }
     const { error } = editId
@@ -237,6 +275,7 @@ export default function OSDetalhe() {
   if (carregando) return <p className="text-gray-600">Carregando...</p>
   if (!os) return <p className="rounded-lg bg-red-100 p-3 text-red-700">{erro || 'OS não encontrada.'}</p>
 
+  const entregue = os.status === 'entregue'
   const cat = f.tipo === 'servico' ? servicos : pecas
   const tab = (ativo: boolean) =>
     `flex-1 rounded-lg px-4 py-2 text-center ${ativo ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700'}`
@@ -262,18 +301,19 @@ export default function OSDetalhe() {
         {os.defeito_relatado && <p className="rounded-lg bg-gray-50 p-3 text-gray-700">{os.defeito_relatado}</p>}
         <label className="block pt-1 text-sm text-gray-600">
           Status
-          <select className={campo} value={os.status} onChange={(e) => mudarStatus(e.target.value as StatusOS)}>
+          <select className={campo} value={os.status} disabled={entregue} onChange={(e) => mudarStatus(e.target.value as StatusOS)}>
             {STATUS.map((s) => (
               <option key={s} value={s}>{ROTULO[s]}</option>
             ))}
           </select>
+          {entregue && <p className="mt-2 text-xs text-gray-500">OS entregue e finalizada. Para manter o histórico financeiro correto, não é possível alterar o status ou os itens.</p>}
         </label>
-        {completo && <p className="text-xs text-gray-500">As peças saem do estoque ao marcar "Em andamento" (uma vez só).</p>}
+        {completo && <p className="text-xs text-gray-500">As peças saem do estoque ao iniciar a OS ou ao finalizá-la diretamente como Pronto/Entregue, uma única vez.</p>}
       </div>
 
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-gray-800">Itens</h2>
-        <button className={botao} onClick={aberto ? fechar : () => setAberto(true)}>{aberto ? 'Cancelar' : '+ Item'}</button>
+        {!entregue && <button className={botao} onClick={aberto ? fechar : () => setAberto(true)}>{aberto ? 'Cancelar' : '+ Item'}</button>}
       </div>
 
       {aberto && (
@@ -305,6 +345,7 @@ export default function OSDetalhe() {
         </form>
       )}
 
+      {avisoNavegacao && <p className="rounded-lg bg-yellow-50 p-3 text-yellow-800" role="status">{avisoNavegacao}</p>}
       {erro && <p className="rounded-lg bg-red-100 p-3 text-red-700">{erro}</p>}
 
       {itens.length === 0 ? (
@@ -322,10 +363,10 @@ export default function OSDetalhe() {
                 </div>
                 <div className="font-semibold text-gray-800">{formatarMoeda(i.quantidade * Number(i.valor_unitario))}</div>
               </div>
-              <div className="mt-2 flex justify-end gap-2 text-sm">
+              {!entregue && <div className="mt-2 flex justify-end gap-2 text-sm">
                 <button onClick={() => editar(i)} className="rounded-lg bg-gray-100 px-3 py-2">Editar</button>
                 <button onClick={() => removerItem(i)} className="rounded-lg bg-red-50 px-3 py-2 text-red-700">Remover</button>
-              </div>
+              </div>}
             </li>
           ))}
         </ul>

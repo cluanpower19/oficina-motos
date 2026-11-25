@@ -20,33 +20,53 @@ const soma = (l: { valor: number }[] | null) => (l ?? []).reduce((s, x) => s + N
 export default function Painel() {
   const { perfil } = useAuth()
   const [r, setR] = useState<Resumo | null>(null)
+  const [erro, setErro] = useState('')
   const dono = perfil?.papel === 'dono'
+  const completo = perfil?.oficina.plano === 'completo'
+  const podeVerFinanceiro = dono && completo
 
   useEffect(() => {
     if (!perfil) return
+    let ativo = true
+    setR(null)
+    setErro('')
     const hoje = hojeISO()
     const mes = hoje.slice(0, 7)
     const [a, m] = mes.split('-').map(Number)
     const fim = m === 12 ? `${a + 1}-01-01` : `${a}-${String(m + 1).padStart(2, '0')}-01`
     ;(async () => {
-      const [os, lem, rec, rcb] = await Promise.all([
-        supabase.from('ordens_servico').select('status').not('status', 'in', '(entregue,cancelado)'),
-        supabase.from('lembretes').select('id', { count: 'exact', head: true }).eq('enviado', false).lte('data_prevista', hoje),
-        dono
-          ? supabase.from('financeiro').select('valor').eq('tipo', 'entrada').eq('pago', true).gte('data', `${mes}-01`).lt('data', fim)
-          : Promise.resolve({ data: null }),
-        dono ? supabase.from('financeiro').select('valor').eq('tipo', 'entrada').eq('pago', false) : Promise.resolve({ data: null }),
-      ])
-      const porStatus: Resumo['porStatus'] = {}
-      for (const o of (os.data ?? []) as { status: StatusOS }[]) porStatus[o.status] = (porStatus[o.status] ?? 0) + 1
-      setR({
-        porStatus,
-        lembretes: lem.count ?? 0,
-        recebido: dono ? soma(rec.data as { valor: number }[] | null) : null,
-        aReceber: dono ? soma(rcb.data as { valor: number }[] | null) : null,
-      })
+      try {
+        const [os, lem, rec, rcb] = await Promise.all([
+          supabase.from('ordens_servico').select('status').not('status', 'in', '(entregue,cancelado)'),
+          completo
+            ? supabase.from('lembretes').select('id', { count: 'exact', head: true }).eq('enviado', false).lte('data_prevista', hoje)
+            : Promise.resolve({ data: null, count: 0 }),
+          podeVerFinanceiro
+            ? supabase.from('financeiro').select('valor').eq('tipo', 'entrada').eq('pago', true).gte('data', `${mes}-01`).lt('data', fim)
+            : Promise.resolve({ data: null }),
+          podeVerFinanceiro
+            ? supabase.from('financeiro').select('valor').eq('tipo', 'entrada').eq('pago', false)
+            : Promise.resolve({ data: null }),
+        ])
+        for (const resultado of [os, lem, rec, rcb]) {
+          if ('error' in resultado && resultado.error) throw resultado.error
+        }
+        const porStatus: Resumo['porStatus'] = {}
+        for (const o of (os.data ?? []) as { status: StatusOS }[]) porStatus[o.status] = (porStatus[o.status] ?? 0) + 1
+        if (ativo) {
+          setR({
+            porStatus,
+            lembretes: lem.count ?? 0,
+            recebido: podeVerFinanceiro ? soma(rec.data as { valor: number }[] | null) : null,
+            aReceber: podeVerFinanceiro ? soma(rcb.data as { valor: number }[] | null) : null,
+          })
+        }
+      } catch {
+        if (ativo) setErro('Não foi possível carregar os indicadores. Verifique sua conexão e tente novamente.')
+      }
     })()
-  }, [perfil, dono])
+    return () => { ativo = false }
+  }, [perfil, dono, completo, podeVerFinanceiro])
 
   const abertas = r ? STATUS.filter((s) => (r.porStatus[s] ?? 0) > 0) : []
 
@@ -71,7 +91,7 @@ export default function Painel() {
       </section>
 
       {!r ? (
-        <p className="text-gray-600">Carregando...</p>
+        <p className={erro ? "rounded-lg bg-red-100 p-3 text-red-700" : "text-gray-600"} role={erro ? "alert" : undefined}>{erro || 'Carregando...'}</p>
       ) : (
         <>
           <section className="space-y-3">
@@ -89,24 +109,28 @@ export default function Painel() {
             )}
           </section>
 
-          <div className={`grid gap-3 ${dono ? 'md:grid-cols-3' : ''}`}>
-            <Link to="/lembretes" className="placar chapa-xadrez block">
-              <div className="placar-rotulo">Lembretes para enviar hoje</div>
-              <div className={`placar-valor ${r.lembretes > 0 ? 'text-orange-600' : 'text-gray-800'}`}>{r.lembretes}</div>
-            </Link>
-            {dono && (
-              <>
-                <Link to="/financeiro" className="placar aco-escovado block">
-                  <div className="placar-rotulo">Recebido no mês</div>
-                  <div className="placar-valor text-orange-400">{formatarMoeda(r.recebido ?? 0)}</div>
+          {(completo || podeVerFinanceiro) && (
+            <div className={`grid gap-3 ${podeVerFinanceiro ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+              {completo && (
+                <Link to="/lembretes" className="placar chapa-xadrez block">
+                  <div className="placar-rotulo">Lembretes para enviar hoje</div>
+                  <div className={`placar-valor ${r.lembretes > 0 ? 'text-orange-600' : 'text-gray-800'}`}>{r.lembretes}</div>
                 </Link>
-                <Link to="/financeiro" className="placar aco-escovado block">
-                  <div className="placar-rotulo">A receber</div>
-                  <div className="placar-valor text-gray-800">{formatarMoeda(r.aReceber ?? 0)}</div>
-                </Link>
-              </>
-            )}
-          </div>
+              )}
+              {podeVerFinanceiro && (
+                <>
+                  <Link to="/financeiro" className="placar aco-escovado block">
+                    <div className="placar-rotulo">Recebido no mês</div>
+                    <div className="placar-valor text-orange-400">{formatarMoeda(r.recebido ?? 0)}</div>
+                  </Link>
+                  <Link to="/financeiro" className="placar aco-escovado block">
+                    <div className="placar-rotulo">A receber</div>
+                    <div className="placar-valor text-gray-800">{formatarMoeda(r.aReceber ?? 0)}</div>
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>
