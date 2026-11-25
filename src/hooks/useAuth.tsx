@@ -50,18 +50,11 @@ async function buscarPerfil(session: Session): Promise<Perfil | null> {
 
   let { data } = await ler()
 
-  // Primeiro login após cadastro: cria a oficina (dono) ou entra com o código (mecânico)
+  // Primeiro login do mecânico: vincula à oficina pelo código. Donos são provisionados pela administração.
   if (!data) {
     const meta = session.user.user_metadata ?? {}
     if (meta.codigo_oficina) {
-      await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
-      ;({ data } = await ler())
-    } else if (meta.oficina_nome) {
-      const r = await supabase.rpc('criar_oficina', {
-        p_nome: meta.oficina_nome,
-        p_telefone: meta.telefone ?? '',
-        p_usuario_nome: meta.nome ?? 'Dono',
-      })
+      const r = await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
       erroCriacao = r.error?.message ?? ''
       ;({ data } = await ler())
     }

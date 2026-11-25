@@ -19,6 +19,7 @@ import Lembretes from './pages/Lembretes'
 import Financeiro from './pages/Financeiro'
 import RecursoPlano from './components/RecursoPlano'
 import SitePublico from './pages/SitePublico'
+import Contratacao from './pages/Contratacao'
 
 function Rotas() {
   const { session, perfil, carregando, recuperacao } = useAuth()
@@ -64,7 +65,7 @@ function Rotas() {
   }
 
   if (!perfil) {
-    return <div className="p-8 text-gray-600">Não foi possível carregar sua oficina. Saia e entre novamente.{erroCriacao && <p className="mt-2 font-semibold text-red-600">{erroCriacao}</p>}</div>
+    return <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center text-gray-700"><div className="max-w-md"><h1 className="text-xl font-bold">Acesso ainda não vinculado a uma oficina</h1><p className="mt-2 text-sm">Se você acabou de contratar, aguarde a equipe concluir o cadastro. Depois, saia e entre novamente.</p>{erroCriacao && <p className="mt-3 text-sm font-semibold text-red-600">{erroCriacao}</p>}<button onClick={() => void supabase.auth.signOut()} className="mt-5 rounded-lg bg-orange-500 px-5 py-2 font-semibold text-black">Sair</button></div></div>
   }
 
   return (
@@ -91,6 +92,7 @@ export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Routes>
+        <Route path="/contratar" element={<Contratacao />} />
         <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
         <Route
           path="*"

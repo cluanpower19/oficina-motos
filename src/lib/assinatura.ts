@@ -12,7 +12,7 @@ export function calcularAssinatura(status: string): Assinatura {
 
 // Opcional: VITE_SUPORTE_WHATSAPP=55DDDNUMERO no .env (contato para pagar/renovar)
 export function linkSuporte(oficina: string): string | null {
-  const n = (import.meta.env.VITE_SUPORTE_WHATSAPP as string | undefined)?.replace(/\\D/g, '')
+  const n = (import.meta.env.VITE_SUPORTE_WHATSAPP as string | undefined)?.replace(/\D/g, '')
   if (!n) return null
   return `https://wa.me/${n}?text=${encodeURIComponent(`Olá! Quero ativar/renovar a assinatura da oficina ${oficina}.`)}`
 }

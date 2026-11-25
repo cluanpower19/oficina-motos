@@ -8,15 +8,13 @@ const campo = 'campo'
 const urlRedirecionamentoAuth = () => import.meta.env.MODE === 'test' ? window.location.origin : urlSite()
 
 export default function Login({ redefinir = false }: { redefinir?: boolean } = {}) {
-  const [modo, setModo] = useState<'entrar' | 'cadastrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : new URLSearchParams(window.location.search).get('cadastro') === '1' ? 'cadastrar' : 'entrar')
+  const [modo, setModo] = useState<'entrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
   const [codigo, setCodigo] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [senhaNova, setSenhaNova] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
   const [nome, setNome] = useState('')
-  const [oficinaNome, setOficinaNome] = useState('')
-  const [telefone, setTelefone] = useState('')
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -59,16 +57,13 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
       } else if (modo === 'entrar') {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
         if (error) setErro('E-mail ou senha incorretos. Se acabou de se cadastrar, confirme seu e-mail primeiro.')
-      } else {
+      } else if (modo === 'mecanico') {
         const { data, error } = await supabase.auth.signUp({
           email,
           password: senha,
           options: {
             emailRedirectTo: urlRedirecionamentoAuth(),
-            data:
-              modo === 'mecanico'
-                ? { nome, codigo_oficina: codigo.trim().toLowerCase() }
-                : { nome, oficina_nome: oficinaNome, telefone: telefone.replace(/\\D/g, '') },
+            data: { nome, codigo_oficina: codigo.trim().toLowerCase() },
           },
         })
         if (error) setErro(error.message)
@@ -88,7 +83,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
     e.currentTarget.style.setProperty('--my', ((e.clientY - r.top) / r.height - 0.5).toFixed(3))
   }
 
-  const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'mecanico' ? 'Entrar como mecânico' : modo === 'cadastrar' ? 'Criar minha oficina' : modo === 'recuperar' ? 'Recuperar senha' : 'Criar nova senha'
+  const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'mecanico' ? 'Entrar como mecânico' : modo === 'recuperar' ? 'Recuperar senha' : 'Criar nova senha'
 
   return (
     <div className="cena">
@@ -130,12 +125,6 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
             </p>
           )}
 
-          {modo === 'cadastrar' && (
-            <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm leading-6 text-orange-950">
-              <strong>Cadastro inicial da oficina</strong>
-              <p>Depois de confirmar seu e-mail, a equipe conclui a ativação da assinatura contratada.</p>
-            </div>
-          )}
 
           {modo === 'mecanico' && (
             <>
@@ -143,17 +132,10 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
               <input className={campo} placeholder="Código da oficina (peça ao dono)" value={codigo} onChange={(e) => setCodigo(e.target.value)} required />
             </>
           )}
-          {modo === 'cadastrar' && (
-            <>
-              <input className={campo} placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
-              <input className={campo} placeholder="Nome da oficina" value={oficinaNome} onChange={(e) => setOficinaNome(e.target.value)} required />
-              <input className={campo} placeholder="Telefone com DDD" inputMode="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
-            </>
-          )}
           {modo !== 'redefinir' && (
             <input className={campo} type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
           )}
-          {(modo === 'entrar' || modo === 'cadastrar' || modo === 'mecanico') && (
+          {(modo === 'entrar' || modo === 'mecanico') && (
             <input className={campo} type="password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
           )}
           {modo === 'redefinir' && (
@@ -167,7 +149,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {aviso && <p className="text-sm text-green-700">{aviso}</p>}
 
           <button disabled={enviando} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
-            {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Entrar na oficina' : modo === 'cadastrar' ? 'Criar minha oficina' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
+            {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Criar acesso de mecânico' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
           </button>
 
           {modo === 'entrar' && (
@@ -175,12 +157,12 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
               <button type="button" onClick={() => { setModo('recuperar'); setErro(''); setAviso('') }} className="link">
                 Esqueci minha senha
               </button>
-              <button type="button" onClick={() => { setModo('cadastrar'); setErro(''); setAviso('') }} className="link">
-                Quero cadastrar minha oficina
-              </button>
+              <a href="https://wa.me/5579998424306?text=Ol%C3%A1!%20Quero%20solicitar%20a%20contrata%C3%A7%C3%A3o%20do%20Of%C3%ADcio%20do%20Motor." target="_blank" rel="noopener noreferrer" className="link">
+                Ainda não contratou? Solicitar contratação
+              </a>
             </>
           )}
-          {(modo === 'cadastrar' || modo === 'mecanico' || modo === 'recuperar' || modo === 'redefinir') && (
+          {(modo === 'mecanico' || modo === 'recuperar' || modo === 'redefinir') && (
             <button type="button" onClick={() => { setModo('entrar'); setErro(''); setAviso('') }} className="link">
               Voltar para entrar
             </button>
