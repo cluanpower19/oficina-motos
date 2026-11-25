@@ -20,13 +20,15 @@ import Financeiro from './pages/Financeiro'
 import RecursoPlano from './components/RecursoPlano'
 import SitePublico from './pages/SitePublico'
 import Contratacao from './pages/Contratacao'
+import CadastroOficina from './pages/CadastroOficina'
 
 function Rotas() {
-  const { session, perfil, carregando, recuperacao } = useAuth()
+  const { session, perfil, carregando, recuperacao, recarregarPerfil } = useAuth()
   const location = useLocation()
   const [ehAdmin, setEhAdmin] = useState(false)
   const [verificandoAdmin, setVerificandoAdmin] = useState(true)
-  const planoCompleto = perfil?.oficina.plano === 'completo' && perfil.oficina.status_assinatura === 'ativo'
+  const [tentandoPerfil, setTentandoPerfil] = useState(false)
+  const planoCompleto = perfil?.oficina.plano === 'completo'
 
   useEffect(() => {
     let ativo = true
@@ -48,7 +50,7 @@ function Rotas() {
   if (recuperacao || window.location.hash.includes('type=recovery')) return <Login redefinir />
 
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
-  if (!session) return location.pathname === '/' ? <SitePublico /> : <Login />
+  if (!session) return location.pathname === '/' ? <SitePublico /> : location.pathname === '/cadastro' ? <CadastroOficina /> : <Login />
 
   if (/\/admin(?:\/(?:solicitacoes|recursos))?\/?$/.test(location.pathname)) {
     if (verificandoAdmin) return <div className="min-h-screen bg-[#0b1016] p-8 text-gray-300">Verificando acesso administrativo...</div>
@@ -65,7 +67,19 @@ function Rotas() {
   }
 
   if (!perfil) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center text-gray-700"><div className="max-w-md"><h1 className="text-xl font-bold">Acesso ainda não vinculado a uma oficina</h1><p className="mt-2 text-sm">Se você acabou de contratar, aguarde a equipe concluir o cadastro. Depois, saia e entre novamente.</p>{erroCriacao && <p className="mt-3 text-sm font-semibold text-red-600">{erroCriacao}</p>}<button onClick={() => void supabase.auth.signOut()} className="mt-5 rounded-lg bg-orange-500 px-5 py-2 font-semibold text-black">Sair</button></div></div>
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center text-gray-700">
+        <div className="max-w-md">
+          <h1 className="text-xl font-bold">Cadastro da oficina não concluído</h1>
+          <p className="mt-2 text-sm">Não foi possível criar ou vincular uma oficina à sua conta. Se acabou de se cadastrar, confirme seu e-mail e entre novamente. Se já confirmou, confira a mensagem abaixo.</p>
+          {erroCriacao && <p className="mt-3 text-sm font-semibold text-red-600">{erroCriacao}</p>}
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <button disabled={tentandoPerfil} onClick={async () => { setTentandoPerfil(true); try { await recarregarPerfil() } finally { setTentandoPerfil(false) } }} className="rounded-lg bg-orange-500 px-5 py-2 font-semibold text-black disabled:opacity-60">{tentandoPerfil ? 'Verificando...' : 'Tentar novamente'}</button>
+            <button onClick={() => void supabase.auth.signOut()} className="rounded-lg border border-gray-300 px-5 py-2 font-semibold text-gray-700">Sair</button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -93,6 +107,7 @@ export default function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Routes>
         <Route path="/contratar" element={<Contratacao />} />
+        <Route path="/cadastro" element={<CadastroOficina />} />
         <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
         <Route
           path="*"

@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { soDigitos } from '../lib/formatos'
 import { reduzirImagem } from '../lib/imagem'
-import { calcularAssinatura, linkSuporte } from '../lib/assinatura'
+import { calcularAssinatura, dataTeste, linkSuporte } from '../lib/assinatura'
 import { MODELO_LEMBRETE, MODELO_ORCAMENTO, MODELO_PRONTA } from '../lib/whatsapp'
 
 const campo =
@@ -17,7 +17,7 @@ export default function Configuracoes() {
   const { perfil, recarregarPerfil } = useAuth()
   const of = perfil!.oficina
   const dono = perfil!.papel === 'dono'
-  const assin = calcularAssinatura(of.status_assinatura)
+  const assin = calcularAssinatura(of.status_assinatura, of.teste_ate)
   const suporte = linkSuporte(of.nome)
 
   const [nome, setNome] = useState(of.nome)
@@ -176,9 +176,11 @@ export default function Configuracoes() {
           Plano {of.plano === 'completo' ? 'Completo' : 'Básico'}:{' '}
           <strong>
             {assin.status === 'ativo' && 'ativa'}
-            {assin.status === 'bloqueado' && 'bloqueada'}
+            {assin.status === 'teste' && 'em teste grátis — ' + assin.diasRestantes + ' dia(s) restante(s)'}
+            {assin.status === 'bloqueado' && (of.status_assinatura === 'teste' ? 'teste encerrado' : 'bloqueada')}
           </strong>
         </p>
+        {assin.status === 'teste' && <p className="text-sm text-gray-600">Seu teste termina em {dataTeste(of.teste_ate)}. Não haverá cobrança automática.</p>}
         {suporte && (
           <a href={suporte} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-green-600 px-4 py-3 font-semibold text-white">
             Ativar ou renovar pelo WhatsApp

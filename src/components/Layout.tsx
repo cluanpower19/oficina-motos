@@ -34,12 +34,16 @@ const todos = [
 
 export default function Layout() {
   const { perfil, sair } = useAuth()
-  const assin = calcularAssinatura(perfil!.oficina.status_assinatura)
+  const assin = calcularAssinatura(perfil!.oficina.status_assinatura, perfil!.oficina.teste_ate)
   const suporte = linkSuporte(perfil!.oficina.nome)
-  const faixa = !assin.ativa
-    ? 'Assinatura inativa: você pode consultar os dados, mas não pode salvar alterações.'
-    : ''
-  const planoCompleto = perfil!.oficina.plano === 'completo' && perfil!.oficina.status_assinatura === 'ativo'
+  const faixa = assin.status === 'teste'
+    ? 'Teste grátis: faltam ' + assin.diasRestantes + ' dia(s). Aproveite os recursos do seu plano.'
+    : !assin.ativa
+      ? (perfil!.oficina.status_assinatura === 'teste'
+          ? 'Seu teste grátis terminou. Você pode consultar os dados, mas não pode salvar alterações.'
+          : 'Assinatura inativa: você pode consultar os dados, mas não pode salvar alterações.')
+      : ''
+  const planoCompleto = perfil!.oficina.plano === 'completo'
   const itens = todos.filter((i) => (i.to !== '/financeiro' || perfil?.papel === 'dono') && (planoCompleto || !['/financeiro', '/lembretes'].includes(i.to)))
 
   return (
@@ -66,7 +70,7 @@ export default function Layout() {
         </nav>
         <div className="rodape-menu">
           <span className="lampada" />
-          Oficina aberta
+          {assin.ativa ? 'Oficina aberta' : 'Somente consulta'}
         </div>
         <button onClick={sair} className="item-menu m-3 mt-0">
           Sair

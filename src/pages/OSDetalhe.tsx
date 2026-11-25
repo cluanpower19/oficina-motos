@@ -33,7 +33,7 @@ const vazio = { tipo: 'servico' as 'servico' | 'peca', catId: '', descricao: '',
 
 export default function OSDetalhe() {
   const { perfil } = useAuth()
-  const completo = perfil?.oficina.plano === 'completo' && perfil.oficina.status_assinatura === 'ativo'
+  const completo = perfil?.oficina.plano === 'completo'
   const { id } = useParams()
   const [os, setOs] = useState<OS | null>(null)
   const [itens, setItens] = useState<Item[]>([])

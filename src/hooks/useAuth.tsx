@@ -40,7 +40,25 @@ const Ctx = createContext<AuthCtx>({
 
 export let erroCriacao = ''
 
-async function buscarPerfil(session: Session): Promise<Perfil | null> {
+// O SDK pode emitir INITIAL_SESSION e SIGNED_IN quase simultaneamente.
+// Compartilha a mesma operação para impedir duas tentativas concorrentes de trial.
+const buscasPerfil = new Map<string, Promise<Perfil | null>>()
+
+function buscarPerfil(session: Session): Promise<Perfil | null> {
+  const id = session.user.id
+  const existente = buscasPerfil.get(id)
+  if (existente) return existente
+  const busca = buscarPerfilUnico(session)
+  buscasPerfil.set(id, busca)
+  const limpar = () => {
+    if (buscasPerfil.get(id) === busca) buscasPerfil.delete(id)
+  }
+  void busca.then(limpar, limpar)
+  return busca
+}
+
+async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
+  erroCriacao = ''
   const ler = () =>
     supabase
       .from('usuarios')
@@ -50,10 +68,19 @@ async function buscarPerfil(session: Session): Promise<Perfil | null> {
 
   let { data } = await ler()
 
-  // Primeiro login do mecânico: vincula à oficina pelo código. Donos são provisionados pela administração.
+  // Primeiro acesso do dono inicia o trial; mecânicos entram pelo código de convite.
   if (!data) {
     const meta = session.user.user_metadata ?? {}
-    if (meta.codigo_oficina) {
+    if (meta.tipo_cadastro === 'oficina') {
+      const r = await supabase.rpc('iniciar_trial_oficina', {
+        p_nome: meta.nome_oficina,
+        p_telefone: meta.telefone,
+        p_usuario_nome: meta.nome,
+        p_plano: meta.plano,
+      })
+      erroCriacao = r.error?.message ?? ''
+      if (!r.error) ({ data } = await ler())
+    } else if (meta.codigo_oficina) {
       const r = await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
       erroCriacao = r.error?.message ?? ''
       ;({ data } = await ler())
@@ -95,8 +122,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCarregando(false)
         return
       }
-      setPerfil(s ? await buscarPerfil(s) : null)
-      setCarregando(false)
+      try {
+        setPerfil(s ? await buscarPerfil(s) : null)
+      } catch (error) {
+        erroCriacao = error instanceof Error ? error.message : 'Falha de comunicação ao carregar sua oficina.'
+        setPerfil(null)
+      } finally {
+        setCarregando(false)
+      }
     }
     const { data: sub } = supabase.auth.onAuthStateChange((evento, s) => {
       setTimeout(() => { void aplicar(s, evento) }, 0)
@@ -112,7 +145,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const recarregarPerfil = useCallback(async () => {
-    if (session) setPerfil(await buscarPerfil(session))
+    if (!session) return
+    setCarregando(true)
+    try {
+      setPerfil(await buscarPerfil(session))
+    } catch (error) {
+      erroCriacao = error instanceof Error ? error.message : 'Falha de comunicação ao carregar sua oficina.'
+      setPerfil(null)
+    } finally {
+      setCarregando(false)
+    }
   }, [session])
 
   return <Ctx.Provider value={{ session, perfil, carregando, recuperacao, sair, recarregarPerfil }}>{children}</Ctx.Provider>

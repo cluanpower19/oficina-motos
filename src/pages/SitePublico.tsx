@@ -18,7 +18,7 @@ const duvidas = [
   ['O cliente precisa criar uma conta para ver o orçamento?', 'Não. Você envia um link e o cliente pode consultar os itens, ver o total e aprovar ou recusar o orçamento sem criar uma conta.'],
   ['Preciso instalar no computador?', 'Não precisa instalar no computador. O sistema abre pelo navegador. Também existe aplicativo Android para usar no celular.'],
   ['Posso cadastrar meus mecânicos?', 'Sim. O dono pode cadastrar a equipe para acessar a oficina usando o código de convite. A cobrança é por oficina, não por funcionário.'],
-  ['Como começo a usar?', 'Escolha um plano e solicite a contratação. Você recebe o contrato para ler e formalizar antes de pagar via PIX. Depois da confirmação do pagamento, a equipe orienta o cadastro e a ativação da oficina.'],
+  ['Como começo a usar?', 'Escolha Básico ou Completo, crie sua conta e confirme seu e-mail. No primeiro acesso confirmado, sua oficina é criada e começam os sete dias grátis, sem cartão ou pagamento antecipado.'],
   ['Posso mudar de plano depois?', 'Pode solicitar a mudança pelo módulo Suporte e melhorias, dentro do sistema. A equipe orienta sobre os recursos e as condições do novo plano.'],
 ]
 
@@ -130,11 +130,11 @@ export default function SitePublico() {
           <div className="sp-section-kicker"><span>06</span> ESCOLHA O QUE FAZ SENTIDO</div>
           <div className="sp-section-heading"><h2>Um plano para o momento<br /><em>da sua oficina.</em></h2><p>Você paga por oficina e pode incluir sua equipe, sem cobrança por funcionário.</p></div>
           <div className="sp-plan-grid">
-            <article className="sp-plan"><div className="sp-plan-label">ESSENCIAL</div><h3>Básico</h3><p className="sp-plan-price">R$ 49,90 <small>/ mês</small></p><p className="sp-plan-desc">Para colocar os atendimentos e serviços em ordem.</p><ul><li>Cadastro de clientes e motos</li><li>Ordens de serviço</li><li>Orçamentos por link</li><li>Catálogo de serviços</li><li>Acesso para equipe incluído</li></ul><Link to="/contratar?plano=basico" className="sp-button sp-button-outline">Solicitar contratação <Seta /></Link></article>
-            <article className="sp-plan sp-plan-featured"><div className="sp-plan-label">GESTÃO AMPLIADA</div><h3>Completo</h3><p className="sp-plan-price">R$ 79,90 <small>/ mês</small></p><p className="sp-plan-desc">Para quem quer cuidar também das peças e do financeiro.</p><ul><li>Tudo do plano Básico</li><li>Controle de peças e estoque</li><li>Lembretes de manutenção</li><li>Controle financeiro</li><li>Fotos nas ordens de serviço</li><li>Acesso para equipe incluído</li></ul><Link to="/contratar?plano=completo" className="sp-button sp-button-primary">Solicitar contratação <Seta /></Link></article>
+            <article className="sp-plan"><div className="sp-plan-label">ESSENCIAL</div><h3>Básico</h3><p className="sp-plan-price">R$ 49,90 <small>/ mês</small></p><p className="sp-plan-desc">Para colocar os atendimentos e serviços em ordem.</p><ul><li>Cadastro de clientes e motos</li><li>Ordens de serviço</li><li>Orçamentos por link</li><li>Catálogo de serviços</li><li>Acesso para equipe incluído</li></ul><Link to="/cadastro?plano=basico" className="sp-button sp-button-outline">Começar 7 dias grátis <Seta /></Link></article>
+            <article className="sp-plan sp-plan-featured"><div className="sp-plan-label">GESTÃO AMPLIADA</div><h3>Completo</h3><p className="sp-plan-price">R$ 79,90 <small>/ mês</small></p><p className="sp-plan-desc">Para quem quer cuidar também das peças e do financeiro.</p><ul><li>Tudo do plano Básico</li><li>Controle de peças e estoque</li><li>Lembretes de manutenção</li><li>Controle financeiro</li><li>Fotos nas ordens de serviço</li><li>Acesso para equipe incluído</li></ul><Link to="/cadastro?plano=completo" className="sp-button sp-button-primary">Começar 7 dias grátis <Seta /></Link></article>
           </div>
-          <p className="sp-pricing-note">Valores mensais via PIX. Vencimento na data de ativação, com cinco dias corridos de tolerância. Sem fidelidade ou multa de cancelamento. O contrato é enviado para leitura e formalização antes do pagamento.</p>
-          <div className="sp-start-panel"><div><span>PRONTO PARA DAR O PRÓXIMO PASSO?</span><h3>Receba o contrato antes de pagar.</h3><p>Escolha seu plano, confira as condições e formalize a contratação. O cadastro da oficina é orientado após a confirmação do PIX.</p></div><Link to="/contratar" className="sp-button sp-button-primary">Solicitar contratação <Seta /></Link></div>
+          <p className="sp-pricing-note">Experimente por sete dias sem cartão e sem pagamento antecipado. O teste começa após a confirmação do e-mail e o primeiro acesso. Depois, você decide se deseja ativar a assinatura mensal após a confirmação do pagamento.</p>
+          <div className="sp-start-panel"><div><span>PRONTO PARA COMEÇAR?</span><h3>Experimente por 7 dias grátis.</h3><p>Escolha seu plano, confirme seu e-mail e use os recursos sem cartão ou pagamento antecipado.</p></div><Link to="/cadastro" className="sp-button sp-button-primary">Criar minha conta <Seta /></Link></div>
         </section>
 
         <section id="duvidas" className="sp-faq">
@@ -145,7 +145,7 @@ export default function SitePublico() {
         <section className="sp-final">
           <img src="/img/moto-cafe.jpg" alt="" loading="lazy" />
           <div className="sp-final-overlay" />
-          <div className="sp-final-content"><div className="sp-section-kicker"><span>08</span> VAMOS COMEÇAR?</div><h2>Você cuida das motos.<br /><em>A gente ajuda com a organização.</em></h2><p>Experimente a demonstração, escolha seu plano e receba o contrato para conferir antes de qualquer pagamento.</p><div className="sp-hero-actions"><Link to="/contratar" className="sp-button sp-button-primary">Solicitar contratação <Seta /></Link><a href="#tour" className="sp-button sp-button-ghost">Rever o tour guiado</a><Link to="/entrar" className="sp-button sp-button-ghost">Já sou cliente · Entrar <Seta /></Link></div></div>
+          <div className="sp-final-content"><div className="sp-section-kicker"><span>08</span> VAMOS COMEÇAR?</div><h2>Você cuida das motos.<br /><em>A gente ajuda com a organização.</em></h2><p>Experimente o sistema por sete dias, escolha seu plano e crie sua conta sem cartão ou pagamento antecipado.</p><div className="sp-hero-actions"><Link to="/cadastro" className="sp-button sp-button-primary">Começar grátis <Seta /></Link><a href="#tour" className="sp-button sp-button-ghost">Rever o tour guiado</a><Link to="/entrar" className="sp-button sp-button-ghost">Já sou cliente · Entrar <Seta /></Link></div></div>
         </section>
       </main>
 

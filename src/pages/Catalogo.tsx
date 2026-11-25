@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export default function Catalogo() {
   const { perfil } = useAuth()
-  const completo = perfil?.oficina.plano === 'completo' && perfil.oficina.status_assinatura === 'ativo'
+  const completo = perfil?.oficina.plano === 'completo'
   const [aba, setAba] = useState<'servicos' | 'pecas'>('servicos')
   const tab = (ativo: boolean) =>
     `flex-1 rounded-lg px-4 py-3 text-center font-semibold ${ativo ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 shadow'}`

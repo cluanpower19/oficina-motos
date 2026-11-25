@@ -3,7 +3,6 @@ import { linkWhatsAppComercial } from '../lib/comercial'
 import './contratacao.css'
 
 type Plano = 'basico' | 'completo'
-
 const planos: Record<Plano, { nome: string; preco: string; descricao: string }> = {
   basico: { nome: 'Básico', preco: 'R$ 49,90', descricao: 'Clientes, motocicletas, ordens de serviço e orçamentos por link.' },
   completo: { nome: 'Completo', preco: 'R$ 79,90', descricao: 'Tudo do Básico, mais estoque, lembretes e controle financeiro.' },
@@ -13,75 +12,62 @@ export default function Contratacao() {
   const [params] = useSearchParams()
   const plano: Plano = params.get('plano') === 'completo' ? 'completo' : 'basico'
   const escolhido = planos[plano]
-  const mensagem = [
-    'Olá! Quero solicitar a contratação do Ofício do Motor.',
-    `Plano escolhido: ${escolhido.nome} (${escolhido.preco}/mês).`,
-    'Gostaria de receber o contrato para leitura e formalização, além das instruções para pagamento via PIX.',
-    'Se necessário, podem me orientar sobre os dados para preencher o contrato.'
-  ].join('\n')
-  const contato = linkWhatsAppComercial(mensagem)
+  const contato = linkWhatsAppComercial('Olá! Tenho dúvidas sobre o plano ' + escolhido.nome + ' do Ofício do Motor.')
 
   return (
     <main className="sp-contract">
       <header className="sp-contract-header">
         <Link to="/" className="sp-contract-brand" aria-label="Ofício do Motor — página inicial">
-          <span className="sp-contract-mark">OM<span>·</span></span>
+          <span className="sp-contract-mark">OM<span>✦</span></span>
           <span><strong>OFÍCIO DO MOTOR</strong><small>GESTÃO PARA OFICINAS DE MOTOS</small></span>
         </Link>
-        <Link to="/entrar" className="sp-contract-login">Já sou cliente · Entrar ↗</Link>
+        <Link to="/entrar" className="sp-contract-login">Já sou cliente — Entrar</Link>
       </header>
-
       <section className="sp-contract-hero">
-        <div className="sp-contract-kicker"><span /> CONTRATAÇÃO COM TRANSPARÊNCIA</div>
-        <h1>Um bom acordo<br /><em>começa com clareza.</em></h1>
-        <p>Escolha seu plano, receba o contrato para ler com calma e conheça todas as condições antes de fazer qualquer pagamento.</p>
+        <div className="sp-contract-kicker"><span /> TESTE GRÁTIS POR 7 DIAS</div>
+        <h1>Conheça o sistema<br /><em>na rotina da sua oficina.</em></h1>
+        <p>Escolha seu plano, crie sua conta e experimente os recursos por sete dias. Sem cartão e sem pagamento antecipado.</p>
       </section>
-
       <section className="sp-contract-content">
         <div className="sp-contract-plan">
           <div className="sp-contract-plan-copy">
-            <span className="sp-contract-label">PLANO SELECIONADO</span>
+            <span className="sp-contract-label">PLANO ESCOLHIDO</span>
             <h2>{escolhido.nome}</h2>
             <p>{escolhido.descricao}</p>
-            <div className="sp-contract-price">{escolhido.preco}<small> / mês</small></div>
+            <div className="sp-contract-price">{escolhido.preco}<small> / mês após o teste</small></div>
           </div>
           <div className="sp-contract-switch" aria-label="Escolher outro plano">
             <span>Comparar planos</span>
             <Link to="/contratar?plano=basico" aria-current={plano === 'basico' ? 'page' : undefined} className={plano === 'basico' ? 'selected' : ''}>Básico</Link>
             <Link to="/contratar?plano=completo" aria-current={plano === 'completo' ? 'page' : undefined} className={plano === 'completo' ? 'selected' : ''}>Completo</Link>
           </div>
-          <a className="sp-contract-cta" href={contato} target="_blank" rel="noopener noreferrer">Solicitar contrato e instruções do PIX <span>↗</span></a>
-          <small className="sp-contract-contact">Atendimento comercial pelo WhatsApp: (79) 99842-4306</small>
+          <Link className="sp-contract-cta" to={'/cadastro?plano=' + plano}>Criar conta e começar grátis <span>→</span></Link>
+          <small className="sp-contract-contact">Sem cartão, sem cobrança antecipada e sem compromisso.</small>
         </div>
-
         <div className="sp-contract-terms">
-          <div className="sp-contract-section-title"><span>01 / CONDIÇÕES</span><h2>O que você precisa saber.</h2></div>
+          <div className="sp-contract-section-title"><span>01 / COMO FUNCIONA</span><h2>Sete dias para experimentar.</h2></div>
           <div className="sp-contract-term-grid">
-            <article><b>Pagamento</b><p>Mensal, via PIX. A equipe confirma os dados e encaminha as instruções de pagamento após a formalização do contrato.</p></article>
-            <article><b>Vencimento</b><p>Na mesma data da ativação em cada mês. Quando a data não existir em determinado mês, o vencimento será no último dia daquele mês.</p></article>
-            <article><b>Prazo de tolerância</b><p>São concedidos cinco dias corridos após o vencimento. Depois desse prazo, o acesso poderá ser suspenso temporariamente para novas alterações, mantendo a consulta dos dados até a confirmação do pagamento.</p></article>
-            <article><b>Cancelamento</b><p>Sem fidelidade e sem multa de cancelamento. A solicitação deve ser feita antes do próximo vencimento para evitar a renovação do período seguinte.</p></article>
-            <article><b>Ativação</b><p>Após o aceite do contrato e a confirmação do PIX, a equipe orienta a criação do cadastro e a liberação da oficina.</p></article>
-            <article><b>Cadastro após a contratação</b><p>O cadastro da oficina é iniciado depois que o contrato estiver formalizado e o pagamento confirmado. A equipe orienta os próximos passos.</p></article>
+            <article><b>Início do teste</b><p>O prazo começa depois que você confirma o e-mail e entra pela primeira vez no sistema.</p></article>
+            <article><b>Sem pagamento antecipado</b><p>Não pedimos cartão, PIX ou dados bancários para criar a conta e experimentar.</p></article>
+            <article><b>Recursos do plano</b><p>Durante o teste, você usa os recursos do plano escolhido: Básico ou Completo.</p></article>
+            <article><b>Depois dos sete dias</b><p>Sem ativação de uma assinatura paga, novas inclusões e alterações ficam suspensas. Seus dados continuam disponíveis para consulta.</p></article>
+            <article><b>Pagamento</b><p>O plano mensal custa {escolhido.preco}. A ativação paga ocorre após a confirmação do pagamento.</p></article>
+            <article><b>Cancelamento</b><p>O teste não gera cobrança automática. Você decide se deseja continuar depois de conhecer o sistema.</p></article>
           </div>
         </div>
-
         <div className="sp-contract-steps">
-          <div className="sp-contract-section-title"><span>02 / ETAPAS</span><h2>Da escolha à primeira entrada.</h2></div>
+          <div className="sp-contract-section-title"><span>02 / PRIMEIROS PASSOS</span><h2>Da conta ao primeiro atendimento.</h2></div>
           <ol>
-            <li><b>Escolha o plano</b><span>Você já selecionou uma opção nesta página.</span></li>
-            <li><b>Receba e confira o contrato</b><span>A identificação do prestador, seu plano, os valores e as regras estarão descritos no documento.</span></li>
-            <li><b>Formalize e pague via PIX</b><span>O pagamento só é solicitado depois que você puder ler e aceitar as condições.</span></li>
-            <li><b>Faça o cadastro e comece</b><span>Com o pagamento confirmado, a equipe orienta a criação da conta e a ativação da oficina.</span></li>
+            <li><b>Escolha seu plano</b><span>Você já selecionou {escolhido.nome}; pode trocar antes de criar a conta.</span></li>
+            <li><b>Cadastre seus dados</b><span>Informe oficina, responsável, telefone, e-mail e senha.</span></li>
+            <li><b>Confirme seu e-mail</b><span>Abra o link enviado para seu endereço. O teste ainda não começa antes disso.</span></li>
+            <li><b>Entre e experimente</b><span>No primeiro acesso confirmado, a oficina é criada e os sete dias começam.</span></li>
           </ol>
         </div>
-
-        <aside className="sp-contract-notice">
-          <strong>Sem cobrança surpresa.</strong> Esta solicitação abre uma conversa com o atendimento comercial. Ela não cria uma conta, não registra uma assinatura e não realiza pagamento. O contrato será disponibilizado para sua leitura e formalização antes de qualquer cobrança.
-        </aside>
+        <aside className="sp-contract-notice"><strong>Sem cobrança surpresa.</strong> O cadastro inicia somente o teste grátis. Nenhum pagamento é solicitado nesta etapa. Se quiser conversar com a equipe antes de começar, <a href={contato} target="_blank" rel="noopener noreferrer">fale com o atendimento</a>.</aside>
         <div className="sp-contract-bottom">
           <Link to="/" className="sp-contract-back">← Voltar ao site</Link>
-          <a href={contato} target="_blank" rel="noopener noreferrer" className="sp-contract-cta">Continuar pelo WhatsApp <span>↗</span></a>
+          <Link to={'/cadastro?plano=' + plano} className="sp-contract-cta">Começar teste grátis <span>→</span></Link>
         </div>
       </section>
       <footer className="sp-contract-footer"><span>OFÍCIO DO MOTOR</span><span>Gestão para oficinas de motocicletas</span><span>© {new Date().getFullYear()}</span></footer>

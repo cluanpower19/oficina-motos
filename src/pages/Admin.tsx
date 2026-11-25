@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import AdminExtras from './AdminExtras'
+import { calcularAssinatura, dataTeste } from '../lib/assinatura'
 
 type Oficina = {
   id: string
@@ -9,6 +10,7 @@ type Oficina = {
   telefone: string | null
   plano: string | null
   status_assinatura: string
+  teste_ate: string
   criado_em: string
 }
 
@@ -49,7 +51,7 @@ export default function Admin() {
       setOficinas(lista)
       setEdicoes(Object.fromEntries(lista.map(o => [o.id, {
         plano: o.plano === 'completo' ? 'completo' : 'basico',
-        status: o.status_assinatura === 'ativo' ? 'ativo' : 'bloqueado',
+        status: o.status_assinatura === 'ativo' || o.status_assinatura === 'teste' ? o.status_assinatura : 'bloqueado',
       }])))
     }
     setCarregando(false)
@@ -61,12 +63,13 @@ export default function Admin() {
     const termo = busca.trim().toLocaleLowerCase('pt-BR')
     return oficinas
       .filter(o => !termo || `${o.nome} ${o.telefone ?? ''}`.toLocaleLowerCase('pt-BR').includes(termo))
-      .filter(o => filtro === 'todas' || (filtro === 'ativas' ? o.status_assinatura === 'ativo' : filtro === 'bloqueadas' ? o.status_assinatura !== 'ativo' : o.plano === filtro))
+      .filter(o => filtro === 'todas' || (filtro === 'ativas' ? o.status_assinatura === 'ativo' : filtro === 'testes' ? calcularAssinatura(o.status_assinatura, o.teste_ate).status === 'teste' : filtro === 'bloqueadas' ? !calcularAssinatura(o.status_assinatura, o.teste_ate).ativa : o.plano === filtro))
       .sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime())
   }, [oficinas, busca, filtro])
 
   const ativas = oficinas.filter(o => o.status_assinatura === 'ativo').length
-  const bloqueadas = oficinas.length - ativas
+  const testes = oficinas.filter(o => calcularAssinatura(o.status_assinatura, o.teste_ate).status === 'teste').length
+  const bloqueadas = oficinas.length - ativas - testes
   const completas = oficinas.filter(o => o.plano === 'completo').length
   const novas = oficinas.filter(o => new Date(o.criado_em) >= inicioDoMes).length
 
@@ -151,10 +154,11 @@ export default function Admin() {
           <p className="text-xs text-slate-500">Dados atualizados ao carregar a lista</p>
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {[
             { label: 'Total de oficinas', value: oficinas.length, detail: 'Cadastros na plataforma', icon: '▦', tone: 'text-slate-100', accent: 'bg-slate-400/10 text-slate-300' },
             { label: 'Acessos ativos', value: ativas, detail: 'Podem utilizar o sistema', icon: '✓', tone: 'text-emerald-300', accent: 'bg-emerald-400/10 text-emerald-300' },
+            { label: 'Em teste grátis', value: testes, detail: 'Dentro dos sete dias', icon: '◷', tone: 'text-sky-300', accent: 'bg-sky-400/10 text-sky-300' },
             { label: 'Acessos bloqueados', value: bloqueadas, detail: 'Sem acesso liberado', icon: '⊘', tone: 'text-amber-300', accent: 'bg-amber-400/10 text-amber-300' },
             { label: 'Novas neste mês', value: novas, detail: `${completas} no plano Completo`, icon: '↗', tone: 'text-orange-300', accent: 'bg-orange-400/10 text-orange-300' },
           ].map(item => (
@@ -203,7 +207,8 @@ export default function Admin() {
               <select aria-label="Filtrar oficinas" value={filtro} onChange={e => setFiltro(e.target.value)} className="rounded-xl border border-white/10 bg-[#090f17] px-4 py-3 text-sm text-slate-300 outline-none focus:border-orange-400/70">
                 <option value="todas">Todos os cadastros</option>
                 <option value="ativas">Somente ativos</option>
-                <option value="bloqueadas">Bloqueados / sem acesso</option>
+                <option value="testes">Somente em teste</option>
+                <option value="bloqueadas">Bloqueados / teste encerrado</option>
                 <option value="basico">Plano Básico</option>
                 <option value="completo">Plano Completo</option>
               </select>
@@ -225,22 +230,25 @@ export default function Admin() {
             <div className="divide-y divide-white/[0.06]">
               {filtradas.map(oficina => {
                 const edicao = edicoes[oficina.id] ?? { plano: 'basico', status: 'bloqueado' }
-                const ativo = oficina.status_assinatura === 'ativo'
-                const alterado = edicao.plano !== (oficina.plano === 'completo' ? 'completo' : 'basico') || edicao.status !== (ativo ? 'ativo' : 'bloqueado')
+                const assinatura = calcularAssinatura(oficina.status_assinatura, oficina.teste_ate)
+                const ativo = assinatura.status === 'ativo'
+                const emTeste = assinatura.status === 'teste'
+                const statusTexto = ativo ? 'Acesso ativo' : emTeste ? 'Em teste' : oficina.status_assinatura === 'teste' ? 'Teste encerrado' : 'Bloqueado'
+                const alterado = edicao.plano !== (oficina.plano === 'completo' ? 'completo' : 'basico') || edicao.status !== oficina.status_assinatura
                 return (
                   <article key={oficina.id} className="p-5 transition hover:bg-white/[0.015] md:px-6">
                     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(440px,1.15fr)] xl:items-center">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="truncate text-base font-bold text-white">{oficina.nome}</h3>
-                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${ativo ? 'bg-emerald-400/10 text-emerald-300' : 'bg-amber-400/10 text-amber-300'}`}>{ativo ? 'Acesso ativo' : 'Bloqueado'}</span>
+                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${ativo ? 'bg-emerald-400/10 text-emerald-300' : emTeste ? 'bg-sky-400/10 text-sky-300' : 'bg-amber-400/10 text-amber-300'}`}>{statusTexto}</span>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-400">
                           <span>☎ {oficina.telefone || 'Telefone não informado'}</span>
                           <span>▦ Cadastro: {dataCurta(oficina.criado_em)}</span>
                           <span>Plano atual: <strong className="font-semibold text-slate-300">{oficina.plano === 'completo' ? 'Completo' : 'Básico'}</strong></span>
                         </div>
-                        {oficina.status_assinatura === 'teste' && <p className="mt-2 text-xs text-amber-300">Cadastro com status antigo de teste; sem acesso liberado.</p>}
+                        {oficina.status_assinatura === 'teste' && <p className="mt-2 text-xs text-slate-400">{emTeste ? 'Teste grátis até ' : 'Teste encerrado em '}{dataTeste(oficina.teste_ate)}.</p>}
                       </div>
                       <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
                         <label className="block text-xs font-medium text-slate-400">Plano da oficina
@@ -250,7 +258,7 @@ export default function Admin() {
                         </label>
                         <label className="block text-xs font-medium text-slate-400">Permissão de acesso
                           <select value={edicao.status} onChange={e => alterar(oficina, 'status', e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#090f17] px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-orange-400/70">
-                            <option value="ativo">Ativo</option><option value="bloqueado">Bloqueado</option>
+                            <option value="ativo">Ativo</option>{oficina.status_assinatura === 'teste' && <option value="teste">Em teste (automático)</option>}<option value="bloqueado">Bloqueado</option>
                           </select>
                         </label>
                         <button disabled={salvando === oficina.id || !alterado} onClick={() => void atualizar(oficina)} className="rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-[#17130f] shadow-lg shadow-orange-950/20 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-40">

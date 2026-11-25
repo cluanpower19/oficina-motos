@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent, type MouseEvent as MouseReact } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase, supabaseConfigurado } from '../lib/supabase'
 import { Emblema } from '../components/Cenario'
 import { Atmosfera } from '../components/Atmosfera'
@@ -157,9 +158,8 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
               <button type="button" onClick={() => { setModo('recuperar'); setErro(''); setAviso('') }} className="link">
                 Esqueci minha senha
               </button>
-              <a href="https://wa.me/5579998424306?text=Ol%C3%A1!%20Quero%20solicitar%20a%20contrata%C3%A7%C3%A3o%20do%20Of%C3%ADcio%20do%20Motor." target="_blank" rel="noopener noreferrer" className="link">
-                Ainda não contratou? Solicitar contratação
-              </a>
+              <Link to="/cadastro" className="link">Criar conta e experimentar grátis por 7 dias</Link>
+              <a href="https://wa.me/5579998424306?text=Ol%C3%A1!%20Quero%20falar%20sobre%20o%20Of%C3%ADcio%20do%20Motor." target="_blank" rel="noopener noreferrer" className="link">Falar com a equipe</a>
             </>
           )}
           {(modo === 'mecanico' || modo === 'recuperar' || modo === 'redefinir') && (
