@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { linkWhatsAppComercial } from './lib/comercial'
 import { AuthProvider, useAuth, erroCriacao } from './hooks/useAuth'
