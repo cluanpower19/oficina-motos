@@ -1,8 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Turnstile } from '@marsidev/react-turnstile'
 import { supabase } from '../lib/supabase'
+
 import { urlRedirecionamentoAuth } from '../lib/urlSite'
 import './cadastro-oficina.css'
+
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
 
 type Plano = 'basico' | 'completo'
 const campo = 'cadastro-campo w-full rounded-xl px-4 py-3 text-base outline-none transition'
@@ -19,10 +23,20 @@ export default function CadastroOficina() {
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [confirmacao, setConfirmacao] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaErro, setCaptchaErro] = useState('')
 
   async function cadastrar(e: FormEvent) {
     e.preventDefault()
     setErro('')
+    if (!turnstileSiteKey) {
+      setErro('A proteção de segurança do cadastro ainda não foi configurada. Tente novamente mais tarde.')
+      return
+    }
+    if (!captchaToken) {
+      setErro('Conclua a verificação de segurança antes de criar sua conta.')
+      return
+    }
     let digitos = telefone.replace(/\D/g, '')
     if ((digitos.length === 12 || digitos.length === 13) && digitos.startsWith('55')) digitos = digitos.slice(2)
     if (!/^[1-9][1-9]9?\d{8}$/.test(digitos)) {
@@ -40,6 +54,7 @@ export default function CadastroOficina() {
         password: senha,
         options: {
           emailRedirectTo: urlRedirecionamentoAuth(),
+          captchaToken,
           data: {
             tipo_cadastro: 'oficina',
             nome_oficina: oficina.trim(),
@@ -113,7 +128,21 @@ export default function CadastroOficina() {
                 </select>
               </label>
               {erro && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
-              <button disabled={enviando} className="w-full rounded-xl bg-orange-500 px-5 py-3.5 font-bold text-gray-950 transition hover:bg-orange-400 disabled:cursor-wait disabled:opacity-60">
+              <div className="space-y-2">
+                {turnstileSiteKey ? (
+                  <Turnstile
+                    siteKey={turnstileSiteKey}
+                    options={{ language: 'pt-BR', theme: 'light', action: 'cadastro_oficina' }}
+                    onSuccess={token => { setCaptchaToken(token); setCaptchaErro('') }}
+                    onExpire={() => setCaptchaToken('')}
+                    onError={() => { setCaptchaToken(''); setCaptchaErro('Não foi possível validar a verificação. Atualize a página e tente novamente.') }}
+                  />
+                ) : (
+                  <p role="alert" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">A proteção de segurança ainda não foi configurada. O cadastro ficará indisponível até a ativação.</p>
+                )}
+                {captchaErro && <p role="alert" className="text-sm text-red-700">{captchaErro}</p>}
+              </div>
+              <button disabled={enviando || !turnstileSiteKey || !captchaToken} className="w-full rounded-xl bg-orange-500 px-5 py-3.5 font-bold text-gray-950 transition hover:bg-orange-400 disabled:cursor-wait disabled:opacity-60">
                 {enviando ? 'Enviando...' : 'Criar conta e começar 7 dias grátis'}
               </button>
               <p className="text-center text-xs leading-relaxed text-gray-500">Ao continuar, você confirma que os dados informados são verdadeiros. O teste é limitado a um por e-mail e telefone.</p>
