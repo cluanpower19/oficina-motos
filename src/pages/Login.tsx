@@ -232,7 +232,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
                 >
                   Baixar para Windows
                 </a>
-                <a href="/downloads/OficioDoMotor.apk" download className="download-app" aria-label="Baixar aplicativo Ofício do Motor para Android">
+                <a href="/downloads/OficioDoMotor.apk?v=2" download className="download-app" aria-label="Baixar aplicativo Ofício do Motor para Android">
                   Baixar para Android
                 </a>
               </div>
