@@ -72,6 +72,6 @@ export default function DemoInterativa() {
       </div>
       <footer className="sp-live-footer"><span>AMBIENTE DE DEMONSTRAÇÃO · DADOS FICTÍCIOS · SEM INTEGRAÇÃO COM A CONTA REAL</span><button type="button" onClick={reiniciar}>↺ Restaurar dados de exemplo</button></footer>
     </div>
-    <p className="sp-live-after">Gostou do que viu? <a href="#planos">Conheça os planos</a> ou <a href="#tour">faça o tour guiado</a> para entender o fluxo completo.</p>
+    <p className="sp-live-after">Gostou do que viu? <a href="#planos">Conheça os planos</a> ou <a href="/cadastro">comece seu teste grátis por 7 dias</a>.</p>
   </section>
 }
