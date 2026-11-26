@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { linkWhatsAppComercial } from './lib/comercial'
 import { AuthProvider, useAuth, erroCriacao } from './hooks/useAuth'
@@ -53,7 +54,12 @@ function Rotas() {
   if (recuperacao || window.location.hash.includes('type=recovery')) return <Login redefinir />
 
   if (carregando) return <div className="p-8 text-gray-600">Carregando...</div>
-  if (!session) return location.pathname === '/' ? <SitePublico /> : location.pathname === '/cadastro' ? <CadastroOficina /> : <Login />
+  if (!session) {
+    // No APK, a rota inicial deve abrir o login; a página pública fica apenas no navegador.
+    if (location.pathname === '/' && !Capacitor.isNativePlatform()) return <SitePublico />
+    if (location.pathname === '/cadastro') return <CadastroOficina />
+    return <Login />
+  }
 
   if (/\/admin(?:\/(?:solicitacoes|recursos))?\/?$/.test(location.pathname)) {
     if (verificandoAdmin) return <div className="min-h-screen bg-[#0b1016] p-8 text-gray-300">Verificando acesso administrativo...</div>
