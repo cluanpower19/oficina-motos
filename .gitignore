@@ -18,3 +18,6 @@ release/
 *-release-base64.txt
 *.p12
 *.pfx
+
+# Local environment files (never commit)
+.env.*.local

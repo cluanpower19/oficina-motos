@@ -17,6 +17,9 @@ export type Perfil = {
     plano: string
     status_assinatura: string
     teste_ate: string
+    vencimento_assinatura: string | null
+    dia_ciclo: number | null
+    cancelamento_agendado: boolean
   }
 }
 
@@ -62,7 +65,7 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
   const ler = () =>
     supabase
       .from('usuarios')
-      .select('nome, papel, oficinas(id, nome, telefone, endereco, logo_url, msg_orcamento, msg_pronta, msg_lembrete, plano, status_assinatura, teste_ate)')
+      .select('nome, papel, oficinas(id, nome, telefone, endereco, logo_url, msg_orcamento, msg_pronta, msg_lembrete, plano, status_assinatura, teste_ate, vencimento_assinatura, dia_ciclo, cancelamento_agendado)')
       .eq('id', session.user.id)
       .maybeSingle()
 

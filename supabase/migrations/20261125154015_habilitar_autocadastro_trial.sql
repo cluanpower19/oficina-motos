@@ -1,8 +1,10 @@
-﻿-- Cadastro autÃ´nomo de oficinas com trial de sete dias apÃ³s confirmaÃ§Ã£o do e-mail.
+-- Cadastro autÃ´nomo de oficinas com trial de sete dias apÃ³s confirmaÃ§Ã£o do e-mail.
 -- teste_ate representa o Ãºltimo dia inclusivo, usando a data local de SÃ£o Paulo.
 
 create schema if not exists app_private;
+
 revoke all on schema app_private from public, anon, authenticated;
+
 grant usage on schema app_private to authenticated;
 
 create or replace function public.assinatura_ok()
@@ -16,7 +18,9 @@ as $function$
     where o.id = public.minha_oficina_id()
   ), false);
 $function$;
+
 revoke all on function public.assinatura_ok() from public, anon;
+
 grant execute on function public.assinatura_ok() to authenticated;
 
 -- O plano controla a leitura dos recursos; assinatura_ok controla gravaÃ§Ãµes.
@@ -29,7 +33,9 @@ as $function$
     where o.id = public.minha_oficina_id()
   ), false);
 $function$;
+
 revoke all on function public.plano_completo_ok() from public, anon;
+
 grant execute on function public.plano_completo_ok() to authenticated;
 
 create or replace function app_private.iniciar_trial_oficina(
@@ -105,7 +111,9 @@ begin
   return v_oficina_id;
 end;
 $function$;
+
 revoke all on function app_private.iniciar_trial_oficina(text, text, text, text) from public, anon, authenticated;
+
 grant execute on function app_private.iniciar_trial_oficina(text, text, text, text) to authenticated;
 
 create or replace function public.iniciar_trial_oficina(
@@ -115,40 +123,54 @@ returns uuid language sql security invoker set search_path = ''
 as $function$
   select app_private.iniciar_trial_oficina($1, $2, $3, $4);
 $function$;
+
 revoke all on function public.iniciar_trial_oficina(text, text, text, text) from public, anon, authenticated;
+
 grant execute on function public.iniciar_trial_oficina(text, text, text, text) to authenticated;
 
 -- O dono nÃ£o pode alterar a prÃ³pria oficina depois que a assinatura expira.
 drop policy if exists "assinatura: dono atualiza propria oficina" on public.oficinas;
+
 create policy "assinatura: dono atualiza propria oficina"
   on public.oficinas as restrictive for update to authenticated
   using (public.assinatura_ok()) with check (public.assinatura_ok());
 
 -- Arquivos seguem consultÃ¡veis; apenas gravaÃ§Ãµes ficam bloqueadas apÃ³s expiraÃ§Ã£o.
 drop policy if exists "assinatura: logos inserir" on storage.objects;
+
 create policy "assinatura: logos inserir" on storage.objects as restrictive for insert to authenticated
   with check ((bucket_id <> 'logos') or public.assinatura_ok());
+
 drop policy if exists "assinatura: logos atualizar" on storage.objects;
+
 create policy "assinatura: logos atualizar" on storage.objects as restrictive for update to authenticated
   using ((bucket_id <> 'logos') or public.assinatura_ok())
   with check ((bucket_id <> 'logos') or public.assinatura_ok());
+
 drop policy if exists "assinatura: logos excluir" on storage.objects;
+
 create policy "assinatura: logos excluir" on storage.objects as restrictive for delete to authenticated
   using ((bucket_id <> 'logos') or public.assinatura_ok());
 
 drop policy if exists "assinatura: fotos OS inserir" on storage.objects;
+
 create policy "assinatura: fotos OS inserir" on storage.objects as restrictive for insert to authenticated
   with check ((bucket_id <> 'os-fotos') or public.assinatura_ok());
+
 drop policy if exists "assinatura: fotos OS atualizar" on storage.objects;
+
 create policy "assinatura: fotos OS atualizar" on storage.objects as restrictive for update to authenticated
   using ((bucket_id <> 'os-fotos') or public.assinatura_ok())
   with check ((bucket_id <> 'os-fotos') or public.assinatura_ok());
+
 drop policy if exists "assinatura: fotos OS excluir" on storage.objects;
+
 create policy "assinatura: fotos OS excluir" on storage.objects as restrictive for delete to authenticated
   using ((bucket_id <> 'os-fotos') or public.assinatura_ok());
 
 -- O painel administrativo distingue trial vÃ¡lido de teste encerrado.
 drop function if exists public.admin_listar_oficinas();
+
 create function public.admin_listar_oficinas()
 returns table (id uuid, nome text, telefone text, plano text, status_assinatura text, criado_em timestamptz, teste_ate date)
 language plpgsql stable security definer set search_path = ''
@@ -162,7 +184,9 @@ begin
     from public.oficinas o order by o.criado_em desc;
 end;
 $function$;
+
 revoke all on function public.admin_listar_oficinas() from public, anon;
+
 grant execute on function public.admin_listar_oficinas() to authenticated;
 
 create or replace function public.admin_atualizar_oficina(p_oficina_id uuid, p_plano text, p_status text)
@@ -188,11 +212,15 @@ begin
   return true;
 end;
 $function$;
+
 revoke all on function public.admin_atualizar_oficina(uuid, text, text) from public, anon;
+
 grant execute on function public.admin_atualizar_oficina(uuid, text, text) to authenticated;
 
 comment on function public.iniciar_trial_oficina(text, text, text, text) is
   'Cria oficina apÃ³s confirmaÃ§Ã£o de e-mail, reservando e-mail e telefone atomicamente para um Ãºnico trial de sete dias.';
+
 comment on function public.plano_completo_ok() is
   'Verifica apenas a contrataÃ§Ã£o do plano Completo; a validade da assinatura Ã© aplicada separadamente por assinatura_ok().';
+
 NOTIFY pgrst, 'reload schema';

@@ -3,8 +3,9 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { soDigitos } from '../lib/formatos'
 import { reduzirImagem } from '../lib/imagem'
-import { calcularAssinatura, dataTeste, linkSuporte } from '../lib/assinatura'
+import { calcularAssinatura, dataTeste } from '../lib/assinatura'
 import { MODELO_LEMBRETE, MODELO_ORCAMENTO, MODELO_PRONTA } from '../lib/whatsapp'
+import CobrancaCliente from '../components/CobrancaCliente'
 
 const campo =
   'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-orange-500 focus:outline-none'
@@ -17,8 +18,7 @@ export default function Configuracoes() {
   const { perfil, recarregarPerfil } = useAuth()
   const of = perfil!.oficina
   const dono = perfil!.papel === 'dono'
-  const assin = calcularAssinatura(of.status_assinatura, of.teste_ate)
-  const suporte = linkSuporte(of.nome)
+  const assin = calcularAssinatura(of.status_assinatura, of.teste_ate, of.vencimento_assinatura, of.cancelamento_agendado)
 
   const [nome, setNome] = useState(of.nome)
   const [telefone, setTelefone] = useState(of.telefone ?? '')
@@ -183,18 +183,18 @@ export default function Configuracoes() {
         <p className="text-gray-800">
           Plano {of.plano === 'completo' ? 'Completo' : 'Básico'}:{' '}
           <strong>
-            {assin.status === 'ativo' && 'ativa'}
+            {assin.status === 'ativo' && (assin.emTolerancia ? 'em período de tolerância' : 'ativa')}
             {assin.status === 'teste' && 'em teste grátis — ' + assin.diasRestantes + ' dia(s) restante(s)'}
             {assin.status === 'bloqueado' && (of.status_assinatura === 'teste' ? 'teste encerrado' : 'bloqueada')}
           </strong>
         </p>
         {assin.status === 'teste' && <p className="text-sm text-gray-600">Seu teste termina em {dataTeste(of.teste_ate)}. Não haverá cobrança automática.</p>}
-        {suporte && (
-          <a href={suporte} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-green-600 px-4 py-3 font-semibold text-white">
-            Ativar ou renovar pelo WhatsApp
-          </a>
-        )}
+        {of.vencimento_assinatura && <p className="text-sm text-gray-600">Vencimento atual: {dataTeste(of.vencimento_assinatura)}.</p>}
+        {assin.vencimentoPendente && <p className="text-sm text-amber-700">Sua assinatura ativa ainda não tem vencimento cadastrado. O acesso atual foi preservado; procure o suporte para regularização.</p>}
+        {of.cancelamento_agendado && <p className="text-sm text-amber-700">A renovação foi cancelada. O acesso permanece até o vencimento.</p>}
       </section>
+
+      <CobrancaCliente />
 
       <section className={cartao}>
         <h2 className="text-lg font-semibold text-gray-800">Equipe</h2>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import AdminExtras from './AdminExtras'
+import AdminCobrancas from './AdminCobrancas'
 import { calcularAssinatura, dataTeste } from '../lib/assinatura'
 
 type Oficina = {
@@ -11,6 +12,9 @@ type Oficina = {
   plano: string | null
   status_assinatura: string
   teste_ate: string
+  vencimento_assinatura: string | null
+  dia_ciclo: number | null
+  cancelamento_agendado: boolean
   criado_em: string
 }
 
@@ -33,7 +37,7 @@ export default function Admin() {
   const [salvando, setSalvando] = useState<string | null>(null)
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
-  const [aba, setAba] = useState<'oficinas' | 'solicitacoes' | 'recursos'>('oficinas')
+  const [aba, setAba] = useState<'oficinas' | 'cobrancas' | 'solicitacoes' | 'recursos'>('oficinas')
   const [novoEmail, setNovoEmail] = useState('')
   const [novaOficina, setNovaOficina] = useState('')
   const [novoResponsavel, setNovoResponsavel] = useState('')
@@ -63,12 +67,12 @@ export default function Admin() {
     const termo = busca.trim().toLocaleLowerCase('pt-BR')
     return oficinas
       .filter(o => !termo || `${o.nome} ${o.telefone ?? ''}`.toLocaleLowerCase('pt-BR').includes(termo))
-      .filter(o => filtro === 'todas' || (filtro === 'ativas' ? o.status_assinatura === 'ativo' : filtro === 'testes' ? calcularAssinatura(o.status_assinatura, o.teste_ate).status === 'teste' : filtro === 'bloqueadas' ? !calcularAssinatura(o.status_assinatura, o.teste_ate).ativa : o.plano === filtro))
+      .filter(o => filtro === 'todas' || (filtro === 'ativas' ? calcularAssinatura(o.status_assinatura,o.teste_ate,o.vencimento_assinatura,o.cancelamento_agendado).ativa && o.status_assinatura === 'ativo' : filtro === 'testes' ? calcularAssinatura(o.status_assinatura,o.teste_ate,o.vencimento_assinatura,o.cancelamento_agendado).status === 'teste' : filtro === 'bloqueadas' ? !calcularAssinatura(o.status_assinatura,o.teste_ate,o.vencimento_assinatura,o.cancelamento_agendado).ativa : o.plano === filtro))
       .sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime())
   }, [oficinas, busca, filtro])
 
-  const ativas = oficinas.filter(o => o.status_assinatura === 'ativo').length
-  const testes = oficinas.filter(o => calcularAssinatura(o.status_assinatura, o.teste_ate).status === 'teste').length
+  const ativas = oficinas.filter(o => calcularAssinatura(o.status_assinatura, o.teste_ate, o.vencimento_assinatura, o.cancelamento_agendado).ativa && o.status_assinatura === 'ativo').length
+  const testes = oficinas.filter(o => calcularAssinatura(o.status_assinatura, o.teste_ate, o.vencimento_assinatura, o.cancelamento_agendado).status === 'teste').length
   const bloqueadas = oficinas.length - ativas - testes
   const completas = oficinas.filter(o => o.plano === 'completo').length
   const novas = oficinas.filter(o => new Date(o.criado_em) >= inicioDoMes).length
@@ -109,7 +113,7 @@ export default function Admin() {
     setCriandoOficina(false)
     if (error) setErro('Não foi possível provisionar a oficina: ' + error.message)
     else {
-      setAviso('Oficina criada bloqueada. Após confirmar contrato e pagamento, altere o acesso para Ativo.')
+      setAviso('Oficina criada bloqueada. O acesso será liberado após a confirmação do Pix na aba Cobranças.')
       setNovoEmail(''); setNovaOficina(''); setNovoResponsavel(''); setNovoTelefone(''); setNovoPlano('basico')
       await carregar()
     }
@@ -143,7 +147,7 @@ export default function Admin() {
 
       <main className="mx-auto max-w-7xl space-y-7 px-4 py-7 md:px-8">
         <nav className="flex flex-wrap gap-2 rounded-2xl border border-white/[0.08] bg-[#101925] p-2">
-          {[{id:'oficinas',label:'Oficinas'},{id:'solicitacoes',label:'Solicitações'},{id:'recursos',label:'Recursos exclusivos'}].map(item => <button key={item.id} onClick={() => setAba(item.id as typeof aba)} className={"rounded-xl px-4 py-2.5 text-sm font-semibold transition "+(aba===item.id?"bg-orange-500 text-[#17130f]":"text-slate-300 hover:bg-white/5")}>{item.label}</button>)}
+          {[{id:'oficinas',label:'Oficinas'},{id:'cobrancas',label:'Cobranças Pix'},{id:'solicitacoes',label:'Solicitações'},{id:'recursos',label:'Recursos exclusivos'}].map(item => <button key={item.id} onClick={() => setAba(item.id as typeof aba)} className={"rounded-xl px-4 py-2.5 text-sm font-semibold transition "+(aba===item.id?"bg-orange-500 text-[#17130f]":"text-slate-300 hover:bg-white/5")}>{item.label}</button>)}
         </nav>
         {aba === 'oficinas' ? <>
         <section className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
@@ -193,7 +197,7 @@ export default function Admin() {
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
                 <h2 className="text-lg font-bold">Gestão de oficinas</h2>
-                <p className="mt-1 text-sm text-slate-400">Consulte cadastros, altere planos e libere ou bloqueie acessos.</p>
+                <p className="mt-1 text-sm text-slate-400">Consulte cadastros e altere planos. A ativação de novas assinaturas ocorre após a confirmação do Pix.</p>
               </div>
               <button onClick={() => void carregar()} disabled={carregando} className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/5 disabled:opacity-50">
                 <span className={carregando ? 'animate-spin' : ''}>⟳</span> {carregando ? 'Atualizando...' : 'Atualizar dados'}
@@ -230,10 +234,10 @@ export default function Admin() {
             <div className="divide-y divide-white/[0.06]">
               {filtradas.map(oficina => {
                 const edicao = edicoes[oficina.id] ?? { plano: 'basico', status: 'bloqueado' }
-                const assinatura = calcularAssinatura(oficina.status_assinatura, oficina.teste_ate)
+                const assinatura = calcularAssinatura(oficina.status_assinatura, oficina.teste_ate, oficina.vencimento_assinatura, oficina.cancelamento_agendado)
                 const ativo = assinatura.status === 'ativo'
                 const emTeste = assinatura.status === 'teste'
-                const statusTexto = ativo ? 'Acesso ativo' : emTeste ? 'Em teste' : oficina.status_assinatura === 'teste' ? 'Teste encerrado' : 'Bloqueado'
+                const statusTexto = ativo ? (assinatura.emTolerancia ? 'Em tolerância' : 'Acesso ativo') : emTeste ? 'Em teste' : oficina.status_assinatura === 'teste' ? 'Teste encerrado' : 'Bloqueado'
                 const alterado = edicao.plano !== (oficina.plano === 'completo' ? 'completo' : 'basico') || edicao.status !== oficina.status_assinatura
                 return (
                   <article key={oficina.id} className="p-5 transition hover:bg-white/[0.015] md:px-6">
@@ -241,12 +245,15 @@ export default function Admin() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="truncate text-base font-bold text-white">{oficina.nome}</h3>
-                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${ativo ? 'bg-emerald-400/10 text-emerald-300' : emTeste ? 'bg-sky-400/10 text-sky-300' : 'bg-amber-400/10 text-amber-300'}`}>{statusTexto}</span>
+                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${ativo ? (assinatura.emTolerancia ? 'bg-amber-400/10 text-amber-300' : 'bg-emerald-400/10 text-emerald-300') : emTeste ? 'bg-sky-400/10 text-sky-300' : 'bg-amber-400/10 text-amber-300'}`}>{statusTexto}</span>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-400">
                           <span>☎ {oficina.telefone || 'Telefone não informado'}</span>
                           <span>▦ Cadastro: {dataCurta(oficina.criado_em)}</span>
                           <span>Plano atual: <strong className="font-semibold text-slate-300">{oficina.plano === 'completo' ? 'Completo' : 'Básico'}</strong></span>
+                          {oficina.vencimento_assinatura && <span>Vencimento: {dataTeste(oficina.vencimento_assinatura)}</span>}
+                          {assinatura.vencimentoPendente && <span className="text-amber-300">Vencimento não cadastrado</span>}
+                          {oficina.cancelamento_agendado && <span className="text-amber-300">Renovação cancelada</span>}
                         </div>
                         {oficina.status_assinatura === 'teste' && <p className="mt-2 text-xs text-slate-400">{emTeste ? 'Teste grátis até ' : 'Teste encerrado em '}{dataTeste(oficina.teste_ate)}.</p>}
                       </div>
@@ -258,7 +265,7 @@ export default function Admin() {
                         </label>
                         <label className="block text-xs font-medium text-slate-400">Permissão de acesso
                           <select value={edicao.status} onChange={e => alterar(oficina, 'status', e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#090f17] px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-orange-400/70">
-                            <option value="ativo">Ativo</option>{oficina.status_assinatura === 'teste' && <option value="teste">Em teste (automático)</option>}<option value="bloqueado">Bloqueado</option>
+                            {oficina.status_assinatura === 'ativo' && <option value="ativo">Ativo</option>}{oficina.status_assinatura === 'teste' && <option value="teste">Em teste (automático)</option>}<option value="bloqueado">Bloqueado</option>
                           </select>
                         </label>
                         <button disabled={salvando === oficina.id || !alterado} onClick={() => void atualizar(oficina)} className="rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-[#17130f] shadow-lg shadow-orange-950/20 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-40">
@@ -276,7 +283,7 @@ export default function Admin() {
           <span>Ofício do Motor · Central de administração</span>
           <span>Ambiente restrito a administradores autorizados</span>
         </footer>
-        </> : <AdminExtras embedded section={aba} />}
+        </> : aba === 'cobrancas' ? <AdminCobrancas /> : <AdminExtras embedded section={aba} />}
       </main>
     </div>
   )

@@ -17,3 +17,4 @@ CREATE INDEX IF NOT EXISTS financeiro_os_oficina_idx
   ON public.financeiro (os_id, oficina_id);
 CREATE INDEX IF NOT EXISTS lembretes_moto_oficina_idx
   ON public.lembretes (moto_id, oficina_id);
+;

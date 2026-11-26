@@ -320,3 +320,4 @@ GRANT INSERT (cliente_id, moto_id, defeito_relatado, km_entrada)
   ON TABLE public.ordens_servico TO authenticated;
 GRANT UPDATE (status)
   ON TABLE public.ordens_servico TO authenticated;
+;

@@ -1,8 +1,6 @@
 -- Corrige regras do trial, baixa de estoque em finalizacao direta e imutabilidade de OS entregue.
 -- Aplicar somente apos revisar o historico de migrations remoto.
 
--- Mantem a consulta do Plano Completo disponivel mesmo apos expiracao do trial/assinatura.
--- A restricao de escrita continua sendo aplicada por assinatura_ok() nas politicas de escrita.
 CREATE OR REPLACE FUNCTION public.plano_completo_ok()
 RETURNS boolean
 LANGUAGE sql
@@ -10,14 +8,23 @@ STABLE
 SECURITY DEFINER
 SET search_path = ''
 AS $function$
-  SELECT coalesce((
-    SELECT o.plano = 'completo'
+  SELECT EXISTS (
+    SELECT 1
       FROM public.oficinas AS o
      WHERE o.id = public.minha_oficina_id()
-  ), false);
+       AND o.plano = 'completo'
+       AND (
+         o.status_assinatura = 'ativo'
+         OR (
+           o.status_assinatura = 'teste'
+           AND o.teste_ate >= (now() AT TIME ZONE 'America/Sao_Paulo')::date
+         )
+       )
+  );
 $function$;
 
 REVOKE ALL ON FUNCTION public.plano_completo_ok() FROM PUBLIC, anon;
+
 GRANT EXECUTE ON FUNCTION public.plano_completo_ok() TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.os_gerar_financeiro()
@@ -113,35 +120,13 @@ REVOKE ALL ON FUNCTION public.os_baixar_estoque_ao_finalizar() FROM PUBLIC, anon
 
 -- Prefixo zz garante execucao depois de os_antes_atualizar_trg, que protege o flag interno.
 DROP TRIGGER IF EXISTS os_baixar_estoque_ao_finalizar_trg ON public.ordens_servico;
+
 DROP TRIGGER IF EXISTS zz_os_baixar_estoque_ao_finalizar_trg ON public.ordens_servico;
+
 CREATE TRIGGER zz_os_baixar_estoque_ao_finalizar_trg
 BEFORE UPDATE OF status ON public.ordens_servico
 FOR EACH ROW
 EXECUTE FUNCTION public.os_baixar_estoque_ao_finalizar();
-
--- Uma OS entregue fica imutavel tambem no banco, nao apenas na interface.
-CREATE OR REPLACE FUNCTION public.os_bloquear_alteracao_entregue()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $function$
-BEGIN
-  IF OLD.status = 'entregue' THEN
-    RAISE EXCEPTION 'Esta OS ja foi entregue e nao pode mais ser alterada.'
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END;
-$function$;
-
-REVOKE ALL ON FUNCTION public.os_bloquear_alteracao_entregue() FROM PUBLIC, anon, authenticated;
-
-DROP TRIGGER IF EXISTS zz_os_bloquear_alteracao_entregue_trg ON public.ordens_servico;
-CREATE TRIGGER zz_os_bloquear_alteracao_entregue_trg
-BEFORE UPDATE ON public.ordens_servico
-FOR EACH ROW
-EXECUTE FUNCTION public.os_bloquear_alteracao_entregue();
 
 -- OS entregue e seu historico financeiro nao podem ser alterados por mudancas nos itens.
 CREATE OR REPLACE FUNCTION public.os_itens_bloquear_entregue()
@@ -204,6 +189,7 @@ $function$;
 REVOKE ALL ON FUNCTION public.os_itens_bloquear_entregue() FROM PUBLIC, anon, authenticated;
 
 DROP TRIGGER IF EXISTS os_itens_bloquear_entregue_trg ON public.os_itens;
+
 CREATE TRIGGER os_itens_bloquear_entregue_trg
 BEFORE INSERT OR UPDATE OR DELETE ON public.os_itens
 FOR EACH ROW

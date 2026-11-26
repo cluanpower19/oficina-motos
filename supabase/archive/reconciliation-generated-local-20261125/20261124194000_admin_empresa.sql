@@ -55,7 +55,7 @@ create or replace function public.admin_atualizar_oficina(
   p_plano text,
   p_status text
 )
-returns void
+returns boolean
 language plpgsql
 security definer
 set search_path = ''
@@ -79,6 +79,8 @@ begin
   if not found then
     raise exception 'Oficina não encontrada';
   end if;
+
+  return true;
 end;
 $$;
 

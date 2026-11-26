@@ -34,15 +34,19 @@ const todos = [
 
 export default function Layout() {
   const { perfil, sair } = useAuth()
-  const assin = calcularAssinatura(perfil!.oficina.status_assinatura, perfil!.oficina.teste_ate)
+  const assin = calcularAssinatura(perfil!.oficina.status_assinatura, perfil!.oficina.teste_ate, perfil!.oficina.vencimento_assinatura, perfil!.oficina.cancelamento_agendado)
   const suporte = linkSuporte(perfil!.oficina.nome)
   const faixa = assin.status === 'teste'
     ? 'Teste grátis: faltam ' + assin.diasRestantes + ' dia(s). Aproveite os recursos do seu plano.'
-    : !assin.ativa
+    : assin.emTolerancia
+      ? 'Pagamento vencido: restam ' + assin.diasRestantes + ' dia(s) de tolerância. Regularize para evitar o bloqueio de alterações.'
+      : !assin.ativa
       ? (perfil!.oficina.status_assinatura === 'teste'
           ? 'Seu teste grátis terminou. Você pode consultar os dados, mas não pode salvar alterações.'
           : 'Assinatura inativa: você pode consultar os dados, mas não pode salvar alterações.')
-      : ''
+      : assin.vencimentoPendente
+        ? 'Acesso ativo sem vencimento cadastrado. Entre em contato com o suporte para regularizar a assinatura.'
+        : ''
   const planoCompleto = perfil!.oficina.plano === 'completo'
   const itens = todos.filter((i) => (i.to !== '/financeiro' || perfil?.papel === 'dono') && (planoCompleto || !['/financeiro', '/lembretes'].includes(i.to)))
 

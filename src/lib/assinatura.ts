@@ -2,6 +2,8 @@ export type Assinatura = {
   ativa: boolean
   status: 'ativo' | 'teste' | 'bloqueado'
   diasRestantes: number
+  emTolerancia: boolean
+  vencimentoPendente: boolean
 }
 
 export function hojeBrasil(): string {
@@ -10,16 +12,54 @@ export function hojeBrasil(): string {
   }).format(new Date())
 }
 
-export function calcularAssinatura(status: string, testeAte?: string | null): Assinatura {
-  if (status === 'ativo') return { ativa: true, status: 'ativo', diasRestantes: 0 }
-  const hoje = hojeBrasil()
+function somarDias(data: string, dias: number): string {
+  const [ano, mes, dia] = data.split('-').map(Number)
+  const d = new Date(Date.UTC(ano, mes - 1, dia + dias))
+  return [d.getUTCFullYear(), String(d.getUTCMonth() + 1).padStart(2, '0'), String(d.getUTCDate()).padStart(2, '0')].join('-')
+}
+
+function diferencaDias(inicio: string, fim: string): number {
+  return Math.round((Date.parse(fim + 'T00:00:00Z') - Date.parse(inicio + 'T00:00:00Z')) / 86400000)
+}
+
+export function calcularAssinatura(
+  status: string,
+  testeAte?: string | null,
+  vencimento?: string | null,
+  cancelamentoAgendado = false,
+  hoje = hojeBrasil(),
+): Assinatura {
   if (status === 'teste' && testeAte && testeAte >= hoje) {
-    const inicio = Date.parse(hoje + 'T00:00:00Z')
-    const fim = Date.parse(testeAte + 'T00:00:00Z')
-    const diasRestantes = Math.max(1, Math.floor((fim - inicio) / 86400000) + 1)
-    return { ativa: true, status: 'teste', diasRestantes }
+    return {
+      ativa: true, status: 'teste',
+      diasRestantes: diferencaDias(hoje, testeAte) + 1,
+      emTolerancia: false, vencimentoPendente: false,
+    }
   }
-  return { ativa: false, status: 'bloqueado', diasRestantes: 0 }
+
+  if (status === 'ativo') {
+    // Oficinas antigas sem vencimento continuam ativas até regularização administrativa.
+    if (!vencimento) {
+      return { ativa: true, status: 'ativo', diasRestantes: 0, emTolerancia: false, vencimentoPendente: true }
+    }
+    if (hoje <= vencimento) {
+      return {
+        ativa: true, status: 'ativo',
+        diasRestantes: diferencaDias(hoje, vencimento) + 1,
+        emTolerancia: false, vencimentoPendente: false,
+      }
+    }
+    const limite = somarDias(vencimento, cancelamentoAgendado ? 0 : 5)
+    if (hoje <= limite) {
+      return {
+        ativa: true, status: 'ativo',
+        diasRestantes: diferencaDias(hoje, limite) + 1,
+        emTolerancia: !cancelamentoAgendado, vencimentoPendente: false,
+      }
+    }
+  }
+
+  return { ativa: false, status: 'bloqueado', diasRestantes: 0, emTolerancia: false, vencimentoPendente: false }
 }
 
 export function dataTeste(valor?: string | null): string {
