@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Big+Shoulders+Display:wght@600;700;800;900&display=swap');
+
+.cadastro-oficina {
+  background:
+    radial-gradient(ellipse at 12% 12%, rgba(31, 111, 120, .24), transparent 42%),
+    radial-gradient(ellipse at 90% 5%, rgba(242, 160, 61, .12), transparent 38%),
+    #0b1016;
+  color: #e8ebef;
+  font-family: 'Barlow', system-ui, sans-serif;
+}
+.cadastro-oficina h1, .cadastro-oficina h2, .cadastro-oficina h3 {
+  font-family: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  letter-spacing: .02em;
+}
+.cadastro-oficina .cadastro-form {
+  background: #f7f8fa !important;
+  color: #18212b !important;
+  border: 1px solid #dfe4ea;
+  box-shadow: 0 24px 70px rgba(0,0,0,.42);
+}
+.cadastro-oficina .cadastro-form h2 { color: #18212b; }
+.cadastro-oficina .cadastro-form label { display: block; color: #263342; }
+.cadastro-oficina .cadastro-form .text-gray-500 { color: #687586; }
+.cadastro-oficina .cadastro-campo {
+  display: block;
+  margin-top: .35rem;
+  border: 1px solid #cbd3dc !important;
+  background: #fff !important;
+  color: #17212d !important;
+  box-shadow: none !important;
+}
+.cadastro-oficina .cadastro-campo:focus {
+  border-color: #df8b2c !important;
+  outline: 3px solid rgba(223,139,44,.18);
+}
+.cadastro-oficina .cadastro-campo::placeholder { color: #7a8796; }
+.cadastro-oficina .cadastro-form button[type="submit"] {
+  min-height: 3.25rem;
+  border: 0;
+  background: linear-gradient(180deg,#f8b457,#e58f27);
+  color: #1b1205;
+}
+.cadastro-oficina .cadastro-form button[type="submit"]:hover { filter: brightness(1.06); }
+.cadastro-oficina .cadastro-form button:disabled { cursor: wait; opacity: .65; }
+.cadastro-oficina .cadastro-form [role="alert"] {
+  background: #fff0ee !important;
+  color: #a32d24 !important;
+  border: 1px solid #f2c5c0;
+  box-shadow: none;
+}
+.cadastro-oficina .cadastro-form [role="status"] {
+  background: #eaf8f0 !important;
+  color: #17623e !important;
+  border: 1px solid #bce7cc;
+  box-shadow: none;
+}
+.cadastro-oficina a { text-underline-offset: 4px; }
+.cadastro-erro {
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(31,111,120,.22), transparent 42%),
+    radial-gradient(ellipse at 90% 0%, rgba(242,160,61,.11), transparent 36%),
+    #0b1016;
+  color: #e8ebef;
+  font-family: 'Barlow', system-ui, sans-serif;
+}
+.cadastro-erro-card {
+  background: linear-gradient(180deg,#1c2430,#141b24);
+  border: 1px solid #354252;
+  box-shadow: 0 28px 80px rgba(0,0,0,.48);
+}
+.cadastro-erro-marca {
+  color: #f2a03d;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.cadastro-erro-marca span { color: #748294; padding: 0 .35rem; }
+.cadastro-erro-icone {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin-top: 2rem;
+  border: 1px solid rgba(242,160,61,.55);
+  border-radius: 50%;
+  background: rgba(242,160,61,.12);
+  color: #f2a03d;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.cadastro-erro-etiqueta {
+  margin-top: 1rem;
+  color: #f2a03d;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+.cadastro-erro-card h1 {
+  color: #f3f1ea;
+  font-family: 'Big Shoulders Display','Arial Narrow',sans-serif;
+  line-height: 1.02;
+}
+.cadastro-erro-mensagem {
+  border: 1px solid rgba(242,160,61,.32);
+  background: rgba(242,160,61,.09);
+  color: #e8ebef;
+  line-height: 1.6;
+}
+.cadastro-erro-mensagem strong { color: #f8bd70; }
+.cadastro-erro-primario, .cadastro-erro-secundario {
+  display: inline-flex;
+  min-height: 3rem;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  border-radius: .8rem;
+  padding: .75rem 1.1rem;
+  font-weight: 700;
+  text-align: center;
+}
+.cadastro-erro-primario {
+  background: linear-gradient(180deg,#f8b457,#e58f27);
+  color: #1b1205;
+}
+.cadastro-erro-secundario {
+  border: 1px solid #465365;
+  background: rgba(255,255,255,.03);
+  color: #e8ebef;
+}
+.cadastro-erro-link { color: #f2a03d; font-weight: 700; }
+@media (max-width: 640px) {
+  .cadastro-oficina h1 { font-size: 2.5rem; }
+  .cadastro-oficina .cadastro-form { border-radius: 1.25rem; }
+}

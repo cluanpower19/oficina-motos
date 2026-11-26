@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { linkWhatsAppComercial } from './lib/comercial'
 import { AuthProvider, useAuth, erroCriacao } from './hooks/useAuth'
 import { supabase } from './lib/supabase'
+import './pages/cadastro-oficina.css'
 const Layout = lazy(() => import('./components/Layout'))
 const Login = lazy(() => import('./pages/Login'))
 const Admin = lazy(() => import('./pages/Admin'))
@@ -25,6 +27,7 @@ const CadastroOficina = lazy(() => import('./pages/CadastroOficina'))
 function Rotas() {
   const { session, perfil, carregando, recuperacao, recarregarPerfil } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [ehAdmin, setEhAdmin] = useState(false)
   const [verificandoAdmin, setVerificandoAdmin] = useState(true)
   const [tentandoPerfil, setTentandoPerfil] = useState(false)
@@ -67,18 +70,35 @@ function Rotas() {
   }
 
   if (!perfil) {
+    const testeJaUtilizado = erroCriacao.toLocaleLowerCase('pt-BR').includes('já foi usado para iniciar um teste')
+    const contato = linkWhatsAppComercial('Olá! Preciso de ajuda com o cadastro do Ofício do Motor.')
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center text-gray-700">
-        <div className="max-w-md">
-          <h1 className="text-xl font-bold">Cadastro da oficina não concluído</h1>
-          <p className="mt-2 text-sm">Não foi possível criar ou vincular uma oficina à sua conta. Se acabou de se cadastrar, confirme seu e-mail e entre novamente. Se já confirmou, confira a mensagem abaixo.</p>
-          {erroCriacao && <p className="mt-3 text-sm font-semibold text-red-600">{erroCriacao}</p>}
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <button disabled={tentandoPerfil} onClick={async () => { setTentandoPerfil(true); try { await recarregarPerfil() } finally { setTentandoPerfil(false) } }} className="rounded-lg bg-orange-500 px-5 py-2 font-semibold text-black disabled:opacity-60">{tentandoPerfil ? 'Verificando...' : 'Tentar novamente'}</button>
-            <button onClick={() => void supabase.auth.signOut()} className="rounded-lg border border-gray-300 px-5 py-2 font-semibold text-gray-700">Sair</button>
+      <main className="cadastro-erro min-h-screen flex items-center justify-center px-4 py-10">
+        <section className="cadastro-erro-card w-full max-w-xl rounded-3xl p-7 sm:p-10">
+          <div className="cadastro-erro-marca">OFÍCIO DO MOTOR <span>•</span> GESTÃO DE OFICINAS</div>
+          <div className="cadastro-erro-icone" aria-hidden="true">!</div>
+          <p className="cadastro-erro-etiqueta">ATENÇÃO AO CADASTRO</p>
+          <h1 className="mt-2 text-3xl sm:text-4xl">Cadastro da oficina não concluído</h1>
+          <p className="mt-4 leading-relaxed">Não foi possível criar ou vincular uma oficina à sua conta.</p>
+          {erroCriacao ? (
+            <div role="alert" className="cadastro-erro-mensagem mt-5 rounded-2xl p-4 sm:p-5">
+              <strong className="block mb-1">{testeJaUtilizado ? 'Teste grátis já utilizado' : 'O que aconteceu'}</strong>
+              <span>{erroCriacao}</span>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm">Se você acabou de confirmar o e-mail, saia da conta e entre novamente. Se o problema continuar, fale com nossa equipe.</p>
+          )}
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            {testeJaUtilizado ? (
+              <a href={contato} target="_blank" rel="noopener noreferrer" className="cadastro-erro-primario">Falar com a equipe</a>
+            ) : (
+              <button disabled={tentandoPerfil} onClick={async () => { setTentandoPerfil(true); try { await recarregarPerfil() } finally { setTentandoPerfil(false) } }} className="cadastro-erro-primario disabled:opacity-60">{tentandoPerfil ? 'Verificando...' : 'Verificar novamente'}</button>
+            )}
+            <button onClick={async () => { await supabase.auth.signOut(); navigate("/entrar") }} className="cadastro-erro-secundario">Sair da conta</button>
           </div>
-        </div>
-      </div>
+          <p className="mt-6 text-xs leading-relaxed">Se você já possui uma conta, não precisa criar outra. Entre com seu e-mail cadastrado.</p>
+        </section>
+      </main>
     )
   }
 

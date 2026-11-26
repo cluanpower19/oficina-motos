@@ -43,6 +43,17 @@ const Ctx = createContext<AuthCtx>({
 
 export let erroCriacao = ''
 
+function mensagemAmigavelCadastro(mensagem: string): string {
+  const normalizada = mensagem.toLocaleLowerCase('pt-BR')
+  if (normalizada.includes('utilizou o teste')) {
+    return 'Este e-mail ou telefone já foi usado para iniciar um teste grátis. Cada e-mail e número de telefone pode participar de um único teste. Se você acredita que houve um engano ou deseja contratar um plano, fale com nossa equipe.'
+  }
+  if (normalizada.includes('confirme seu e-mail')) {
+    return 'Confirme seu endereço de e-mail pelo link que enviamos e depois entre novamente para concluir o cadastro.'
+  }
+  return mensagem
+}
+
 // O SDK pode emitir INITIAL_SESSION e SIGNED_IN quase simultaneamente.
 // Compartilha a mesma operação para impedir duas tentativas concorrentes de trial.
 const buscasPerfil = new Map<string, Promise<Perfil | null>>()
@@ -85,7 +96,7 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
         p_usuario_nome: meta.nome,
         p_plano: meta.plano,
       })
-      erroCriacao = r.error?.message ?? ''
+      erroCriacao = r.error ? mensagemAmigavelCadastro(r.error.message) : ''
       if (!r.error) {
         const consulta = await ler()
         if (consulta.error) throw new Error('O cadastro foi iniciado, mas não foi possível carregar a oficina: ' + consulta.error.message)
@@ -93,7 +104,7 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
       }
     } else if (meta.codigo_oficina) {
       const r = await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
-      erroCriacao = r.error?.message ?? ''
+      erroCriacao = r.error ? mensagemAmigavelCadastro(r.error.message) : ''
       if (!r.error) {
         const consulta = await ler()
         if (consulta.error) throw new Error('O acesso foi criado, mas não foi possível carregar a oficina: ' + consulta.error.message)
