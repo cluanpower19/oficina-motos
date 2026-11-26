@@ -97,6 +97,10 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
         p_plano: meta.plano,
       })
       erroCriacao = r.error ? mensagemAmigavelCadastro(r.error.message) : ''
+      if (r.error?.message.toLocaleLowerCase('pt-BR').includes('utilizou o teste')) {
+        // A RPC valida novamente no servidor; falha no registro não pode impedir o acesso ao aviso.
+        try { await supabase.rpc('registrar_alerta_trial_repetido') } catch { /* registro de auditoria não bloqueia a autenticação */ }
+      }
       if (!r.error) {
         const consulta = await ler()
         if (consulta.error) throw new Error('O cadastro foi iniciado, mas não foi possível carregar a oficina: ' + consulta.error.message)

@@ -20,6 +20,7 @@ type Oficina = {
 }
 
 type Edicao = { plano: string; status: string }
+type AlertaSeguranca = { id: string; email: string; telefone: string; motivo: string; criado_em: string; revisado_em: string | null; tentativas_email_24h: number; tentativas_telefone_24h: number }
 
 const dataCurta = (valor: string) => {
   if (!valor) return '—'
@@ -38,7 +39,11 @@ export default function Admin() {
   const [salvando, setSalvando] = useState<string | null>(null)
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
-  const [aba, setAba] = useState<'oficinas' | 'cobrancas' | 'solicitacoes' | 'recursos'>('oficinas')
+  const [alertas, setAlertas] = useState<AlertaSeguranca[]>([])
+  const [carregandoAlertas, setCarregandoAlertas] = useState(false)
+  const [erroAlertas, setErroAlertas] = useState('')
+  const [salvandoAlerta, setSalvandoAlerta] = useState<string | null>(null)
+  const [aba, setAba] = useState<'oficinas' | 'cobrancas' | 'seguranca' | 'solicitacoes' | 'recursos'>('oficinas')
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -57,6 +62,26 @@ export default function Admin() {
   }, [])
 
   useEffect(() => { void carregar() }, [carregar, session?.user.id])
+
+  const carregarAlertas = useCallback(async () => {
+    setCarregandoAlertas(true)
+    setErroAlertas('')
+    const { data, error } = await supabase.rpc('admin_listar_alertas_seguranca')
+    if (error) setErroAlertas(error.message)
+    else setAlertas((data ?? []) as AlertaSeguranca[])
+    setCarregandoAlertas(false)
+  }, [])
+
+  useEffect(() => { void carregarAlertas() }, [carregarAlertas, session?.user.id])
+
+  async function marcarAlertaRevisado(alerta: AlertaSeguranca) {
+    setSalvandoAlerta(alerta.id)
+    const { error } = await supabase.rpc('admin_marcar_alerta_seguranca_revisado', { p_alerta_id: alerta.id })
+    if (error) setErroAlertas(error.message)
+    else await carregarAlertas()
+    setSalvandoAlerta(null)
+  }
+
 
   const filtradas = useMemo(() => {
     const termo = busca.trim().toLocaleLowerCase('pt-BR')
@@ -118,7 +143,7 @@ export default function Admin() {
 
       <main className="mx-auto max-w-7xl space-y-7 px-4 py-7 md:px-8">
         <nav className="flex flex-wrap gap-2 rounded-2xl border border-white/[0.08] bg-[#101925] p-2">
-          {[{id:'oficinas',label:'Oficinas'},{id:'cobrancas',label:'Cobranças Pix'},{id:'solicitacoes',label:'Solicitações'},{id:'recursos',label:'Recursos exclusivos'}].map(item => <button key={item.id} onClick={() => setAba(item.id as typeof aba)} className={"rounded-xl px-4 py-2.5 text-sm font-semibold transition "+(aba===item.id?"bg-orange-500 text-[#17130f]":"text-slate-300 hover:bg-white/5")}>{item.label}</button>)}
+          {[{id:'oficinas',label:'Oficinas'},{id:'cobrancas',label:'Cobranças Pix'},{id:'seguranca',label:`Segurança${alertas.some(a => !a.revisado_em) ? ` · ${alertas.filter(a => !a.revisado_em).length}` : ''}`},{id:'solicitacoes',label:'Solicitações'},{id:'recursos',label:'Recursos exclusivos'}].map(item => <button key={item.id} onClick={() => { setAba(item.id as typeof aba); if (item.id === 'seguranca') void carregarAlertas() }} className={"rounded-xl px-4 py-2.5 text-sm font-semibold transition "+(aba===item.id?"bg-orange-500 text-[#17130f]":"text-slate-300 hover:bg-white/5")}>{item.label}</button>)}
         </nav>
         {aba === 'oficinas' ? <>
         <section className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
@@ -246,7 +271,23 @@ export default function Admin() {
           <span>Ofício do Motor · Central de administração</span>
           <span>Ambiente restrito a administradores autorizados</span>
         </footer>
-        </> : aba === 'cobrancas' ? <AdminCobrancas /> : <AdminExtras embedded section={aba} />}
+        </> : aba === 'cobrancas' ? <AdminCobrancas /> : aba === 'seguranca' ? <>
+          <section className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div><p className="text-sm font-medium text-orange-400">Proteção contra abuso</p><h2 className="mt-1 text-xl font-bold">Alertas de segurança</h2><p className="mt-1 max-w-3xl text-sm text-slate-400">Tentativas de iniciar um novo teste usando e-mail ou telefone que já participou de um trial. Os dados são conferidos novamente pelo banco antes de registrar o alerta.</p></div>
+            <button onClick={() => void carregarAlertas()} disabled={carregandoAlertas} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-slate-300 hover:bg-white/5 disabled:opacity-50">{carregandoAlertas ? 'Atualizando...' : 'Atualizar alertas'}</button>
+          </section>
+          <section className="grid gap-3 sm:grid-cols-3">
+            <article className="rounded-2xl border border-white/[0.08] bg-[#101925] p-5"><p className="text-sm text-slate-400">Alertas registrados</p><p className="mt-3 text-3xl font-bold">{alertas.length}</p><p className="mt-1 text-xs text-slate-500">Últimos 100 registros</p></article>
+            <article className="rounded-2xl border border-white/[0.08] bg-[#101925] p-5"><p className="text-sm text-slate-400">Aguardando revisão</p><p className="mt-3 text-3xl font-bold text-amber-300">{alertas.filter(a => !a.revisado_em).length}</p><p className="mt-1 text-xs text-slate-500">Alertas ainda não analisados</p></article>
+            <article className="rounded-2xl border border-white/[0.08] bg-[#101925] p-5"><p className="text-sm text-slate-400">Repetições em 24 horas</p><p className="mt-3 text-3xl font-bold text-orange-300">{alertas.filter(a => Math.max(Number(a.tentativas_email_24h), Number(a.tentativas_telefone_24h)) > 1).length}</p><p className="mt-1 text-xs text-slate-500">Alertas associados a identificadores repetidos</p></article>
+          </section>
+          {erroAlertas && <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">{erroAlertas}</div>}
+          <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#101925]">
+            <div className="border-b border-white/[0.07] p-5"><h3 className="font-bold">Histórico de tentativas bloqueadas</h3><p className="mt-1 text-xs text-slate-500">E-mail e telefone foram informados no cadastro e ficam visíveis somente para administradores.</p></div>
+            {carregandoAlertas ? <p className="p-8 text-center text-sm text-slate-400">Carregando alertas...</p> : alertas.length === 0 ? <p className="p-8 text-center text-sm text-slate-400">Nenhuma tentativa de reutilização de trial registrada ainda.</p> : <div className="divide-y divide-white/[0.06]">{alertas.map(alerta => <article key={alerta.id} className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"><div className="min-w-0 space-y-2"><div className="flex flex-wrap items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${alerta.revisado_em ? 'bg-slate-500/10 text-slate-400' : 'bg-amber-400/10 text-amber-300'}`}>{alerta.revisado_em ? 'Revisado' : 'Pendente'}</span><span className="text-xs text-slate-500">{new Date(alerta.criado_em).toLocaleString('pt-BR')}</span></div><p className="break-all text-sm font-semibold text-white">{alerta.email}</p><p className="text-sm text-slate-300">Telefone: {alerta.telefone}</p><p className="text-xs text-slate-400">{alerta.motivo === 'email_e_telefone_reutilizados' ? 'E-mail e telefone já utilizados em outro teste' : alerta.motivo === 'email_reutilizado' ? 'E-mail já utilizado em outro teste' : 'Telefone já utilizado em outro teste'}</p><p className="text-xs text-slate-500">Últimas 24h: {alerta.tentativas_email_24h} tentativa(s) com este e-mail · {alerta.tentativas_telefone_24h} com este telefone</p></div>{!alerta.revisado_em && <button onClick={() => void marcarAlertaRevisado(alerta)} disabled={salvandoAlerta === alerta.id} className="shrink-0 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-slate-300 hover:bg-white/5 disabled:opacity-50">{salvandoAlerta === alerta.id ? 'Salvando...' : 'Marcar como revisado'}</button>}</article>)}</div>}
+          </section>
+          <p className="text-xs leading-relaxed text-slate-500">Limite desta versão: registra bloqueios do trial depois da confirmação do e-mail. Não registra tentativas de CAPTCHA reprovadas nem IP do visitante. Para acompanhar desafios automatizados, consulte as métricas do Turnstile no Cloudflare.</p>
+        </> : <AdminExtras embedded section={aba} />}
       </main>
     </div>
   )
