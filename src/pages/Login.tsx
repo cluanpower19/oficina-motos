@@ -20,12 +20,10 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
   const [aviso, setAviso] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [linkWindows, setLinkWindows] = useState<string | null>(null)
-  const [linkMac, setLinkMac] = useState<string | null>(null)
 
   useEffect(() => {
     if (!noSite) return
     urlInstalador('-win-x64.exe').then(setLinkWindows)
-    urlInstalador(navigator.userAgent.includes('Mac') ? '-mac-arm64.dmg' : '-mac-x64.dmg').then(setLinkMac)
   }, [])
 
   async function enviar(e: FormEvent) {
@@ -174,7 +172,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           )}
           {noSite && (
             <div className="downloads-entrada mt-5 border-t border-gray-700 pt-4 text-center">
-              <p className="mb-3 text-sm text-gray-400">Baixe o aplicativo para seu dispositivo</p>
+              <p className="mb-3 text-sm text-gray-400">Acesse pelo navegador ou use o aplicativo</p>
               <div className="downloads-lista">
                 <a
                   href={linkWindows ?? URL_DOWNLOAD}
@@ -183,15 +181,8 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
                 >
                   Baixar para Windows
                 </a>
-                <a
-                  href={linkMac ?? URL_DOWNLOAD}
-                  {...(linkMac ? { download: true } : { target: '_blank', rel: 'noreferrer' })}
-                  className="download-app"
-                >
-                  Baixar para Mac
-                </a>
                 <a href="/downloads/OficioDoMotor.apk" download className="download-app" aria-label="Baixar aplicativo Ofício do Motor para Android">
-                  Baixar aplicativo para Android (APK)
+                  Baixar para Android
                 </a>
               </div>
             </div>
