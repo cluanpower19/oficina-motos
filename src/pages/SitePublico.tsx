@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import TourGuiado from './TourGuiado'
 import DemoInterativa from './DemoInterativa'
 import './site-publico.css'
 
@@ -26,7 +25,6 @@ const navegacao = [
   ['#visao', 'Benefícios'],
   ['#como-funciona', 'Como funciona'],
   ['#demo', 'Demonstração'],
-  ['#tour', 'Tour'],
   ['#recursos', 'Recursos'],
   ['#planos', 'Planos'],
   ['#duvidas', 'Perguntas'],
@@ -72,7 +70,6 @@ export default function SitePublico() {
               <Link to="/cadastro" className="sp-button sp-button-primary">Começar teste grátis de 7 dias <Seta /></Link>
               <a href="#planos" className="sp-button sp-button-ghost">Ver planos</a>
             </div>
-            <a className="sp-hero-tour-link" href="#tour">Prefere conhecer antes? Faça o tour guiado <Seta /></a>
             <div className="sp-hero-trial-proof"><span>7 DIAS GRÁTIS</span><i /> <span>SEM CARTÃO</span><i /> <span>SEM PAGAMENTO ANTECIPADO</span></div>
           </div>
           <div className="sp-hero-side-note"><span className="sp-side-line" /> FEITO PARA QUEM CUIDA DE MOTOS</div>
@@ -94,7 +91,7 @@ export default function SitePublico() {
             <article className="sp-flow-card"><span>02</span><div className="sp-flow-icon" aria-hidden="true">▤</div><h3>Monte a ordem de serviço</h3><p>Inclua serviços e valores e atualize a ordem conforme o trabalho avança.</p><small>ORÇAMENTO · EXECUÇÃO</small></article>
             <article className="sp-flow-card"><span>03</span><div className="sp-flow-icon" aria-hidden="true">↗</div><h3>Compartilhe com o cliente</h3><p>Compartilhe o link pelo WhatsApp. O cliente confere o orçamento e responde sem criar conta.</p><small>APROVAÇÃO · ENTREGA</small></article>
           </div>
-          <div className="sp-flow-foot"><span>UM ATENDIMENTO, DO COMEÇO AO FIM.</span><a href="#tour">Veja esse fluxo no tour guiado <Seta /></a></div>
+          <div className="sp-flow-foot"><span>UM ATENDIMENTO, DO COMEÇO AO FIM.</span></div>
         </section>
 
         <section className="sp-editorial">
@@ -142,12 +139,11 @@ export default function SitePublico() {
           <div className="sp-faq-grid"><h2>Respostas claras<br /><em>para decidir com calma.</em></h2><div className="sp-faq-list">{duvidas.map(([q, a]) => <details key={q}><summary>{q}<span>＋</span></summary><p>{a}</p></details>)}</div></div>
         </section>
 
-        <TourGuiado />
 
         <section className="sp-final">
           <img src="/img/moto-cafe.jpg" alt="" loading="lazy" />
           <div className="sp-final-overlay" />
-          <div className="sp-final-content"><div className="sp-section-kicker"><span>08</span> SUA OFICINA PODE FICAR MAIS ORGANIZADA</div><h2>Cuide dos serviços.<br /><em>Deixe o controle com o sistema.</em></h2><p>Experimente por sete dias, sem cartão e sem pagamento antecipado. Veja como o sistema funciona na rotina da sua oficina.</p><div className="sp-hero-actions"><Link to="/cadastro" className="sp-button sp-button-primary">Começar grátis <Seta /></Link><a href="#tour" className="sp-button sp-button-ghost">Rever o tour guiado</a><Link to="/entrar" className="sp-button sp-button-ghost">Já sou cliente · Entrar <Seta /></Link></div></div>
+          <div className="sp-final-content"><div className="sp-section-kicker"><span>08</span> SUA OFICINA PODE FICAR MAIS ORGANIZADA</div><h2>Cuide dos serviços.<br /><em>Deixe o controle com o sistema.</em></h2><p>Experimente por sete dias, sem cartão e sem pagamento antecipado. Veja como o sistema funciona na rotina da sua oficina.</p><div className="sp-hero-actions"><Link to="/cadastro" className="sp-button sp-button-primary">Começar teste grátis de 7 dias <Seta /></Link><Link to="/entrar" className="sp-button sp-button-ghost">Já sou cliente · Entrar <Seta /></Link></div></div>
         </section>
       </main>
 
