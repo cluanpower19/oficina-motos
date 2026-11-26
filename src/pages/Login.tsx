@@ -28,6 +28,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
   const [enviando, setEnviando] = useState(false)
   const [linkWindows, setLinkWindows] = useState<string | null>(null)
   const [captchaToken, setCaptchaToken] = useState('')
+  const [senhaAlterada, setSenhaAlterada] = useState(false)
 
   useEffect(() => {
     if (!noSite) return
@@ -58,12 +59,10 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           const { error } = await supabase.auth.updateUser({ password: senhaNova })
           if (error) setErro(error.message)
           else {
-            await supabase.auth.signOut()
-            window.history.replaceState(null, '', window.location.pathname)
-            setModo('entrar')
+            setSenhaAlterada(true)
             setSenhaNova('')
             setConfirmarSenha('')
-            setAviso('Senha alterada com sucesso! Entre usando sua nova senha.')
+            setAviso('Senha alterada com sucesso! Agora clique em “Ir para login” e entre usando sua nova senha.')
           }
         }
       } else if (modo === 'entrar') {
@@ -165,7 +164,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
               )}
             </div>
           )}
-          {modo === 'redefinir' && (
+          {modo === 'redefinir' && !senhaAlterada && (
             <>
               <input className={campo} type="password" placeholder="Nova senha (mín. 6 caracteres)" minLength={6} value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} required />
               <input className={campo} type="password" placeholder="Confirme a nova senha" minLength={6} value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} required />
@@ -175,9 +174,16 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {erro && <p className="text-sm text-red-600">{erro}</p>}
           {aviso && <p className="text-sm text-green-700">{aviso}</p>}
 
-          <button disabled={enviando || (modo === 'recuperar' && (!turnstileSiteKey || !captchaToken))} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
-            {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Criar acesso de mecânico' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
-          </button>
+          {!senhaAlterada && (
+            <button disabled={enviando || (modo === 'recuperar' && (!turnstileSiteKey || !captchaToken))} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
+              {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Criar acesso de mecânico' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
+            </button>
+          )}
+          {modo === 'redefinir' && senhaAlterada && (
+            <button type="button" onClick={() => { void supabase.auth.signOut() }} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600">
+              Ir para login
+            </button>
+          )}
 
           {modo === 'entrar' && (
             <>
