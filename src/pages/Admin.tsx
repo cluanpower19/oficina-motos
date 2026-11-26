@@ -9,6 +9,7 @@ type Oficina = {
   id: string
   nome: string
   telefone: string | null
+  email: string | null
   plano: string | null
   status_assinatura: string
   teste_ate: string
@@ -60,7 +61,7 @@ export default function Admin() {
   const filtradas = useMemo(() => {
     const termo = busca.trim().toLocaleLowerCase('pt-BR')
     return oficinas
-      .filter(o => !termo || `${o.nome} ${o.telefone ?? ''}`.toLocaleLowerCase('pt-BR').includes(termo))
+      .filter(o => !termo || `${o.nome} ${o.telefone ?? ''} ${o.email ?? ''}`.toLocaleLowerCase('pt-BR').includes(termo))
       .filter(o => filtro === 'todas' || (filtro === 'ativas' ? calcularAssinatura(o.status_assinatura,o.teste_ate,o.vencimento_assinatura,o.cancelamento_agendado).ativa && o.status_assinatura === 'ativo' : filtro === 'testes' ? calcularAssinatura(o.status_assinatura,o.teste_ate,o.vencimento_assinatura,o.cancelamento_agendado).status === 'teste' : filtro === 'bloqueadas' ? !calcularAssinatura(o.status_assinatura,o.teste_ate,o.vencimento_assinatura,o.cancelamento_agendado).ativa : o.plano === filtro))
       .sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime())
   }, [oficinas, busca, filtro])
@@ -167,7 +168,7 @@ export default function Admin() {
             <div className="grid gap-3 md:grid-cols-[1fr_auto]">
               <div className="relative">
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">⌕</span>
-                <input className="w-full rounded-xl border border-white/10 bg-[#090f17] py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-orange-400/70 focus:ring-2 focus:ring-orange-400/10" placeholder="Buscar por nome ou telefone..." value={busca} onChange={e => setBusca(e.target.value)} />
+                <input className="w-full rounded-xl border border-white/10 bg-[#090f17] py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-orange-400/70 focus:ring-2 focus:ring-orange-400/10" placeholder="Buscar por oficina, telefone ou e-mail..." value={busca} onChange={e => setBusca(e.target.value)} />
               </div>
               <select aria-label="Filtrar oficinas" value={filtro} onChange={e => setFiltro(e.target.value)} className="rounded-xl border border-white/10 bg-[#090f17] px-4 py-3 text-sm text-slate-300 outline-none focus:border-orange-400/70">
                 <option value="todas">Todos os cadastros</option>
@@ -209,7 +210,8 @@ export default function Admin() {
                           <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${ativo ? (assinatura.emTolerancia ? 'bg-amber-400/10 text-amber-300' : 'bg-emerald-400/10 text-emerald-300') : emTeste ? 'bg-sky-400/10 text-sky-300' : 'bg-amber-400/10 text-amber-300'}`}>{statusTexto}</span>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-400">
-                          <span>☎ {oficina.telefone || 'Telefone não informado'}</span>
+                          <span>Telefone: {oficina.telefone || 'Nao informado'}</span>
+                          <span className="break-all">E-mail: {oficina.email || 'Nao encontrado'}</span>
                           <span>▦ Cadastro: {dataCurta(oficina.criado_em)}</span>
                           <span>Plano atual: <strong className="font-semibold text-slate-300">{oficina.plano === 'completo' ? 'Completo' : 'Básico'}</strong></span>
                           {oficina.vencimento_assinatura && <span>Vencimento: {dataTeste(oficina.vencimento_assinatura)}</span>}
