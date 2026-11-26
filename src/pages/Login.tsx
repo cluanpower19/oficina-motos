@@ -46,7 +46,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           setErro('Conclua a verificação de segurança antes de solicitar a recuperação.')
           return
         }
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlRecuperacaoSenha(), captchaToken })
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: urlRecuperacaoSenha(), captchaToken })
         setCaptchaToken('')
         if (error) setErro(error.message)
         else setAviso('Se houver uma conta vinculada a esse e-mail, enviaremos um link para redefinir a senha. Confira sua caixa de entrada e o spam.')
@@ -66,8 +66,13 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           }
         }
       } else if (modo === 'entrar') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
-        if (error) setErro('E-mail ou senha incorretos. Se acabou de se cadastrar, confirme seu e-mail primeiro.')
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha })
+        if (error) {
+          if (error.code === 'email_not_confirmed') setErro('Este e-mail ainda não foi confirmado. Confira sua caixa de entrada.')
+          else if (error.code === 'too_many_requests') setErro('Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.')
+          else if (error.code === 'invalid_credentials') setErro('O Supabase não reconheceu esse e-mail e essa senha. Confira se digitou a senha nova corretamente, respeitando maiúsculas, minúsculas e caracteres especiais.')
+          else setErro(`Não foi possível entrar: ${error.message}${error.code ? ` (${error.code})` : ''}`)
+        }
       } else if (modo === 'mecanico') {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -144,10 +149,10 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
             </>
           )}
           {modo !== 'redefinir' && (
-            <input className={campo} type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input className={campo} type="email" autoComplete="username" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
           )}
           {(modo === 'entrar' || modo === 'mecanico') && (
-            <input className={campo} type="password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
+            <input className={campo} type="password" autoComplete="current-password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
           )}
           {modo === 'recuperar' && (
             <div className="flex flex-col items-center gap-2 py-2">
