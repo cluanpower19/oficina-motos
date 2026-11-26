@@ -66,7 +66,12 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           }
         }
       } else if (modo === 'entrar') {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha })
+        if (!turnstileSiteKey || !captchaToken) {
+          setErro('Conclua a verificação de segurança antes de entrar.')
+          return
+        }
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha, options: { captchaToken } })
+        setCaptchaToken('')
         if (error) {
           if (error.code === 'email_not_confirmed') setErro('Este e-mail ainda não foi confirmado. Confira sua caixa de entrada.')
           else if (error.code === 'too_many_requests') setErro('Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.')
@@ -74,14 +79,20 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           else setErro(`Não foi possível entrar: ${error.message}${error.code ? ` (${error.code})` : ''}`)
         }
       } else if (modo === 'mecanico') {
+        if (!turnstileSiteKey || !captchaToken) {
+          setErro('Conclua a verificação de segurança antes de criar o acesso.')
+          return
+        }
         const { data, error } = await supabase.auth.signUp({
           email,
           password: senha,
           options: {
             emailRedirectTo: urlRedirecionamentoAuth(),
             data: { nome, codigo_oficina: codigo.trim().toLowerCase() },
+            captchaToken,
           },
         })
+        setCaptchaToken('')
         if (error) setErro(error.message)
         else if (!data.session) setAviso('Cadastro iniciado! Enviamos um link de confirmação para seu e-mail. Confirme o endereço antes de entrar. Verifique também o spam.')
         else setAviso('Cadastro concluído. Você já pode entrar.')
@@ -154,12 +165,13 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {(modo === 'entrar' || modo === 'mecanico') && (
             <input className={campo} type="password" autoComplete="current-password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
           )}
-          {modo === 'recuperar' && (
+          {(modo === 'entrar' || modo === 'recuperar' || modo === 'mecanico') && (
             <div className="flex flex-col items-center gap-2 py-2">
               {turnstileSiteKey ? (
                 <Turnstile
+                  key={modo}
                   siteKey={turnstileSiteKey}
-                  options={{ action: 'recuperar_senha', language: 'pt-BR', theme: 'light' }}
+                  options={{ action: modo === 'entrar' ? 'login' : modo === 'recuperar' ? 'recuperar_senha' : 'cadastro_mecanico', language: 'pt-BR', theme: 'light' }}
                   onSuccess={token => { setCaptchaToken(token); setErro('') }}
                   onExpire={() => setCaptchaToken('')}
                   onError={() => { setCaptchaToken(''); setErro('Não foi possível validar a verificação. Atualize a página e tente novamente.') }}
@@ -180,7 +192,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {aviso && <p className="text-sm text-green-700">{aviso}</p>}
 
           {!senhaAlterada && (
-            <button disabled={enviando || (modo === 'recuperar' && (!turnstileSiteKey || !captchaToken))} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
+            <button disabled={enviando || (['entrar', 'recuperar', 'mecanico'].includes(modo) && (!turnstileSiteKey || !captchaToken))} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
               {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Criar acesso de mecânico' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
             </button>
           )}
@@ -192,7 +204,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
 
           {modo === 'entrar' && (
             <>
-              <button type="button" onClick={() => { setModo('recuperar'); setErro(''); setAviso('') }} className="link">
+              <button type="button" onClick={() => { setModo('recuperar'); setCaptchaToken(''); setErro(''); setAviso('') }} className="link">
                 Esqueci minha senha
               </button>
               <Link to="/cadastro" className="link">Criar conta e experimentar grátis por 7 dias</Link>
@@ -200,12 +212,12 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
             </>
           )}
           {(modo === 'mecanico' || modo === 'recuperar' || modo === 'redefinir') && (
-            <button type="button" onClick={() => { setModo('entrar'); setErro(''); setAviso('') }} className="link">
+            <button type="button" onClick={() => { setModo('entrar'); setCaptchaToken(''); setErro(''); setAviso('') }} className="link">
               Voltar para entrar
             </button>
           )}
           {modo === 'entrar' && (
-            <button type="button" onClick={() => { setModo('mecanico'); setErro(''); setAviso('') }} className="link">
+            <button type="button" onClick={() => { setModo('mecanico'); setCaptchaToken(''); setErro(''); setAviso('') }} className="link">
               Sou mecânico e tenho o código da oficina
             </button>
           )}
