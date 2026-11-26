@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent, type MouseEvent as MouseReact } from 'react'
+import { Turnstile } from '@marsidev/react-turnstile'
 import { Link } from 'react-router-dom'
 import { supabase, supabaseConfigurado } from '../lib/supabase'
 import { Emblema } from '../components/Cenario'
@@ -6,6 +7,7 @@ import { Atmosfera } from '../components/Atmosfera'
 import { URL_DOWNLOAD, noSite, urlInstalador, urlSite } from '../lib/urlSite'
 
 const campo = 'campo'
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
 const urlRedirecionamentoAuth = () => import.meta.env.MODE === 'test' ? window.location.origin : urlSite()
 
 export default function Login({ redefinir = false }: { redefinir?: boolean } = {}) {
@@ -20,6 +22,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
   const [aviso, setAviso] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [linkWindows, setLinkWindows] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState('')
 
   useEffect(() => {
     if (!noSite) return
@@ -33,7 +36,12 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
     setEnviando(true)
     try {
       if (modo === 'recuperar') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlRedirecionamentoAuth() })
+        if (!turnstileSiteKey || !captchaToken) {
+          setErro('Conclua a verificação de segurança antes de solicitar a recuperação.')
+          return
+        }
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlRedirecionamentoAuth(), captchaToken })
+        setCaptchaToken('')
         if (error) setErro(error.message)
         else setAviso('Se houver uma conta vinculada a esse e-mail, enviaremos um link para redefinir a senha. Confira sua caixa de entrada e o spam.')
       } else if (modo === 'redefinir') {
@@ -137,6 +145,21 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {(modo === 'entrar' || modo === 'mecanico') && (
             <input className={campo} type="password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
           )}
+          {modo === 'recuperar' && (
+            <div className="flex flex-col items-center gap-2 py-2">
+              {turnstileSiteKey ? (
+                <Turnstile
+                  siteKey={turnstileSiteKey}
+                  options={{ action: 'recuperar_senha', language: 'pt-BR', theme: 'light' }}
+                  onSuccess={token => { setCaptchaToken(token); setErro('') }}
+                  onExpire={() => setCaptchaToken('')}
+                  onError={() => { setCaptchaToken(''); setErro('Não foi possível validar a verificação. Atualize a página e tente novamente.') }}
+                />
+              ) : (
+                <p className="text-sm text-red-600">A verificação de segurança está indisponível. Tente novamente mais tarde.</p>
+              )}
+            </div>
+          )}
           {modo === 'redefinir' && (
             <>
               <input className={campo} type="password" placeholder="Nova senha (mín. 6 caracteres)" minLength={6} value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} required />
@@ -147,7 +170,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {erro && <p className="text-sm text-red-600">{erro}</p>}
           {aviso && <p className="text-sm text-green-700">{aviso}</p>}
 
-          <button disabled={enviando} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
+          <button disabled={enviando || (modo === 'recuperar' && (!turnstileSiteKey || !captchaToken))} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
             {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Criar acesso de mecânico' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
           </button>
 
