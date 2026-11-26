@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import DemoInterativa from './DemoInterativa'
 import './site-publico.css'
 
 const recursos = [
@@ -24,7 +23,6 @@ const duvidas = [
 const navegacao = [
   ['#visao', 'Benefícios'],
   ['#como-funciona', 'Como funciona'],
-  ['#demo', 'Demonstração'],
   ['#recursos', 'Recursos'],
   ['#planos', 'Planos'],
   ['#duvidas', 'Perguntas'],
@@ -99,8 +97,6 @@ export default function SitePublico() {
           <div className="sp-editorial-copy"><div className="sp-section-kicker"><span>03</span> MENOS PAPELADA NO DIA A DIA</div><h2>Mais clareza para tocar a oficina.<br /><em>Menos tempo procurando informação.</em></h2><p>Encontre os dados do cliente, o histórico da moto e o que foi combinado para cada serviço. Tudo fica registrado para você não depender de papéis, cadernos ou conversas antigas.</p><div className="sp-proof-list"><div><b>01</b><span>O histórico de cada cliente e moto</span></div><div><b>02</b><span>Cada serviço no seu lugar</span></div><div><b>03</b><span>Orçamentos para enviar pelo WhatsApp</span></div></div></div>
         </section>
 
-        <DemoInterativa />
-
         <section className="sp-trust-strip" aria-label="Destaques do Ofício do Motor">
           <div><b>SEM CONTA PARA O CLIENTE</b><span>O orçamento abre pelo link.</span></div>
           <div><b>HISTÓRICO POR PLACA</b><span>Encontre o atendimento da moto.</span></div>
@@ -109,7 +105,7 @@ export default function SitePublico() {
         </section>
 
         <section id="recursos" className="sp-features">
-          <div className="sp-section-kicker"><span>05</span> FERRAMENTAS PARA O TRABALHO DE TODO DIA</div>
+          <div className="sp-section-kicker"><span>04</span> FERRAMENTAS PARA O TRABALHO DE TODO DIA</div>
           <div className="sp-section-heading"><h2>O essencial para cuidar<br /><em>de cada atendimento.</em></h2><p>Recursos práticos para acompanhar clientes, serviços, peças e o financeiro da oficina.</p></div>
           <div className="sp-feature-grid">
             {recursos.map((r) => <article className="sp-feature" key={r.numero}><div className="sp-feature-top"><span>{r.numero}</span><small>{r.detalhe}</small></div><h3>{r.titulo}</h3><p>{r.texto}</p><div className="sp-feature-rule" /></article>)}
@@ -124,7 +120,7 @@ export default function SitePublico() {
         </section>
 
         <section id="planos" className="sp-pricing">
-          <div className="sp-section-kicker"><span>06</span> PLANOS SIMPLES, SEM SURPRESA</div>
+          <div className="sp-section-kicker"><span>05</span> PLANOS SIMPLES, SEM SURPRESA</div>
           <div className="sp-section-heading"><h2>Comece pelo essencial.<br /><em>Amplie quando precisar.</em></h2><p>Escolha o plano que combina com a sua rotina. O valor é por oficina, sem cobrança por funcionário.</p></div>
           <div className="sp-plan-grid">
             <article className="sp-plan"><div className="sp-plan-label">ESSENCIAL</div><h3>Básico</h3><p className="sp-plan-price">R$ 49,90 <small>/ mês</small></p><p className="sp-plan-desc">Para organizar clientes, motos e ordens de serviço.</p><ul><li>Cadastro de clientes e motos</li><li>Ordens de serviço</li><li>Orçamentos por link</li><li>Catálogo de serviços</li><li>Acesso para equipe incluído</li></ul><Link to="/cadastro?plano=basico" className="sp-button sp-button-outline">Testar o Básico por 7 dias <Seta /></Link></article>
@@ -135,7 +131,7 @@ export default function SitePublico() {
         </section>
 
         <section id="duvidas" className="sp-faq">
-          <div className="sp-section-kicker"><span>07</span> PERGUNTAS FREQUENTES</div>
+          <div className="sp-section-kicker"><span>06</span> PERGUNTAS FREQUENTES</div>
           <div className="sp-faq-grid"><h2>Respostas claras<br /><em>para decidir com calma.</em></h2><div className="sp-faq-list">{duvidas.map(([q, a]) => <details key={q}><summary>{q}<span>＋</span></summary><p>{a}</p></details>)}</div></div>
         </section>
 
@@ -143,7 +139,7 @@ export default function SitePublico() {
         <section className="sp-final">
           <img src="/img/moto-cafe.jpg" alt="" loading="lazy" />
           <div className="sp-final-overlay" />
-          <div className="sp-final-content"><div className="sp-section-kicker"><span>08</span> SUA OFICINA PODE FICAR MAIS ORGANIZADA</div><h2>Cuide dos serviços.<br /><em>Deixe o controle com o sistema.</em></h2><p>Experimente por sete dias, sem cartão e sem pagamento antecipado. Veja como o sistema funciona na rotina da sua oficina.</p><div className="sp-hero-actions"><Link to="/cadastro" className="sp-button sp-button-primary">Começar teste grátis de 7 dias <Seta /></Link><Link to="/entrar" className="sp-button sp-button-ghost">Já sou cliente · Entrar <Seta /></Link></div></div>
+          <div className="sp-final-content"><div className="sp-section-kicker"><span>07</span> SUA OFICINA PODE FICAR MAIS ORGANIZADA</div><h2>Cuide dos serviços.<br /><em>Deixe o controle com o sistema.</em></h2><p>Experimente por sete dias, sem cartão e sem pagamento antecipado. Veja como o sistema funciona na rotina da sua oficina.</p><div className="sp-hero-actions"><Link to="/cadastro" className="sp-button sp-button-primary">Começar teste grátis de 7 dias <Seta /></Link><Link to="/entrar" className="sp-button sp-button-ghost">Já sou cliente · Entrar <Seta /></Link></div></div>
         </section>
       </main>
 
