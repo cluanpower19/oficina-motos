@@ -38,12 +38,6 @@ export default function Admin() {
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
   const [aba, setAba] = useState<'oficinas' | 'cobrancas' | 'solicitacoes' | 'recursos'>('oficinas')
-  const [novoEmail, setNovoEmail] = useState('')
-  const [novaOficina, setNovaOficina] = useState('')
-  const [novoResponsavel, setNovoResponsavel] = useState('')
-  const [novoTelefone, setNovoTelefone] = useState('')
-  const [novoPlano, setNovoPlano] = useState('basico')
-  const [criandoOficina, setCriandoOficina] = useState(false)
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -93,30 +87,6 @@ export default function Admin() {
       await carregar()
     }
     setSalvando(null)
-  }
-
-  async function criarOficina() {
-    if (!novoEmail.trim() || !novaOficina.trim() || !novoResponsavel.trim()) {
-      setErro('Informe o e-mail confirmado, o nome da oficina e o responsável.')
-      return
-    }
-    setCriandoOficina(true)
-    setErro('')
-    setAviso('')
-    const { error } = await supabase.rpc('admin_criar_oficina', {
-      p_email: novoEmail.trim(),
-      p_nome: novaOficina.trim(),
-      p_telefone: novoTelefone.replace(/\D/g, ''),
-      p_usuario_nome: novoResponsavel.trim(),
-      p_plano: novoPlano,
-    })
-    setCriandoOficina(false)
-    if (error) setErro('Não foi possível provisionar a oficina: ' + error.message)
-    else {
-      setAviso('Oficina criada bloqueada. O acesso será liberado após a confirmação do Pix na aba Cobranças.')
-      setNovoEmail(''); setNovaOficina(''); setNovoResponsavel(''); setNovoTelefone(''); setNovoPlano('basico')
-      await carregar()
-    }
   }
 
   function alterar(oficina: Oficina, campo: keyof Edicao, valor: string) {
@@ -177,19 +147,10 @@ export default function Admin() {
           ))}
         </section>
 
-        <section className="rounded-2xl border border-orange-400/20 bg-[#101925] p-5 md:p-6">
-          <div className="mb-4">
-            <h2 className="text-lg font-bold">Provisionar nova oficina</h2>
-            <p className="mt-1 text-sm text-slate-400">Primeiro convide o responsável em Supabase → Authentication → Users. Depois que ele aceitar e confirmar o e-mail, informe os mesmos dados abaixo. A oficina será criada bloqueada.</p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="text-xs text-slate-400">E-mail confirmado do usuário<input type="email" value={novoEmail} onChange={e=>setNovoEmail(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#090f17] px-3 py-2.5 text-sm text-white" placeholder="responsavel@email.com" /></label>
-            <label className="text-xs text-slate-400">Nome da oficina<input value={novaOficina} onChange={e=>setNovaOficina(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#090f17] px-3 py-2.5 text-sm text-white" placeholder="Nome da oficina" /></label>
-            <label className="text-xs text-slate-400">Nome do responsável<input value={novoResponsavel} onChange={e=>setNovoResponsavel(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#090f17] px-3 py-2.5 text-sm text-white" placeholder="Nome completo" /></label>
-            <label className="text-xs text-slate-400">Telefone<input value={novoTelefone} onChange={e=>setNovoTelefone(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#090f17] px-3 py-2.5 text-sm text-white" placeholder="DDD + número" /></label>
-            <label className="text-xs text-slate-400">Plano<select value={novoPlano} onChange={e=>setNovoPlano(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#090f17] px-3 py-2.5 text-sm text-white"><option value="basico">Básico</option><option value="completo">Completo</option></select></label>
-            <div className="flex items-end"><button onClick={()=>void criarOficina()} disabled={criandoOficina} className="w-full rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-[#17130f] disabled:opacity-50">{criandoOficina?'Criando...':'Criar oficina bloqueada'}</button></div>
-          </div>
+        <section className="rounded-2xl border border-white/[0.08] bg-[#101925] p-5 md:p-6">
+          <h2 className="text-lg font-bold">Novos clientes</h2>
+          <p className="mt-1 text-sm leading-relaxed text-slate-400">O cadastro é feito pelo próprio cliente na página pública. Após confirmar o e-mail e entrar pela primeira vez, a oficina é criada automaticamente com 7 dias de teste grátis. Você acompanha o cadastro aqui e confirma a assinatura somente depois de conferir o pagamento na aba Cobranças Pix.</p>
+          <a href="https://oficiodomotor.github.io/cadastro" target="_blank" rel="noreferrer" className="mt-4 inline-flex rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-[#17130f] transition hover:bg-orange-400">Abrir cadastro público</a>
         </section>
 
         <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#101925] shadow-2xl shadow-black/20">
