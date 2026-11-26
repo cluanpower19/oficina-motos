@@ -9,6 +9,11 @@ import { URL_DOWNLOAD, noSite, urlInstalador, urlSite } from '../lib/urlSite'
 const campo = 'campo'
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
 const urlRedirecionamentoAuth = () => import.meta.env.MODE === 'test' ? window.location.origin : urlSite()
+const urlRecuperacaoSenha = () => {
+  const destino = new URL(urlRedirecionamentoAuth())
+  destino.searchParams.set('recovery', '1')
+  return destino.toString()
+}
 
 export default function Login({ redefinir = false }: { redefinir?: boolean } = {}) {
   const [modo, setModo] = useState<'entrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
@@ -40,7 +45,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           setErro('Conclua a verificação de segurança antes de solicitar a recuperação.')
           return
         }
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlRedirecionamentoAuth(), captchaToken })
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: urlRecuperacaoSenha(), captchaToken })
         setCaptchaToken('')
         if (error) setErro(error.message)
         else setAviso('Se houver uma conta vinculada a esse e-mail, enviaremos um link para redefinir a senha. Confira sua caixa de entrada e o spam.')

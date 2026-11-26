@@ -130,8 +130,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [carregando, setCarregando] = useState(true)
-  const [recuperacao, setRecuperacao] = useState(false)
-  const recuperacaoRef = useRef(false)
+  // O parâmetro explícito mantém a tela de recuperação mesmo se o SDK limpar o fragmento da URL.
+  const iniciouRecuperacao = window.location.search.includes('recovery=1') || window.location.hash.includes('type=recovery')
+  const [recuperacao, setRecuperacao] = useState(iniciouRecuperacao)
+  const recuperacaoRef = useRef(iniciouRecuperacao)
 
   useEffect(() => {
     const aplicar = async (s: Session | null, evento?: string) => {
@@ -165,7 +167,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTimeout(() => { void aplicar(s, evento) }, 0)
     })
     supabase.auth.getSession().then(({ data }) => {
-      if (!recuperacaoRef.current) void aplicar(data.session)
+      // Mesmo no retorno de recuperação, guardar a sessão para permitir updateUser({ password }).
+      void aplicar(data.session)
     })
     return () => sub.subscription.unsubscribe()
   }, [])
