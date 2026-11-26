@@ -54,7 +54,8 @@ export default function SitePublico() {
           <button type="button" className="sp-menu-toggle" aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuAberto} aria-controls="sp-site-nav" onClick={() => setMenuAberto((v) => !v)}>
             <span /><span /><span />
           </button>
-          <Link to="/entrar" className="sp-header-cta" aria-label="Já sou cliente? Entrar">Entrar <Seta /></Link>
+          <Link to="/cadastro" className="sp-header-trial">Teste grátis <Seta /></Link>
+          <Link to="/entrar" className="sp-header-cta" aria-label="Já sou cliente? Entrar">Entrar</Link>
         </div>
       </header>
 
@@ -66,12 +67,13 @@ export default function SitePublico() {
           <div className="sp-hero-content">
             <p className="sp-eyebrow"><span /> GESTÃO FEITA PARA A ROTINA DA OFICINA</p>
             <h1>Sua oficina em ordem.<br /><em>Seu dia mais leve.</em></h1>
-            <p className="sp-hero-lead">Clientes, motos, orçamentos e ordens de serviço ficam no mesmo lugar. Você acompanha cada atendimento sem se perder em papéis ou conversas.</p>
+            <p className="sp-hero-lead">Organize clientes, motos, orçamentos e ordens de serviço em um só lugar. <strong>Experimente por 7 dias grátis</strong> e veja como funciona na rotina da sua oficina.</p>
             <div className="sp-hero-actions">
-              <a href="#demo" className="sp-button sp-button-primary">Conhecer o sistema <Seta /></a>
-              <a href="#como-funciona" className="sp-button sp-button-ghost">Entender como funciona <span aria-hidden="true">↓</span></a>
+              <Link to="/cadastro" className="sp-button sp-button-primary">Começar teste grátis de 7 dias <Seta /></Link>
+              <a href="#planos" className="sp-button sp-button-ghost">Ver planos</a>
             </div>
-            <div className="sp-hero-foot"><span>7 DIAS GRÁTIS · SEM CARTÃO</span><span>CLIENTES · MOTOS · ORÇAMENTOS · SERVIÇOS</span></div>
+            <a className="sp-hero-tour-link" href="#tour">Prefere conhecer antes? Faça o tour guiado <Seta /></a>
+            <div className="sp-hero-trial-proof"><span>7 DIAS GRÁTIS</span><i /> <span>SEM CARTÃO</span><i /> <span>SEM PAGAMENTO ANTECIPADO</span></div>
           </div>
           <div className="sp-hero-side-note"><span className="sp-side-line" /> FEITO PARA QUEM CUIDA DE MOTOS</div>
         </section>
@@ -101,8 +103,6 @@ export default function SitePublico() {
         </section>
 
         <DemoInterativa />
-
-        <TourGuiado />
 
         <section className="sp-trust-strip" aria-label="Destaques do Ofício do Motor">
           <div><b>SEM CONTA PARA O CLIENTE</b><span>O orçamento abre pelo link.</span></div>
@@ -141,6 +141,8 @@ export default function SitePublico() {
           <div className="sp-section-kicker"><span>07</span> PERGUNTAS FREQUENTES</div>
           <div className="sp-faq-grid"><h2>Respostas claras<br /><em>para decidir com calma.</em></h2><div className="sp-faq-list">{duvidas.map(([q, a]) => <details key={q}><summary>{q}<span>＋</span></summary><p>{a}</p></details>)}</div></div>
         </section>
+
+        <TourGuiado />
 
         <section className="sp-final">
           <img src="/img/moto-cafe.jpg" alt="" loading="lazy" />
