@@ -10,9 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+# Compartilha o bloqueio com o fluxo do APK para impedir publicações concorrentes.
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: android-official-release
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -27,6 +28,13 @@ jobs:
       - name: Testes automatizados
         run: npm test
       - run: npm run build
+      - name: Preservar o APK oficial na publicação do site
+        run: |
+          mkdir -p dist/downloads
+          curl --fail --location --retry 3 --retry-all-errors \
+            https://oficiodomotor.github.io/downloads/OficioDoMotor.apk \
+            --output dist/downloads/OficioDoMotor.apk
+          test -s dist/downloads/OficioDoMotor.apk
       - name: Fallback SPA (rotas diretas como /orcamento/...)
         run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
