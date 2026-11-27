@@ -134,9 +134,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const iniciouRecuperacao = window.location.search.includes('recovery=1') || window.location.hash.includes('type=recovery')
   const [recuperacao, setRecuperacao] = useState(iniciouRecuperacao)
   const recuperacaoRef = useRef(iniciouRecuperacao)
+  const requisicaoPerfil = useRef(0)
 
   useEffect(() => {
     const aplicar = async (s: Session | null, evento?: string) => {
+      const requisicaoAtual = ++requisicaoPerfil.current
       if (evento === 'PASSWORD_RECOVERY') {
         recuperacaoRef.current = true
         setRecuperacao(true)
@@ -150,17 +152,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRecuperacao(false)
       }
       setSession(s)
+      if (!s) {
+        setPerfil(null)
+        setCarregando(false)
+        return
+      }
+      // A sessão pode chegar antes do perfil. Mantenha a tela de carregamento
+      // até terminar a consulta, evitando exibir um falso erro de cadastro.
+      setCarregando(true)
       if (recuperacaoRef.current) {
         setCarregando(false)
         return
       }
       try {
-        setPerfil(s ? await buscarPerfil(s) : null)
+        const novoPerfil = await buscarPerfil(s)
+        if (requisicaoAtual === requisicaoPerfil.current) {
+          setPerfil(novoPerfil)
+          if (novoPerfil) erroCriacao = ''
+        }
       } catch (error) {
-        erroCriacao = error instanceof Error ? error.message : 'Falha de comunicação ao carregar sua oficina.'
-        setPerfil(null)
+        if (requisicaoAtual === requisicaoPerfil.current) {
+          erroCriacao = error instanceof Error ? error.message : 'Falha de comunicação ao carregar sua oficina.'
+          setPerfil(null)
+        }
       } finally {
-        setCarregando(false)
+        if (requisicaoAtual === requisicaoPerfil.current) setCarregando(false)
       }
     }
     const { data: sub } = supabase.auth.onAuthStateChange((evento, s) => {
