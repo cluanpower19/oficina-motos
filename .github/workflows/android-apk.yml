@@ -89,24 +89,14 @@ jobs:
           test -s "$APK"
           "${ANDROID_HOME}/build-tools/36.0.0/apksigner" verify --verbose "$APK"
 
-      - name: Publish APK in website files
-        run: |
-          mkdir -p public/downloads
-          cp android/app/build/outputs/apk/release/app-release.apk public/downloads/OficioDoMotor.apk
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/downloads/OficioDoMotor.apk
-          if ! git diff --cached --quiet; then
-            git commit -m "Publica APK oficial assinado"
-            git push
-          fi
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
       - name: Build website including the official APK
         run: |
           npm run build
+          mkdir -p dist/downloads
+          cp android/app/build/outputs/apk/release/app-release.apk dist/downloads/OficioDoMotor.apk
           cp dist/index.html dist/404.html
 
       - name: Upload website
