@@ -159,3 +159,117 @@ a:hover > .velocimetro { transform: translateY(-2px); border-color: rgba(242,160
 .download-app { display: flex; width: 100%; min-height: 3rem; align-items: center; justify-content: center; padding: 0.75rem 1rem; border: 1px solid rgba(242,160,61,0.55); border-radius: 0.65rem; background: rgba(242,160,61,0.07); color: var(--tungstenio); font-family: var(--fonte-titulo); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; text-align: center; text-decoration: none; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
 .download-app:hover { background: rgba(242,160,61,0.16); border-color: var(--tungstenio); transform: translateY(-1px); }
 @media (min-width: 560px) { .downloads-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+
+/* ===== Login nativo Android: experiência própria, separada da página comercial ===== */
+.login-app {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.1rem, 5vw, 2.5rem);
+  overflow-y: auto;
+  background:
+    radial-gradient(ellipse at 50% -12%, rgba(242,160,61,.19), transparent 52%),
+    radial-gradient(ellipse at 0% 100%, rgba(31,111,120,.16), transparent 42%),
+    linear-gradient(145deg, #080d13 0%, #111a24 52%, #090e14 100%);
+}
+.login-app-form {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-app-card {
+  width: 100%;
+  max-width: 27rem;
+  padding: clamp(1.5rem, 5vw, 2.25rem);
+  border: 1px solid rgba(201,206,214,.16);
+  border-radius: 1.35rem;
+  background: linear-gradient(155deg, rgba(29,39,52,.98), rgba(13,19,27,.99));
+  box-shadow: 0 28px 80px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.07);
+  animation: login-app-entra .45s ease-out both;
+}
+.login-app-card::before { height: 4px; opacity: 1; }
+.login-app-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .9rem;
+  margin: 0 auto 1.8rem;
+  padding-bottom: 1.35rem;
+  border-bottom: 1px solid rgba(201,206,214,.13);
+}
+.login-app-brand strong {
+  display: block;
+  color: #f3f5f7;
+  font-family: var(--fonte-marca);
+  font-size: 1.25rem;
+  letter-spacing: .09em;
+  line-height: 1.1;
+}
+.login-app-brand span {
+  display: block;
+  margin-top: .3rem;
+  color: var(--tungstenio);
+  font-family: var(--fonte-titulo);
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .2em;
+}
+.login-app-card h2 {
+  margin-bottom: .25rem;
+  text-align: center;
+  font-size: 1.8rem;
+}
+.login-app-intro {
+  margin: .45rem 0 1.2rem;
+  color: #9aa7b6;
+  text-align: center;
+  font-size: .92rem;
+  line-height: 1.5;
+}
+.login-app-card .campo {
+  min-height: 3.15rem;
+  border-radius: .75rem;
+  border: 1px solid #394758;
+  background: #0b121a;
+  padding: .9rem 1rem;
+  color: #f1f4f7;
+}
+.login-app-card .campo:focus {
+  border-color: var(--tungstenio);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(242,160,61,.14);
+}
+.login-app-card button[type="submit"] {
+  min-height: 3.25rem;
+  margin-top: .25rem;
+  border-radius: .75rem;
+  background: linear-gradient(135deg, #ffc16d, #e58f27);
+  color: #1b1205;
+  font-family: var(--fonte-titulo);
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 22px rgba(229,143,39,.2);
+}
+.login-app-card .link {
+  color: #c0cad5;
+  font-size: .9rem;
+  padding: .42rem;
+}
+.login-app-card .link:hover { color: var(--tungstenio); }
+@keyframes login-app-entra {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 420px) {
+  .login-app { padding: 1rem; }
+  .login-app-card { padding: 1.4rem 1.15rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-app-card { animation: none; }
+}
