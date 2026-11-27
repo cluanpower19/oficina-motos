@@ -1,5 +1,7 @@
 name: Build and publish official Android APK
 
+# Publicação de produção: build assinado e deploy do APK oficial.
+
 on:
   workflow_dispatch:
   push:
