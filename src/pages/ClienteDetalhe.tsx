@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { formatarPlaca, formatarTelefone, mensagemErro, validarAnoFabricacao, validarPlaca } from '../lib/formatos'
+import { formatarMoeda, formatarPlaca, formatarTelefone, mensagemErro, validarAnoFabricacao, validarPlaca } from '../lib/formatos'
+import { COR, ROTULO, type StatusOS } from '../lib/status'
 import { botao, campo } from './Clientes'
 
 type Moto = {
@@ -14,12 +15,29 @@ type Moto = {
   km_atual: number | null
 }
 type Cliente = { id: string; nome: string; telefone: string | null; observacoes: string | null }
+type HistoricoOS = {
+  id: string
+  numero: number
+  moto_id: string
+  status: StatusOS
+  valor_total: number
+  km_entrada: number | null
+  criado_em: string
+}
+type ItemHistorico = {
+  id: string
+  os_id: string
+  tipo: 'servico' | 'peca'
+  descricao: string
+  quantidade: number
+  valor_unitario: number
+}
 
 export default function ClienteDetalhe() {
   const { id } = useParams()
   const nav = useNavigate()
   const [cli, setCli] = useState<Cliente | null>(null)
-  const [motos, setMotos] = useState<Moto[]>([])
+  const [motos, setMotos] = useState<Moto[]>([])\n  const [historico, setHistorico] = useState<HistoricoOS[]>([])\n  const [itensHistorico, setItensHistorico] = useState<ItemHistorico[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [ok, setOk] = useState('')
@@ -186,10 +204,52 @@ export default function ClienteDetalhe() {
         )}
       </div>
 
-      <div className="rounded-xl bg-white p-4 shadow">
-        <h2 className="text-lg font-semibold text-gray-800">Histórico de serviços</h2>
-        <p className="text-gray-600">Aparece aqui depois da Etapa 4 (ordens de serviço).</p>
-      </div>
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800">Histórico de manutenção</h2>
+          <p className="text-sm text-gray-500">Ordens de serviço e serviços realizados em cada moto.</p>
+        </div>
+        {historico.length === 0 ? (
+          <div className="rounded-xl bg-white p-4 text-sm text-gray-600 shadow">
+            Ainda não há ordens de serviço registradas para este cliente.
+          </div>
+        ) : motos.map((mo) => {
+          const ordensMoto = historico.filter((os) => os.moto_id === mo.id)
+          if (!ordensMoto.length) return null
+          return (
+            <div key={mo.id} className="space-y-2 rounded-xl bg-white p-4 shadow">
+              <div className="font-semibold text-gray-800">{formatarPlaca(mo.placa)} · {[mo.marca, mo.modelo].filter(Boolean).join(' ')}</div>
+              {mo.km_atual != null && <p className="text-xs text-gray-500">Quilometragem cadastrada: {mo.km_atual.toLocaleString('pt-BR')} km</p>}
+              {ordensMoto.map((os) => {
+                const itens = itensHistorico.filter((item) => item.os_id === os.id)
+                return (
+                  <div key={os.id} className="border-t border-gray-100 pt-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Link to={`/os/${os.id}`} className="font-semibold text-orange-600 underline">OS #{os.numero}</Link>
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${COR[os.status]}`}>{ROTULO[os.status]}</span>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {new Date(os.criado_em).toLocaleDateString('pt-BR')}
+                      {os.km_entrada != null ? ` · ${os.km_entrada.toLocaleString('pt-BR')} km` : ''}
+                    </p>
+                    {itens.length > 0 ? (
+                      <ul className="mt-2 space-y-1">
+                        {itens.map((item) => (
+                          <li key={item.id} className="flex justify-between gap-3 text-sm text-gray-700">
+                            <span>{item.descricao} <span className="text-gray-400">({item.tipo === 'servico' ? 'serviço' : 'peça'} · {item.quantidade}x)</span></span>
+                            <span className="shrink-0">{formatarMoeda(Number(item.quantidade) * Number(item.valor_unitario))}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : <p className="mt-2 text-xs text-gray-400">Nenhum serviço ou peça lançado nesta OS.</p>}
+                    <div className="mt-2 text-right text-sm font-semibold text-gray-800">Total: {formatarMoeda(Number(os.valor_total))}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
+      </section>
 
       <button onClick={removerCliente} className="text-sm text-red-600">Remover cliente</button>
     </div>
