@@ -2,7 +2,7 @@ name: Ambiente de testes
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'feature/**']
   workflow_dispatch:
   pull_request:
     branches: [main]
@@ -13,6 +13,10 @@ permissions:
 jobs:
   test-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
@@ -21,12 +25,35 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Instalar Android SDK
+        run: |
+          yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
       - name: Instalar dependências
         run: npm ci
       - name: Executar testes automatizados
         run: npm test
-      - name: Gerar aplicativo conectado ao Supabase de testes
+      - name: Gerar aplicativo web conectado ao Supabase de testes
         run: npm run build:test
+      - name: Sincronizar projeto Android
+        run: npx cap sync android
+      - name: Validar configuração Android do Turnstile
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; const p='android/app/src/main/assets/capacitor.config.json'; const c=JSON.parse(fs.readFileSync(p,'utf8')); if(c.server?.hostname!=='oficiodomotor.github.io') throw new Error('Hostname do Turnstile ausente/incorreto no APK: '+JSON.stringify(c.server)); if(!c.server?.allowNavigation?.includes('challenges.cloudflare.com')) throw new Error('allowNavigation do Cloudflare ausente no APK'); console.log('Configuração Android validada:', JSON.stringify(c.server));"
+      - name: Compilar APK Android de testes
+        working-directory: android
+        run: bash ./gradlew --no-daemon assembleDebug
+      - name: Preparar artefato de testes
+        run: |
+          mkdir -p dist/downloads
+          rm -f dist/downloads/OficioDoMotor.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/downloads/OficioDoMotor-Testes.apk
+          test -s dist/downloads/OficioDoMotor-Testes.apk
       - name: Guardar aplicativo de testes (sem publicar no site oficial)
         uses: actions/upload-artifact@v4
         with:
