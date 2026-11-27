@@ -1,0 +1,38 @@
+name: Verify Android signing certificate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-signing-certificate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Read signing certificate fingerprint
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          set +x
+          test -n "$ANDROID_KEYSTORE_BASE64" || { echo "Keystore secret is empty"; exit 1; }
+          test -n "$ANDROID_KEYSTORE_PASSWORD" || { echo "Keystore password secret is empty"; exit 1; }
+          test -n "$ANDROID_KEY_ALIAS" || { echo "Key alias secret is empty"; exit 1; }
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release-key.p12"
+          echo "Certificate fingerprint (SHA-256):"
+          keytool -list -v -keystore "$RUNNER_TEMP/release-key.p12" -storetype PKCS12 -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" 2>/dev/null | grep -E 'SHA256:|SHA-256:'
+
+      - name: Remove temporary keystore
+        if: always()
+        shell: bash
+        run: rm -f "$RUNNER_TEMP/release-key.p12"
