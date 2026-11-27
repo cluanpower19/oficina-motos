@@ -114,38 +114,46 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
   const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'mecanico' ? 'Entrar como mecânico' : modo === 'recuperar' ? 'Recuperar senha' : 'Criar nova senha'
 
   return (
-    <div className="cena">
-      <section className="cena-visual" aria-hidden="false" onMouseMove={mover}>
-        <div className="camera">
-          <div className="foto-cena" aria-hidden="true" />
-          <div className="luz-foto" aria-hidden="true" />
-          <Atmosfera />
-        </div>
-        <div className="barra-cine topo" aria-hidden="true" />
-        <div className="barra-cine base" aria-hidden="true" />
-        <div className="cena-texto">
-          <div className="marca">
-            <Emblema tamanho={52} />
-            <div className="marca-nome">
-              Ofício
-              <small>do motor · Gestão</small>
+    <div className={noSite ? "cena" : "login-app"}>
+      {noSite && (
+        <section className="cena-visual" aria-hidden="false" onMouseMove={mover}>
+          <div className="camera">
+            <div className="foto-cena" aria-hidden="true" />
+            <div className="luz-foto" aria-hidden="true" />
+            <Atmosfera />
+          </div>
+          <div className="barra-cine topo" aria-hidden="true" />
+          <div className="barra-cine base" aria-hidden="true" />
+          <div className="cena-texto">
+            <div className="marca">
+              <Emblema tamanho={52} />
+              <div className="marca-nome">
+                Ofício
+                <small>do motor · Gestão</small>
+              </div>
+            </div>
+            <div>
+              <h1 className="manchete">Chega de orçamento só de boca.</h1>
+              <p className="sub-manchete">O cliente aprova pelo link no WhatsApp e a oficina guarda o dia e a hora. Depois não tem discussão.</p>
+              <div className="assinatura">
+                <span>Orçamento por link</span>
+                <span>Histórico por placa</span>
+                <span>Lembrete de óleo</span>
+              </div>
             </div>
           </div>
-          <div>
-            <h1 className="manchete">Chega de orçamento só de boca.</h1>
-            <p className="sub-manchete">O cliente aprova pelo link no WhatsApp e a oficina guarda o dia e a hora. Depois não tem discussão.</p>
-            <div className="assinatura">
-              <span>Orçamento por link</span>
-              <span>Histórico por placa</span>
-              <span>Lembrete de óleo</span>
+        </section>
+      )}
+      <section className={noSite ? "cena-form" : "login-app-form"}>
+        <form onSubmit={enviar} className="cartao-entrada space-y-3 login-app-card">
+          {!noSite && (
+            <div className="login-app-brand">
+              <Emblema tamanho={58} />
+              <div><strong>OFÍCIO DO MOTOR</strong><span>GESTÃO DE OFICINAS</span></div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="cena-form">
-        <form onSubmit={enviar} className="cartao-entrada space-y-3">
+          )}
           <h2 className="titulo text-3xl text-gray-800">{titulo}</h2>
+          {!noSite && <p className="login-app-intro">Acesse sua oficina com segurança e continue de onde parou.</p>}
 
           {!supabaseConfigurado && (
             <p className="rounded bg-yellow-100 p-3 text-sm text-yellow-800">
