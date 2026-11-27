@@ -7,21 +7,21 @@ on:
       - main
     paths:
       - '.github/workflows/android-apk.yml'
-      - 'src/pages/Login.tsx'
-      - 'src/App.tsx'
-      - 'src/components/Layout.tsx'
-      - 'android/app/build.gradle'
-      - 'android/app/src/main/java/**'
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
       - 'capacitor.config.ts'
-      - 'android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml'
-      - 'android/app/src/main/res/mipmap-anydpi/ic_launcher.xml'
-      - 'android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml'
+      - '.env.production'
+      - 'android/**'
 
 permissions:
   contents: write
   pages: write
   id-token: write
 
+# Serializa as publicações do APK e do site no mesmo ambiente GitHub Pages.
 concurrency:
   group: android-official-release
   cancel-in-progress: false
