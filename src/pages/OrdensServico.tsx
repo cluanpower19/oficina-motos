@@ -24,7 +24,7 @@ export default function OrdensServico() {
   useEffect(() => {
     supabase
       .from('ordens_servico')
-      .select('id, numero, status, valor_total, criado_em, clientes(nome), motos(placa, modelo)')
+      .select('id, numero, status, valor_total, criado_em, clientes!ordens_servico_cliente_id_fkey(nome), motos!ordens_servico_moto_id_fkey(placa, modelo)')
       .order('numero', { ascending: false })
       .limit(200)
       .then(({ data, error }) => {
