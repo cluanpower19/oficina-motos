@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/android-apk.yml'
       - 'src/pages/Login.tsx'
       - 'src/App.tsx'
       - 'src/components/Layout.tsx'
