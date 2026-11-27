@@ -62,6 +62,8 @@ export default function ClienteDetalhe() {
       if (!c) {
         setCli(null)
         setMotos([])
+        setHistorico([])
+        setItensHistorico([])
         return
       }
       setCli(c)
@@ -74,8 +76,40 @@ export default function ClienteDetalhe() {
       if (erroMotos) {
         setMotos([])
         setErro(mensagemErro(erroMotos))
+        setHistorico([])
+        setItensHistorico([])
       } else {
         setMotos(ms ?? [])
+      }
+
+      const { data: ordens, error: erroOrdens } = await supabase
+        .from('ordens_servico')
+        .select('id, numero, moto_id, status, valor_total, km_entrada, criado_em')
+        .eq('cliente_id', c.id)
+        .order('criado_em', { ascending: false })
+        .limit(100)
+
+      if (erroOrdens) {
+        setHistorico([])
+        setItensHistorico([])
+        setErro(mensagemErro(erroOrdens))
+      } else {
+        const listaOS = (ordens ?? []) as HistoricoOS[]
+        setHistorico(listaOS)
+        if (listaOS.length > 0) {
+          const { data: itens, error: erroItens } = await supabase
+            .from('os_itens')
+            .select('id, os_id, tipo, descricao, quantidade, valor_unitario')
+            .in('os_id', listaOS.map((os) => os.id))
+          if (erroItens) {
+            setItensHistorico([])
+            setErro(mensagemErro(erroItens))
+          } else {
+            setItensHistorico((itens ?? []) as ItemHistorico[])
+          }
+        } else {
+          setItensHistorico([])
+        }
       }
     } catch {
       setErro('Não foi possível carregar o cliente e suas motos. Verifique sua conexão e tente novamente.')
