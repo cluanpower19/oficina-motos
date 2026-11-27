@@ -153,7 +153,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
             </div>
           )}
           <h2 className="titulo text-3xl text-gray-800">{titulo}</h2>
-          {!noSite && <p className="login-app-intro">Acesse sua oficina com segurança e continue de onde parou.</p>}
+          {!noSite && <p className="login-app-intro">Entre com seus dados para acessar sua oficina.</p>}
 
           {!supabaseConfigurado && (
             <p className="rounded bg-yellow-100 p-3 text-sm text-yellow-800">
