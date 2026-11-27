@@ -57,7 +57,10 @@ function Rotas() {
   if (!session) {
     // No APK, a rota inicial deve abrir o login; a página pública fica apenas no navegador.
     if (location.pathname === '/' && !Capacitor.isNativePlatform()) return <SitePublico />
-    if (location.pathname === '/cadastro') return <CadastroOficina />
+    if (/^\/cadastro\/?$/.test(location.pathname)) {
+      if (Capacitor.isNativePlatform()) return <Navigate to="/entrar" replace />
+      return <CadastroOficina />
+    }
     return <Login />
   }
 
