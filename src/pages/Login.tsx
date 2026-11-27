@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent, type MouseEvent as MouseReact } from 'react'
 import { Turnstile } from '@marsidev/react-turnstile'
-import { Link } from 'react-router-dom'
 import { supabase, supabaseConfigurado } from '../lib/supabase'
 import { Emblema } from '../components/Cenario'
 import { Atmosfera } from '../components/Atmosfera'
