@@ -174,7 +174,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
                   options={{ action: modo === 'entrar' ? 'login' : modo === 'recuperar' ? 'recuperar_senha' : 'cadastro_mecanico', language: 'pt-BR', theme: 'light' }}
                   onSuccess={token => { setCaptchaToken(token); setErro('') }}
                   onExpire={() => setCaptchaToken('')}
-                  onError={() => { setCaptchaToken(''); setErro('Não foi possível validar a verificação. Atualize a página e tente novamente.') }}
+                  onError={(codigoErro) => { setCaptchaToken(''); setErro(`Falha na verificação do Cloudflare (código ${codigoErro}). Atualize a página e tente novamente.`) }}
                 />
               ) : (
                 <p className="text-sm text-red-600">A verificação de segurança está indisponível. Tente novamente mais tarde.</p>
