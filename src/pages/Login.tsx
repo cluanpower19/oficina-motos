@@ -237,7 +237,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
               <button type="button" onClick={() => { setModo('recuperar'); setCaptchaToken(''); setCaptchaStatus('Preparando verificação de segurança...'); setErro(''); setAviso('') }} className="link">
                 Esqueci minha senha
               </button>
-              <Link to="/cadastro" className="link">Criar conta e experimentar grátis por 7 dias</Link>
+              {noSite && <Link to="/cadastro" className="link">Criar conta e experimentar grátis por 7 dias</Link>}
               <a href="https://wa.me/5579998424306?text=Ol%C3%A1!%20Quero%20falar%20sobre%20o%20Of%C3%ADcio%20do%20Motor." target="_blank" rel="noopener noreferrer" className="link">Falar com a equipe</a>
             </>
           )}
@@ -246,7 +246,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
               Voltar para entrar
             </button>
           )}
-          {modo === 'entrar' && (
+          {noSite && modo === 'entrar' && (
             <button type="button" onClick={() => { setModo('mecanico'); setCaptchaToken(''); setCaptchaStatus('Preparando verificação de segurança...'); setErro(''); setAviso('') }} className="link">
               Sou mecânico e tenho o código da oficina
             </button>
