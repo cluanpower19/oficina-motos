@@ -56,7 +56,7 @@ export default function OSDetalhe() {
       const [a, b] = await Promise.all([
         supabase
           .from('ordens_servico')
-          .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, moto_id, oficina_id, token_publico, clientes(nome, telefone), motos(placa, marca, modelo)')
+          .select('id, numero, status, valor_total, defeito_relatado, km_entrada, criado_em, cliente_id, moto_id, oficina_id, token_publico, clientes!ordens_servico_cliente_id_fkey(nome, telefone), motos!ordens_servico_moto_id_fkey(placa, marca, modelo)')
           .eq('id', id)
           .single(),
         supabase

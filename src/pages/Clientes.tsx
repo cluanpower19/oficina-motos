@@ -22,7 +22,7 @@ export default function Clientes() {
   async function carregar() {
     const { data, error } = await supabase
       .from('clientes')
-      .select('id, nome, telefone, motos(id, placa, marca, modelo)')
+      .select('id, nome, telefone, motos!motos_cliente_id_fkey(id, placa, marca, modelo)')
       .order('nome')
     if (error) setErro(error.message)
     else setLista((data ?? []) as Cliente[])

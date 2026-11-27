@@ -36,7 +36,7 @@ export default function Lembretes() {
   const carregar = useCallback(async () => {
     const { data, error } = await supabase
       .from('lembretes')
-      .select('id, tipo, data_prevista, km_previsto, motos(placa, marca, modelo, clientes(nome, telefone))')
+      .select('id, tipo, data_prevista, km_previsto, motos!lembretes_moto_id_fkey(placa, marca, modelo, clientes!motos_cliente_id_fkey(nome, telefone))')
       .eq('enviado', false)
       .order('data_prevista', { ascending: true, nullsFirst: false })
     if (error) setErro(error.message)
@@ -52,7 +52,7 @@ export default function Lembretes() {
     setAberto(true)
     if (motos.length === 0) {
       try {
-        const { data, error } = await supabase.from('motos').select('id, placa, modelo, clientes(nome)').order('placa')
+        const { data, error } = await supabase.from('motos').select('id, placa, modelo, clientes!motos_cliente_id_fkey(nome)').order('placa')
         if (error) {
           setErro(mensagemErro(error))
           return

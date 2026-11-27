@@ -35,7 +35,7 @@ export default function NovaOS() {
     }
     supabase
       .from('motos')
-      .select('id, placa, marca, modelo, km_atual, cliente_id, clientes(nome)')
+      .select('id, placa, marca, modelo, km_atual, cliente_id, clientes!motos_cliente_id_fkey(nome)')
       .ilike('placa', `%${p}%`)
       .limit(8)
       .then(({ data, error }) => {
