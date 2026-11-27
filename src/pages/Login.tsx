@@ -28,6 +28,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
   const [enviando, setEnviando] = useState(false)
   const [linkWindows, setLinkWindows] = useState<string | null>(null)
   const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaStatus, setCaptchaStatus] = useState('Preparando verificação de segurança...')
   const [senhaAlterada, setSenhaAlterada] = useState(false)
 
   useEffect(() => {
@@ -168,14 +169,35 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {(modo === 'entrar' || modo === 'recuperar' || modo === 'mecanico') && (
             <div className="flex flex-col items-center gap-2 py-2">
               {turnstileSiteKey ? (
-                <Turnstile
-                  key={modo}
-                  siteKey={turnstileSiteKey}
-                  options={{ action: modo === 'entrar' ? 'login' : modo === 'recuperar' ? 'recuperar_senha' : 'cadastro_mecanico', language: 'pt-BR', theme: 'light' }}
-                  onSuccess={token => { setCaptchaToken(token); setErro('') }}
-                  onExpire={() => setCaptchaToken('')}
-                  onError={(codigoErro) => { setCaptchaToken(''); setErro(`Falha na verificação do Cloudflare (código ${codigoErro}). Atualize a página e tente novamente.`) }}
-                />
+                <>
+                  <Turnstile
+                    key={modo}
+                    siteKey={turnstileSiteKey}
+                    options={{ action: modo === 'entrar' ? 'login' : modo === 'recuperar' ? 'recuperar_senha' : 'cadastro_mecanico', language: 'pt-BR', theme: 'light' }}
+                    scriptOptions={{
+                      onError: () => {
+                        setCaptchaToken('')
+                        setCaptchaStatus('Não foi possível carregar o script do Cloudflare.')
+                        setErro('Falha ao carregar a verificação de segurança. Confira a conexão do aplicativo.')
+                      },
+                    }}
+                    onLoadScript={() => setCaptchaStatus('Script do Cloudflare carregado. Inicializando verificação...')}
+                    onWidgetLoad={() => setCaptchaStatus('Verificação carregada. Aguardando confirmação...')}
+                    onSuccess={token => { setCaptchaToken(token); setCaptchaStatus('Verificação concluída.'); setErro('') }}
+                    onExpire={() => { setCaptchaToken(''); setCaptchaStatus('A verificação expirou. Faça novamente.') }}
+                    onUnsupported={() => {
+                      setCaptchaToken('')
+                      setCaptchaStatus('O navegador interno do aplicativo não é compatível com a verificação.')
+                      setErro('O navegador interno não é compatível com o Cloudflare Turnstile.')
+                    }}
+                    onError={(codigoErro) => {
+                      setCaptchaToken('')
+                      setCaptchaStatus(`Falha no desafio do Cloudflare (código ${codigoErro || 'não informado'}).`)
+                      setErro(`Falha na verificação do Cloudflare (código ${codigoErro || 'não informado'}). Atualize a página e tente novamente.`)
+                    }}
+                  />
+                  <p className="text-xs text-gray-500" role="status">{captchaStatus}</p>
+                </>
               ) : (
                 <p className="text-sm text-red-600">A verificação de segurança está indisponível. Tente novamente mais tarde.</p>
               )}
@@ -204,7 +226,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
 
           {modo === 'entrar' && (
             <>
-              <button type="button" onClick={() => { setModo('recuperar'); setCaptchaToken(''); setErro(''); setAviso('') }} className="link">
+              <button type="button" onClick={() => { setModo('recuperar'); setCaptchaToken(''); setCaptchaStatus('Preparando verificação de segurança...'); setErro(''); setAviso('') }} className="link">
                 Esqueci minha senha
               </button>
               <Link to="/cadastro" className="link">Criar conta e experimentar grátis por 7 dias</Link>
@@ -212,12 +234,12 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
             </>
           )}
           {(modo === 'mecanico' || modo === 'recuperar' || modo === 'redefinir') && (
-            <button type="button" onClick={() => { setModo('entrar'); setCaptchaToken(''); setErro(''); setAviso('') }} className="link">
+            <button type="button" onClick={() => { setModo('entrar'); setCaptchaToken(''); setCaptchaStatus('Preparando verificação de segurança...'); setErro(''); setAviso('') }} className="link">
               Voltar para entrar
             </button>
           )}
           {modo === 'entrar' && (
-            <button type="button" onClick={() => { setModo('mecanico'); setCaptchaToken(''); setErro(''); setAviso('') }} className="link">
+            <button type="button" onClick={() => { setModo('mecanico'); setCaptchaToken(''); setCaptchaStatus('Preparando verificação de segurança...'); setErro(''); setAviso('') }} className="link">
               Sou mecânico e tenho o código da oficina
             </button>
           )}
@@ -232,7 +254,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
                 >
                   Baixar para Windows
                 </a>
-                <a href="/downloads/OficioDoMotor.apk?v=2" download className="download-app" aria-label="Baixar aplicativo Ofício do Motor para Android">
+                <a href="/downloads/OficioDoMotor.apk?v=3" download className="download-app" aria-label="Baixar aplicativo Ofício do Motor para Android">
                   Baixar para Android
                 </a>
               </div>
