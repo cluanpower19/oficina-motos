@@ -5,6 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Ofício do Motor',
   webDir: 'dist',
   server: {
+    // Usa no WebView Android o mesmo hostname autorizado no Turnstile do site.
+    hostname: 'oficiodomotor.github.io',
     // Permite que o desafio do Turnstile carregue dentro do WebView do Android.
     allowNavigation: ['challenges.cloudflare.com'],
   },
