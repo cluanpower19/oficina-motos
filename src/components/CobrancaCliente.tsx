@@ -220,8 +220,7 @@ export default function CobrancaCliente() {
                 <span className="cc-upload-button">{ocupado ? 'Enviando...' : 'Escolher arquivo'}</span>
               </label>
             )}
-            {ultimoComprovante?.status === 'rejeitado' && <p className="cc-feedback cc-error"><strong>Comprovante recusado:</strong> {ultimoComprovante.motivo_rejeicao || pendente.motivo_rejeicao || 'Confira os dados e envie um novo comprovante.'}</p>}
-            {pendente.motivo_rejeicao && !ultimoComprovante?.motivo_rejeicao && <p className="cc-feedback cc-error">Motivo informado: {pendente.motivo_rejeicao}</p>}
+            {pendente.motivo_rejeicao && <p className="cc-feedback cc-error"><strong>Comprovante recusado:</strong> {pendente.motivo_rejeicao} Confira os dados e envie um novo arquivo.</p>}
           </div>
         )}
 
