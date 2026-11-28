@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { soDigitos } from '../lib/formatos'
@@ -12,12 +12,9 @@ const campo =
 const botao = 'rounded-lg bg-orange-500 px-5 py-3 font-semibold text-white hover:bg-orange-600 disabled:opacity-60'
 const cartao = 'space-y-3 rounded-xl bg-white p-4 shadow'
 
-type Membro = { id: string; nome: string; papel: 'dono' | 'mecanico' }
-
 export default function Configuracoes() {
   const { perfil, recarregarPerfil } = useAuth()
   const of = perfil!.oficina
-  const dono = perfil!.papel === 'dono'
   const assin = calcularAssinatura(of.status_assinatura, of.teste_ate, of.vencimento_assinatura, of.cancelamento_agendado)
 
   const [nome, setNome] = useState(of.nome)
@@ -26,32 +23,10 @@ export default function Configuracoes() {
   const [mOrc, setMOrc] = useState(of.msg_orcamento ?? MODELO_ORCAMENTO)
   const [mPronta, setMPronta] = useState(of.msg_pronta ?? MODELO_PRONTA)
   const [mLemb, setMLemb] = useState(of.msg_lembrete ?? MODELO_LEMBRETE)
-  const [codigo, setCodigo] = useState('')
-  const [equipe, setEquipe] = useState<Membro[]>([])
   const [msg, setMsg] = useState('')
   const [erro, setErro] = useState('')
   const [ocupado, setOcupado] = useState(false)
 
-  const carregarDono = useCallback(async () => {
-    try {
-      const [c, e] = await Promise.all([
-        supabase.from('oficinas').select('codigo_convite').eq('id', of.id).maybeSingle(),
-        supabase.from('usuarios').select('id, nome, papel').order('criado_em'),
-      ])
-      if (c.error || e.error) {
-        setErro('Não foi possível carregar os dados da equipe. Atualize a página e tente novamente.')
-        return
-      }
-      setCodigo(c.data?.codigo_convite ?? '')
-      setEquipe((e.data as Membro[]) ?? [])
-    } catch {
-      setErro('Não foi possível carregar os dados da equipe. Verifique sua conexão e tente novamente.')
-    }
-  }, [of.id])
-
-  useEffect(() => {
-    if (dono) carregarDono()
-  }, [dono, carregarDono])
 
   function aviso(ok: string) {
     setErro('')
@@ -107,24 +82,7 @@ export default function Configuracoes() {
     }
   }
 
-  async function renovar() {
-    if (!window.confirm('Gerar um código novo? O código antigo deixa de funcionar.')) return
-    const { data, error } = await supabase.rpc('renovar_convite')
-    if (error) return setErro('Não foi possível gerar o código.')
-    setCodigo(data as string)
-    aviso('Código novo gerado.')
-  }
 
-  if (!dono) {
-    return (
-      <div className="space-y-3">
-        <h1 className="text-2xl font-bold text-gray-800">Configurações</h1>
-        <p className="rounded-lg bg-gray-100 p-4 text-gray-700">
-          Só o dono da oficina pode alterar as configurações. Você está logado como mecânico ({perfil!.nome}).
-        </p>
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-5">
@@ -196,26 +154,6 @@ export default function Configuracoes() {
 
       <CobrancaCliente />
 
-      <section className={cartao}>
-        <h2 className="text-lg font-semibold text-gray-800">Equipe</h2>
-        <ul className="divide-y">
-          {equipe.map((m) => (
-            <li key={m.id} className="flex justify-between py-2 text-gray-800">
-              <span>{m.nome}</span>
-              <span className="text-sm text-gray-600">{m.papel === 'dono' ? 'Dono' : 'Mecânico'}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="text-sm text-gray-600">
-          Para adicionar um mecânico: ele abre o sistema, toca em "Sou mecânico (tenho um código)" e usa este código:
-        </p>
-        <div className="flex items-center gap-3">
-          <code className="rounded bg-gray-100 px-3 py-2 text-lg font-bold tracking-widest text-gray-800">{codigo || '...'}</code>
-          <button type="button" onClick={renovar} className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800">
-            Gerar novo
-          </button>
-        </div>
-      </section>
     </div>
   )
 }

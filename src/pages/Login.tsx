@@ -14,13 +14,11 @@ const urlRecuperacaoSenha = () => {
 }
 
 export default function Login({ redefinir = false }: { redefinir?: boolean } = {}) {
-  const [modo, setModo] = useState<'entrar' | 'mecanico' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
-  const [codigo, setCodigo] = useState('')
+  const [modo, setModo] = useState<'entrar' | 'recuperar' | 'redefinir'>(() => redefinir || window.location.hash.includes('type=recovery') ? 'redefinir' : 'entrar')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [senhaNova, setSenhaNova] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
-  const [nome, setNome] = useState('')
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -77,25 +75,6 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           else if (error.code === 'invalid_credentials') setErro('O Supabase não reconheceu esse e-mail e essa senha. Confira se digitou a senha nova corretamente, respeitando maiúsculas, minúsculas e caracteres especiais.')
           else setErro(`Não foi possível entrar: ${error.message}${error.code ? ` (${error.code})` : ''}`)
         }
-      } else if (modo === 'mecanico') {
-        if (!turnstileSiteKey || !captchaToken) {
-          setErro('Conclua a verificação de segurança antes de criar o acesso.')
-          return
-        }
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password: senha,
-          options: {
-            emailRedirectTo: urlRedirecionamentoAuth(),
-            data: { nome, codigo_oficina: codigo.trim().toLowerCase() },
-            captchaToken,
-          },
-        })
-        setCaptchaToken('')
-        if (error) setErro(error.message)
-        else if (!data.session) setAviso('Cadastro iniciado! Enviamos um link de confirmação para seu e-mail. Confirme o endereço antes de entrar. Verifique também o spam.')
-        else setAviso('Cadastro concluído. Você já pode entrar.')
-      }
     } catch {
       setErro('Não foi possível concluir a solicitação. Verifique sua conexão e tente novamente.')
     } finally {
@@ -103,7 +82,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
     }
   }
 
-  const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'mecanico' ? 'Entrar como mecânico' : modo === 'recuperar' ? 'Recuperar senha' : 'Criar nova senha'
+  const titulo = modo === 'entrar' ? 'Entrar na oficina' : modo === 'recuperar' ? 'Recuperar senha' : 'Criar nova senha'
 
   return (
     <div className="login-app">
@@ -123,26 +102,20 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           )}
 
 
-          {modo === 'mecanico' && (
-            <>
-              <input className={campo} placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
-              <input className={campo} placeholder="Código da oficina (peça ao dono)" value={codigo} onChange={(e) => setCodigo(e.target.value)} required />
-            </>
-          )}
           {modo !== 'redefinir' && (
             <input className={campo} type="email" autoComplete="username" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
           )}
-          {(modo === 'entrar' || modo === 'mecanico') && (
+          {modo === 'entrar' && (
             <input className={campo} type="password" autoComplete="current-password" placeholder="Senha (mín. 6 caracteres)" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required />
           )}
-          {(modo === 'entrar' || modo === 'recuperar' || modo === 'mecanico') && (
+          {(modo === 'entrar' || modo === 'recuperar') && (
             <div className="flex flex-col items-center gap-2 py-2">
               {turnstileSiteKey ? (
                 <>
                   <Turnstile
                     key={modo}
                     siteKey={turnstileSiteKey}
-                    options={{ action: modo === 'entrar' ? 'login' : modo === 'recuperar' ? 'recuperar_senha' : 'cadastro_mecanico', language: 'pt-BR', theme: 'light' }}
+                    options={{ action: modo === 'entrar' ? 'login' : 'recuperar_senha', language: 'pt-BR', theme: 'light' }}
                     scriptOptions={{
                       onError: () => {
                         setCaptchaToken('')
@@ -183,8 +156,8 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           {aviso && <p className="text-sm text-green-700">{aviso}</p>}
 
           {!senhaAlterada && (
-            <button disabled={enviando || (['entrar', 'recuperar', 'mecanico'].includes(modo) && (!turnstileSiteKey || !captchaToken))} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
-              {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'mecanico' ? 'Criar acesso de mecânico' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
+            <button disabled={enviando || (['entrar', 'recuperar'].includes(modo) && (!turnstileSiteKey || !captchaToken))} className="w-full rounded-lg bg-orange-500 py-3.5 text-lg hover:bg-orange-600 disabled:opacity-60">
+              {enviando ? 'Aguarde...' : modo === 'entrar' ? 'Entrar' : modo === 'recuperar' ? 'Enviar link de recuperação' : 'Salvar nova senha'}
             </button>
           )}
           {modo === 'redefinir' && senhaAlterada && (
@@ -201,14 +174,9 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
               <a href="https://wa.me/5579998424306?text=Ol%C3%A1!%20Quero%20falar%20sobre%20o%20Of%C3%ADcio%20do%20Motor." target="_blank" rel="noopener noreferrer" className="link">Falar com a equipe</a>
             </>
           )}
-          {(modo === 'mecanico' || modo === 'recuperar' || modo === 'redefinir') && (
+          {(modo === 'recuperar' || modo === 'redefinir') && (
             <button type="button" onClick={() => { setModo('entrar'); setCaptchaToken(''); setCaptchaStatus('Preparando verificação de segurança...'); setErro(''); setAviso('') }} className="link">
               Voltar para entrar
-            </button>
-          )}
-          {!noSite && modo === 'entrar' && (
-            <button type="button" onClick={() => { setModo('mecanico'); setCaptchaToken(''); setCaptchaStatus('Preparando verificação de segurança...'); setErro(''); setAviso('') }} className="link">
-              Sou mecânico e tenho o código da oficina
             </button>
           )}
           {noSite && (

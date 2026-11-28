@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase'
 
 export type Perfil = {
   nome: string
-  papel: 'dono' | 'mecanico'
   oficina: {
     id: string
     nome: string
@@ -76,7 +75,7 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
   const ler = () =>
     supabase
       .from('usuarios')
-      .select('nome, papel, oficinas(id, nome, telefone, endereco, logo_url, msg_orcamento, msg_pronta, msg_lembrete, plano, status_assinatura, teste_ate, vencimento_assinatura, dia_ciclo, cancelamento_agendado)')
+      .select('nome, oficinas(id, nome, telefone, endereco, logo_url, msg_orcamento, msg_pronta, msg_lembrete, plano, status_assinatura, teste_ate, vencimento_assinatura, dia_ciclo, cancelamento_agendado)')
       .eq('id', session.user.id)
       .maybeSingle()
 
@@ -86,7 +85,7 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
   }
   let { data } = primeiraConsulta
 
-  // Primeiro acesso do dono inicia o trial; mecânicos entram pelo código de convite.
+  // Primeiro acesso do responsável inicia o período de avaliação.
   if (!data) {
     const meta = session.user.user_metadata ?? {}
     if (meta.tipo_cadastro === 'oficina') {
@@ -106,22 +105,12 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
         if (consulta.error) throw new Error('O cadastro foi iniciado, mas não foi possível carregar a oficina: ' + consulta.error.message)
         data = consulta.data
       }
-    } else if (meta.codigo_oficina) {
-      const r = await supabase.rpc('entrar_oficina', { p_codigo: meta.codigo_oficina, p_nome: meta.nome ?? 'Mecânico' })
-      erroCriacao = r.error ? mensagemAmigavelCadastro(r.error.message) : ''
-      if (!r.error) {
-        const consulta = await ler()
-        if (consulta.error) throw new Error('O acesso foi criado, mas não foi possível carregar a oficina: ' + consulta.error.message)
-        data = consulta.data
-      }
-    }
   }
   if (!data) return null
 
   const of = Array.isArray(data.oficinas) ? data.oficinas[0] : data.oficinas
   return {
     nome: data.nome,
-    papel: data.papel as Perfil['papel'],
     oficina: of as Perfil['oficina'],
   }
 }

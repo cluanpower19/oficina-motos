@@ -48,7 +48,7 @@ export default function Layout() {
         ? 'Acesso ativo sem vencimento cadastrado. Entre em contato com o suporte para regularizar a assinatura.'
         : ''
   const planoCompleto = perfil!.oficina.plano === 'completo'
-  const itens = todos.filter((i) => (i.to !== '/financeiro' || perfil?.papel === 'dono') && (planoCompleto || !['/financeiro', '/lembretes'].includes(i.to)))
+  const itens = todos.filter((i) => planoCompleto || !['/financeiro', '/lembretes'].includes(i.to))
 
   return (
     <div className="min-h-full md:flex">

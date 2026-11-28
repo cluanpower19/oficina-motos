@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../hooks/useAuth'
 import { formatarMoeda, lerNumeroEstrito, mensagemErro } from '../lib/formatos'
 import { dataBR, hojeISO } from '../lib/lembretes'
 import { botao, campo } from './Clientes'
@@ -38,7 +37,6 @@ const soma = (l: Mov[]) => l.reduce((s, x) => s + Number(x.valor), 0)
 const vazio = { tipo: 'saida' as 'entrada' | 'saida', descricao: '', valor: '', data: '', pago: true }
 
 export default function Financeiro() {
-  const { perfil } = useAuth()
   const [mes, setMes] = useState(() => hojeISO().slice(0, 7))
   const [lista, setLista] = useState<Mov[]>([])
   const [receber, setReceber] = useState<Mov[]>([])
@@ -70,12 +68,8 @@ export default function Financeiro() {
   }, [mes])
 
   useEffect(() => {
-    if (perfil?.papel === 'dono') carregar()
-  }, [carregar, perfil?.papel])
-
-  if (perfil?.papel !== 'dono') {
-    return <p className="rounded-xl bg-white p-4 text-gray-700 shadow">O financeiro é visível só para o dono da oficina.</p>
-  }
+    carregar()
+  }, [carregar])
 
   async function salvar(e: FormEvent) {
     e.preventDefault()
