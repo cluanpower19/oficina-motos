@@ -11,6 +11,7 @@ type Notificacao = { id: string; tipo: string; titulo: string; mensagem: string;
 type Pagamento = {
   id: string; plano: string; valor: number; status: string; criado_em: string
   confirmado_em: string | null; novo_vencimento: string | null; motivo_rejeicao: string | null
+  provedor: string; pix_payload: string | null; pix_encoded_image: string | null; pix_expira_em: string | null
   comprovantes_assinatura: Comprovante[]
 }
 
@@ -33,6 +34,7 @@ export default function CobrancaCliente() {
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
   const [copiado, setCopiado] = useState(false)
+  const [documento, setDocumento] = useState('')
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -40,7 +42,7 @@ export default function CobrancaCliente() {
     const [p, x, h, n] = await Promise.all([
       supabase.from('planos_cobranca').select('plano,preco').order('preco'),
       supabase.from('configuracao_pix').select('tipo_chave,chave_pix,titular,instrucoes').eq('id', true).maybeSingle(),
-      supabase.from('pagamentos_assinatura').select('id,plano,valor,status,criado_em,confirmado_em,novo_vencimento,motivo_rejeicao,comprovantes_assinatura(id,status,enviado_em,motivo_rejeicao)').eq('oficina_id', oficina.id).order('criado_em', { ascending: false }),
+      supabase.from('pagamentos_assinatura').select('id,plano,valor,status,criado_em,confirmado_em,novo_vencimento,motivo_rejeicao,provedor,pix_payload,pix_encoded_image,pix_expira_em,comprovantes_assinatura(id,status,enviado_em,motivo_rejeicao)').eq('oficina_id', oficina.id).order('criado_em', { ascending: false }),
       supabase.from('notificacoes_cobranca').select('id,tipo,titulo,mensagem,criado_em,lida_em').eq('oficina_id', oficina.id).order('criado_em',{ascending:false}).limit(5),
     ])
     if (p.error || x.error || h.error || n.error) {
@@ -62,6 +64,23 @@ export default function CobrancaCliente() {
     setOcupado(false)
     if (error) setErro(error.message.includes('cobrança em aberto') ? error.message : 'Não foi possível gerar a cobrança. ' + error.message)
     else { setAviso('Cobrança criada. Confira os dados do PIX e envie o comprovante após pagar.'); await carregar() }
+  }
+
+  async function solicitarAsaas() {
+    const digits = documento.replace(/\\D/g, '')
+    if (digits.length !== 11 && digits.length !== 14) { setErro('Informe um CPF (11 números) ou CNPJ (14 números) válido.'); return }
+    setOcupado(true); setErro(''); setAviso('')
+    const { data, error } = await supabase.functions.invoke('criar-cobranca-pix', { body: { plano: planoEscolhido, cpfCnpj: digits } })
+    setOcupado(false)
+    if (error || !data?.success) { setErro(data?.error || error?.message || 'Não foi possível gerar o PIX. Tente novamente.'); return }
+    setDocumento('')
+    setAviso('PIX gerado. Pague pelo QR Code ou copie e cole o código no aplicativo do seu banco.')
+    await carregar()
+  }
+
+  async function copiarPayload(payload: string) {
+    try { await navigator.clipboard.writeText(payload); setCopiado(true); setAviso('Código PIX Copia e Cola copiado.'); window.setTimeout(() => setCopiado(false), 2500) }
+    catch { setErro('Não foi possível copiar automaticamente. Selecione e copie o código PIX.') }
   }
 
   async function copiarChave() {
@@ -114,10 +133,10 @@ export default function CobrancaCliente() {
     else { setAviso('Cancelamento agendado. Seu acesso permanece até o vencimento.'); await recarregarPerfil(); await carregar() }
   }
 
-  const pendente = pagamentos.find(p => p.status === 'aguardando_comprovante' || p.status === 'em_analise')
+  const pendente = pagamentos.find(p => p.status === 'aguardando_comprovante' || p.status === 'aguardando_pagamento' || p.status === 'em_analise')
   const precoEscolhido = planos.find(p => p.plano === planoEscolhido)?.preco
   const pagamentoConfirmado = pagamentos.find(p => p.status === 'confirmado')
-  const statusPagamento = (status: string) => status === 'confirmado' ? 'Pagamento confirmado' : status === 'em_analise' ? 'Comprovante em análise' : status === 'cancelado' ? 'Cobrança cancelada' : 'Aguardando comprovante'
+  const statusPagamento = (status: string) => status === 'confirmado' ? 'Pagamento confirmado' : status === 'em_analise' ? 'Comprovante em análise' : status === 'cancelado' ? 'Cobrança cancelada' : status === 'aguardando_pagamento' ? 'Aguardando pagamento' : 'Aguardando comprovante'
 
   return (
     <section className="cc-shell" aria-labelledby="cc-title">
@@ -131,7 +150,7 @@ export default function CobrancaCliente() {
       </div>
 
       <div className="cc-trust-row">
-        <span><b>✓</b> PIX configurado</span>
+        <span><b>✓</b> PIX dinâmico ou manual</span>
         <span><b>✓</b> Comprovante privado</span>
         <span><b>✓</b> Ativação após conferência</span>
       </div>
@@ -176,10 +195,16 @@ export default function CobrancaCliente() {
               <div><span>RESUMO DA CONTRATAÇÃO</span><strong>Plano {nomePlano(planoEscolhido)}</strong><small>Pagamento mensal por PIX · sem cobrança automática</small></div>
               <div className="cc-order-value"><span>VALOR DO CICLO</span><strong>{precoEscolhido === undefined ? '—' : moeda(Number(precoEscolhido))}</strong></div>
             </div>
-            <button type="button" disabled={ocupado || !planos.length || !pix?.chave_pix || precoEscolhido === undefined} onClick={() => void solicitar()} className="cc-primary-action">
-              {ocupado ? 'Preparando cobrança...' : !pix?.chave_pix ? 'PIX temporariamente indisponível' : 'Continuar para pagamento'} <span>→</span>
+            <div className="cc-document-field">
+              <label htmlFor="cc-cpf-cnpj">CPF ou CNPJ do responsável pelo pagamento</label>
+              <input id="cc-cpf-cnpj" type="text" inputMode="numeric" autoComplete="off" maxLength={18} placeholder="Digite somente números ou use a pontuação" value={documento} onChange={e => setDocumento(e.target.value.replace(/[^0-9.\\/-]/g, '').slice(0,18))} />
+              <small>Usado para identificar o pagador no Asaas. O documento não será armazenado no banco do Ofício do Motor.</small>
+            </div>
+            <button type="button" disabled={ocupado || !planos.length || documento.replace(/\\D/g,'').length < 11 || precoEscolhido === undefined} onClick={() => void solicitarAsaas()} className="cc-primary-action">
+              {ocupado ? 'Preparando cobrança...' : 'Gerar PIX com QR Code'} <span>→</span>
             </button>
-            <p className="cc-no-surprise">Nenhuma cobrança é feita ao selecionar o plano. A solicitação apenas prepara os dados para o PIX.</p>
+            {pix?.chave_pix && <button type="button" disabled={ocupado || precoEscolhido === undefined} onClick={() => void solicitar()} className="cc-manual-action">Usar PIX manual (chave e comprovante)</button>}
+            <p className="cc-no-surprise">Nenhuma cobrança é feita ao selecionar o plano. O QR Code é individual e o acesso é liberado após a confirmação do pagamento pelo Asaas.</p>
           </div>
         )}
 
@@ -200,7 +225,16 @@ export default function CobrancaCliente() {
               <div><span>VALOR EXATO</span><strong className="cc-highlight">{moeda(Number(pendente.valor))}</strong></div>
               <div><span>SOLICITADO EM</span><strong>{dataHora(pendente.criado_em)}</strong></div>
             </div>
-            {pendente.status === 'aguardando_comprovante' && pix?.chave_pix ? (
+            {pendente.provedor === 'asaas' && pendente.pix_payload ? (
+              <div className="cc-pix-card cc-asaas-pix">
+                <div className="cc-pix-top"><span className="cc-pix-symbol">PIX</span><div><strong>PIX dinâmico gerado pelo Asaas</strong><small>Escaneie o QR Code ou use o código Copia e Cola.</small></div></div>
+                {pendente.pix_encoded_image && <img className="cc-asaas-qr" src={'data:image/png;base64,' + pendente.pix_encoded_image} alt="QR Code PIX para pagamento" />}
+                <div className="cc-pix-detail"><span>PIX COPIA E COLA</span><strong className="cc-pix-key">{pendente.pix_payload}</strong></div>
+                <button type="button" onClick={() => void copiarPayload(pendente.pix_payload!)} className="cc-copy-button">{copiado ? '✓ Código copiado' : '▣ Copiar código PIX'}</button>
+                {pendente.pix_expira_em && <p className="cc-pix-instructions">Válido até {dataHora(pendente.pix_expira_em)}. Se expirar, solicite uma nova cobrança.</p>}
+                <div className="cc-security-note"><b>Pagamento seguro:</b> confira o valor e o nome do recebedor no aplicativo do banco. A confirmação é automática após o retorno do Asaas.</div>
+              </div>
+            ) : pendente.status === 'aguardando_comprovante' && pix?.chave_pix ? (
               <div className="cc-pix-card">
                 <div className="cc-pix-top"><span className="cc-pix-symbol">PIX</span><div><strong>Faça a transferência pelo aplicativo do seu banco</strong><small>Confira o favorecido antes de confirmar a operação.</small></div></div>
                 <div className="cc-pix-detail"><span>{tipoChave(pix.tipo_chave)}</span><strong className="cc-pix-key">{pix.chave_pix}</strong></div>
