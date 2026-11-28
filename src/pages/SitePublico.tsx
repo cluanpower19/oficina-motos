@@ -73,6 +73,26 @@ export default function SitePublico() {
           <div className="sp-hero-side-note"><span className="sp-side-line" /> FEITO PARA QUEM CUIDA DE MOTOS</div>
         </section>
 
+        <section className="sp-video-section" aria-labelledby="sp-video-title">
+          <div className="sp-video-inner">
+            <div className="sp-section-kicker"><span>CONHEÇA O SISTEMA</span> POR DENTRO DO OFÍCIO DO MOTOR</div>
+            <div className="sp-video-heading">
+              <h2 id="sp-video-title">Veja o Ofício do Motor em ação.</h2>
+              <p>Conheça como organizar a oficina, acompanhar os serviços e manter as informações de cada cliente e motocicleta em ordem.</p>
+            </div>
+            <div className="sp-video-frame">
+              <video controls preload="none" playsInline poster="/videos/oficio-do-motor-poster.jpg" aria-label="Vídeo de apresentação do sistema Ofício do Motor">
+                <source src="/videos/oficio-do-motor-web.mp4" type="video/mp4" />
+                Seu navegador não conseguiu reproduzir este vídeo. Atualize o navegador ou tente novamente.
+              </video>
+            </div>
+            <div className="sp-video-cta">
+              <span>PRONTO PARA ORGANIZAR SUA OFICINA?</span>
+              <Link to="/cadastro" className="sp-button sp-button-primary">Começar teste grátis de 7 dias <Seta /></Link>
+            </div>
+          </div>
+        </section>
+
         <section className="sp-intro" id="visao">
           <div className="sp-section-kicker"><span>01</span> INFORMAÇÃO NO LUGAR CERTO</div>
           <div className="sp-intro-grid">
