@@ -106,7 +106,7 @@ export default function CobrancaCliente() {
   }
 
   async function cancelar() {
-    if (!window.confirm('Deseja cancelar a renovação? Seu acesso permanece até o fim do período já pago.')) return
+    if (!window.confirm('Deseja programar o encerramento da assinatura? Seu acesso permanece até o fim do período já pago.')) return
     setOcupado(true); setErro(''); setAviso('')
     const { error } = await supabase.rpc('solicitar_cancelamento_assinatura')
     setOcupado(false)
@@ -131,7 +131,7 @@ export default function CobrancaCliente() {
       </div>
 
       <div className="cc-trust-row">
-        <span><b>✓</b> PIX identificado</span>
+        <span><b>✓</b> PIX configurado</span>
         <span><b>✓</b> Comprovante privado</span>
         <span><b>✓</b> Ativação após conferência</span>
       </div>
@@ -225,7 +225,7 @@ export default function CobrancaCliente() {
         )}
 
         {oficina.status_assinatura === 'ativo' && oficina.vencimento_assinatura && !oficina.cancelamento_agendado && !pendente && (
-          <div className="cc-renewal-row"><div><strong>Renovação da assinatura</strong><p>Seu acesso permanece ativo até o fim do período pago. Você pode cancelar a renovação quando quiser.</p></div><button type="button" disabled={ocupado} onClick={() => void cancelar()} className="cc-cancel-button">Cancelar renovação</button></div>
+          <div className="cc-renewal-row"><div><strong>Renovação da assinatura</strong><p>Seu acesso permanece ativo até o fim do período pago. Você pode solicitar o encerramento da assinatura. O acesso permanece até o fim do período pago.</p></div><button type="button" disabled={ocupado} onClick={() => void cancelar()} className="cc-cancel-button">Solicitar encerramento</button></div>
         )}
         {oficina.cancelamento_agendado && <p className="cc-feedback cc-warning">Renovação cancelada. Seu acesso permanece até {dataTeste(oficina.vencimento_assinatura)}.</p>}
 
