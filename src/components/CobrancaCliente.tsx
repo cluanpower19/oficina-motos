@@ -17,7 +17,7 @@ type Pagamento = {
 const moeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const dataHora = (valor: string) => new Date(valor).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 const nomePlano = (plano: string) => plano === 'completo' ? 'Completo' : 'Básico'
-const tipoChave = (tipo: string | null) => ({ cpf: 'CPF', cnpj: 'CNPJ', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Chave aleatória' }[tipo ?? ''] ?? 'Chave Pix')
+const tiposChave: Record<string, string> = { cpf: 'CPF', cnpj: 'CNPJ', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Chave aleatória' }\nconst tipoChave = (tipo: string | null) => tiposChave[tipo ?? ''] ?? 'Chave Pix'
 
 export default function CobrancaCliente() {
   const { perfil, recarregarPerfil } = useAuth()
