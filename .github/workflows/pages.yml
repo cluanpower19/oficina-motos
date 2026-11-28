@@ -3,6 +3,17 @@ name: Deploy no GitHub Pages
 on:
   push:
     branches: [main]
+    # Alterações do app e do site são publicadas pelo fluxo do APK,
+    # que também inclui o APK oficial no mesmo deploy.
+    paths-ignore:
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'capacitor.config.ts'
+      - '.env.production'
+      - 'android/**'
   workflow_dispatch:
 
 permissions:
