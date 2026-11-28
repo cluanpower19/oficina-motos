@@ -75,6 +75,7 @@ export default function Login({ redefinir = false }: { redefinir?: boolean } = {
           else if (error.code === 'invalid_credentials') setErro('O Supabase não reconheceu esse e-mail e essa senha. Confira se digitou a senha nova corretamente, respeitando maiúsculas, minúsculas e caracteres especiais.')
           else setErro(`Não foi possível entrar: ${error.message}${error.code ? ` (${error.code})` : ''}`)
         }
+      }
     } catch {
       setErro('Não foi possível concluir a solicitação. Verifique sua conexão e tente novamente.')
     } finally {

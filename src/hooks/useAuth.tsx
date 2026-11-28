@@ -105,6 +105,7 @@ async function buscarPerfilUnico(session: Session): Promise<Perfil | null> {
         if (consulta.error) throw new Error('O cadastro foi iniciado, mas não foi possível carregar a oficina: ' + consulta.error.message)
         data = consulta.data
       }
+    }
   }
   if (!data) return null
 
