@@ -68,12 +68,13 @@ export default function CobrancaCliente() {
 
   async function solicitarAsaas() {
     const digits = documento.replace(/\D/g, '')
-    if (digits.length !== 11 && digits.length !== 14) { setErro('Informe um CPF (11 números) ou CNPJ (14 números) válido.'); return }
+    if (!oficina.asaas_customer_id && digits.length !== 11 && digits.length !== 14) { setErro('Informe um CPF (11 números) ou CNPJ (14 números) válido.'); return }
     setOcupado(true); setErro(''); setAviso('')
     const { data, error } = await supabase.functions.invoke('criar-cobranca-pix', { body: { plano: planoEscolhido, cpfCnpj: digits } })
     setOcupado(false)
     if (error || !data?.success) { setErro(data?.error || error?.message || 'Não foi possível gerar o PIX. Tente novamente.'); return }
     setDocumento('')
+    await recarregarPerfil()
     setAviso('PIX gerado. Pague pelo QR Code ou copie e cole o código no aplicativo do seu banco.')
     await carregar()
   }
@@ -195,12 +196,12 @@ export default function CobrancaCliente() {
               <div><span>RESUMO DA CONTRATAÇÃO</span><strong>Plano {nomePlano(planoEscolhido)}</strong><small>Pagamento mensal por PIX · sem cobrança automática</small></div>
               <div className="cc-order-value"><span>VALOR DO CICLO</span><strong>{precoEscolhido === undefined ? '—' : moeda(Number(precoEscolhido))}</strong></div>
             </div>
-            <div className="cc-document-field">
+            {!oficina.asaas_customer_id ? <div className="cc-document-field">
               <label htmlFor="cc-cpf-cnpj">CPF ou CNPJ do responsável pelo pagamento</label>
               <input id="cc-cpf-cnpj" type="text" inputMode="numeric" autoComplete="off" maxLength={18} placeholder="Digite somente números ou use a pontuação" value={documento} onChange={e => setDocumento(e.target.value.replace(/[^0-9./-]/g, '').slice(0,18))} />
               <small>Usado para identificar o pagador no Asaas. O documento não será armazenado no banco do Ofício do Motor.</small>
-            </div>
-            <button type="button" disabled={ocupado || !planos.length || documento.replace(/\D/g,'').length < 11 || precoEscolhido === undefined} onClick={() => void solicitarAsaas()} className="cc-primary-action">
+            </div> : <p className="cc-document-saved">✓ Pagador já cadastrado com segurança no Asaas. Não é necessário informar o documento novamente.</p>}
+            <button type="button" disabled={ocupado || !planos.length || (!oficina.asaas_customer_id && documento.replace(/\D/g,'').length < 11) || precoEscolhido === undefined} onClick={() => void solicitarAsaas()} className="cc-primary-action">
               {ocupado ? 'Preparando cobrança...' : 'Gerar PIX com QR Code'} <span>→</span>
             </button>
             {pix?.chave_pix && <button type="button" disabled={ocupado || precoEscolhido === undefined} onClick={() => void solicitar()} className="cc-manual-action">Usar PIX manual (chave e comprovante)</button>}
