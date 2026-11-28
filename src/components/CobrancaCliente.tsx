@@ -67,7 +67,7 @@ export default function CobrancaCliente() {
   }
 
   async function solicitarAsaas() {
-    const digits = documento.replace(/\\D/g, '')
+    const digits = documento.replace(/\D/g, '')
     if (digits.length !== 11 && digits.length !== 14) { setErro('Informe um CPF (11 números) ou CNPJ (14 números) válido.'); return }
     setOcupado(true); setErro(''); setAviso('')
     const { data, error } = await supabase.functions.invoke('criar-cobranca-pix', { body: { plano: planoEscolhido, cpfCnpj: digits } })
@@ -197,10 +197,10 @@ export default function CobrancaCliente() {
             </div>
             <div className="cc-document-field">
               <label htmlFor="cc-cpf-cnpj">CPF ou CNPJ do responsável pelo pagamento</label>
-              <input id="cc-cpf-cnpj" type="text" inputMode="numeric" autoComplete="off" maxLength={18} placeholder="Digite somente números ou use a pontuação" value={documento} onChange={e => setDocumento(e.target.value.replace(/[^0-9.\\/-]/g, '').slice(0,18))} />
+              <input id="cc-cpf-cnpj" type="text" inputMode="numeric" autoComplete="off" maxLength={18} placeholder="Digite somente números ou use a pontuação" value={documento} onChange={e => setDocumento(e.target.value.replace(/[^0-9./-]/g, '').slice(0,18))} />
               <small>Usado para identificar o pagador no Asaas. O documento não será armazenado no banco do Ofício do Motor.</small>
             </div>
-            <button type="button" disabled={ocupado || !planos.length || documento.replace(/\\D/g,'').length < 11 || precoEscolhido === undefined} onClick={() => void solicitarAsaas()} className="cc-primary-action">
+            <button type="button" disabled={ocupado || !planos.length || documento.replace(/\D/g,'').length < 11 || precoEscolhido === undefined} onClick={() => void solicitarAsaas()} className="cc-primary-action">
               {ocupado ? 'Preparando cobrança...' : 'Gerar PIX com QR Code'} <span>→</span>
             </button>
             {pix?.chave_pix && <button type="button" disabled={ocupado || precoEscolhido === undefined} onClick={() => void solicitar()} className="cc-manual-action">Usar PIX manual (chave e comprovante)</button>}
