@@ -16,3 +16,5 @@ alter table public.ordens_servico
 alter table public.ordens_servico drop column if exists mecanico_id;
 
 -- Alteração aplicada junto com a retirada dos componentes da interface.
+
+-- Validação automática do código corrigido.
