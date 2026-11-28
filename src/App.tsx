@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { linkWhatsAppComercial } from './lib/comercial'
 import { AuthProvider, useAuth, erroCriacao } from './hooks/useAuth'
+import { Emblema } from './components/Cenario'
 import { supabase } from './lib/supabase'
 import './pages/cadastro-oficina.css'
 const Layout = lazy(() => import('./components/Layout'))
@@ -84,7 +85,7 @@ function Rotas() {
     return (
       <main className="cadastro-erro min-h-screen flex items-center justify-center px-4 py-10">
         <section className="cadastro-erro-card w-full max-w-xl rounded-3xl p-7 sm:p-10">
-          <div className="cadastro-erro-marca">OFÍCIO DO MOTOR <span>•</span> GESTÃO DE OFICINAS</div>
+          <div className="flex items-center gap-3 text-sm font-bold tracking-widest"><Emblema tamanho={42} /><span>OFÍCIO DO MOTOR<small className="mt-1 block text-[10px] font-medium tracking-[.18em] text-gray-400">GESTÃO DE OFICINAS</small></span></div>
           <div className="cadastro-erro-icone" aria-hidden="true">!</div>
           <p className="cadastro-erro-etiqueta">ATENÇÃO AO CADASTRO</p>
           <h1 className="mt-2 text-3xl sm:text-4xl">Cadastro da oficina não concluído</h1>

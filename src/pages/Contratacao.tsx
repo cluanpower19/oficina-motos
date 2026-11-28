@@ -18,7 +18,7 @@ export default function Contratacao() {
     <main className="sp-contract">
       <header className="sp-contract-header">
         <Link to="/" className="sp-contract-brand" aria-label="Ofício do Motor — página inicial">
-          <span className="sp-contract-mark">OM<span>✦</span></span>
+          <img className="sp-contract-mark" src="/marca-oficio.svg" alt="" />
           <span><strong>OFÍCIO DO MOTOR</strong><small>GESTÃO PARA OFICINAS DE MOTOS</small></span>
         </Link>
         <Link to="/entrar" className="sp-contract-login">Já sou cliente — Entrar</Link>

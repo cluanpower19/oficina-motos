@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { supabase } from '../lib/supabase'
+import { Emblema } from '../components/Cenario'
 
 import { urlRedirecionamentoAuth } from '../lib/urlSite'
 import './cadastro-oficina.css'
@@ -77,7 +78,7 @@ export default function CadastroOficina() {
   return (
     <main className="cadastro-oficina min-h-screen px-4 py-8 text-white sm:py-12">
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-4">
-        <Link to="/" className="text-sm font-bold tracking-[.18em] text-orange-400">OFÍCIO DO MOTOR</Link>
+        <Link to="/" className="flex items-center gap-3 text-sm font-bold tracking-[.18em] text-orange-400"><Emblema tamanho={40} /><span>OFÍCIO DO MOTOR</span></Link>
         <Link to="/entrar" className="text-sm text-gray-300 underline underline-offset-4">Já tenho uma conta</Link>
       </header>
       <section className="mx-auto mt-8 grid max-w-5xl gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">

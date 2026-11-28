@@ -40,7 +40,7 @@ export default function SitePublico() {
     <div className="site-publico">
       <header className="sp-header">
         <a href="#inicio" className="sp-brand" aria-label="Ofício do Motor — início" onClick={fecharMenu}>
-          <span className="sp-brand-mark">OM<span>·</span></span>
+          <img className="sp-brand-mark" src="/marca-oficio.svg" alt="" />
           <span className="sp-brand-copy"><strong>OFÍCIO DO MOTOR</strong><small>GESTÃO PARA OFICINAS DE MOTOS</small></span>
         </a>
         <nav id="sp-site-nav" className={`sp-nav ${menuAberto ? 'is-open' : ''}`} aria-label="Navegação principal">
