@@ -21,9 +21,8 @@ export default function Painel() {
   const { perfil } = useAuth()
   const [r, setR] = useState<Resumo | null>(null)
   const [erro, setErro] = useState('')
-  const dono = perfil?.papel === 'dono'
   const completo = perfil?.oficina.plano === 'completo'
-  const podeVerFinanceiro = dono && completo
+  const podeVerFinanceiro = completo
 
   useEffect(() => {
     if (!perfil) return
@@ -66,7 +65,7 @@ export default function Painel() {
       }
     })()
     return () => { ativo = false }
-  }, [perfil, dono, completo, podeVerFinanceiro])
+  }, [perfil, completo, podeVerFinanceiro])
 
   const abertas = r ? STATUS.filter((s) => (r.porStatus[s] ?? 0) > 0) : []
 
