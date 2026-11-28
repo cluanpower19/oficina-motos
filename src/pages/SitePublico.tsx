@@ -163,7 +163,7 @@ export default function SitePublico() {
         </section>
       </main>
 
-      <footer className="sp-footer"><a href="#inicio" className="sp-brand"><span className="sp-brand-mark">OM<span>·</span></span><span className="sp-brand-copy"><strong>OFÍCIO DO MOTOR</strong><small>GESTÃO PARA OFICINAS DE MOTOS</small></span></a><p>© {new Date().getFullYear()} Ofício do Motor. Organização simples para acompanhar cada serviço, do começo à entrega.</p><a href="#inicio">VOLTAR AO TOPO ↑</a></footer>
+      <footer className="sp-footer"><a href="#inicio" className="sp-brand" aria-label="Ofício do Motor — início"><img className="sp-brand-mark" src="/marca-oficio.svg" alt="" /><span className="sp-brand-copy"><strong>OFÍCIO DO MOTOR</strong><small>GESTÃO PARA OFICINAS DE MOTOS</small></span></a><p>© {new Date().getFullYear()} Ofício do Motor. Organização simples para acompanhar cada serviço, do começo à entrega.</p><a href="#inicio">VOLTAR AO TOPO ↑</a></footer>
     </div>
   )
 }
