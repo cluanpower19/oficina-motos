@@ -116,7 +116,6 @@ export default function CobrancaCliente() {
 
   const pendente = pagamentos.find(p => p.status === 'aguardando_comprovante' || p.status === 'em_analise')
   const precoEscolhido = planos.find(p => p.plano === planoEscolhido)?.preco
-  const ultimoComprovante = pendente?.comprovantes_assinatura?.[0]
   const pagamentoConfirmado = pagamentos.find(p => p.status === 'confirmado')
   const statusPagamento = (status: string) => status === 'confirmado' ? 'Pagamento confirmado' : status === 'em_analise' ? 'Comprovante em análise' : status === 'cancelado' ? 'Cobrança cancelada' : 'Aguardando comprovante'
 
