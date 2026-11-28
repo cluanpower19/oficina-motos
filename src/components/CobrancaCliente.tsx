@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ChangeEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { dataTeste } from '../lib/assinatura'
+import './cobranca-cliente.css'
 
 type Plano = { plano: string; preco: number }
 type Pix = { tipo_chave: string | null; chave_pix: string | null; titular: string | null; instrucoes: string | null }
@@ -13,7 +14,11 @@ type Pagamento = {
   comprovantes_assinatura: Comprovante[]
 }
 
-const moeda = (valor: number) => valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+const moeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+const dataHora = (valor: string) => new Date(valor).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+const nomePlano = (plano: string) => plano === 'completo' ? 'Completo' : 'Básico'
+const tiposChave: Record<string, string> = { cpf: 'CPF', cnpj: 'CNPJ', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Chave aleatória' }
+const tipoChave = (tipo: string | null) => tiposChave[tipo ?? ''] ?? 'Chave Pix'
 
 export default function CobrancaCliente() {
   const { perfil, recarregarPerfil } = useAuth()
@@ -27,17 +32,20 @@ export default function CobrancaCliente() {
   const [ocupado, setOcupado] = useState(false)
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
+  const [copiado, setCopiado] = useState(false)
 
   const carregar = useCallback(async () => {
     setCarregando(true)
+    setErro('')
     const [p, x, h, n] = await Promise.all([
       supabase.from('planos_cobranca').select('plano,preco').order('preco'),
       supabase.from('configuracao_pix').select('tipo_chave,chave_pix,titular,instrucoes').eq('id', true).maybeSingle(),
       supabase.from('pagamentos_assinatura').select('id,plano,valor,status,criado_em,confirmado_em,novo_vencimento,motivo_rejeicao,comprovantes_assinatura(id,status,enviado_em,motivo_rejeicao)').eq('oficina_id', oficina.id).order('criado_em', { ascending: false }),
       supabase.from('notificacoes_cobranca').select('id,tipo,titulo,mensagem,criado_em,lida_em').eq('oficina_id', oficina.id).order('criado_em',{ascending:false}).limit(5),
     ])
-    if (p.error || x.error || h.error || n.error) setErro('Não foi possível carregar a cobrança. Atualize a página e tente novamente.')
-    else {
+    if (p.error || x.error || h.error || n.error) {
+      setErro('Não foi possível carregar os dados de pagamento. Confira sua conexão e tente atualizar.')
+    } else {
       setPlanos((p.data ?? []) as Plano[])
       setPix(x.data as Pix | null)
       setPagamentos((h.data ?? []) as unknown as Pagamento[])
@@ -53,7 +61,19 @@ export default function CobrancaCliente() {
     const { error } = await supabase.rpc('solicitar_pagamento_assinatura', { p_plano: planoEscolhido })
     setOcupado(false)
     if (error) setErro(error.message.includes('cobrança em aberto') ? error.message : 'Não foi possível gerar a cobrança. ' + error.message)
-    else { setAviso('Cobrança criada. Faça o Pix e envie o comprovante abaixo.'); await carregar() }
+    else { setAviso('Cobrança criada. Confira os dados do PIX e envie o comprovante após pagar.'); await carregar() }
+  }
+
+  async function copiarChave() {
+    if (!pix?.chave_pix) return
+    try {
+      await navigator.clipboard.writeText(pix.chave_pix)
+      setCopiado(true)
+      setAviso('Chave PIX copiada. Cole no aplicativo do seu banco.')
+      window.setTimeout(() => setCopiado(false), 2500)
+    } catch {
+      setErro('Não foi possível copiar automaticamente. Selecione e copie a chave exibida.')
+    }
   }
 
   async function enviarComprovante(pagamento: Pagamento, e: ChangeEvent<HTMLInputElement>) {
@@ -74,18 +94,19 @@ export default function CobrancaCliente() {
     }
     const reg = await supabase.rpc('registrar_comprovante_assinatura', { p_pagamento_id: pagamento.id, p_caminho: caminho })
     setOcupado(false)
-    if (reg.error) setErro('Arquivo enviado, mas não foi possível registrar o comprovante. Contate o suporte antes de enviar novamente.')
-    else { setAviso('Comprovante enviado. A assinatura só será ativada após a conferência do Pix.'); await carregar() }
+    if (reg.error) setErro('O arquivo foi enviado, mas não conseguimos registrar o comprovante. Contate o suporte antes de tentar novamente.')
+    else { setAviso('Comprovante recebido. A assinatura será ativada após a conferência do pagamento.'); await carregar() }
   }
 
   async function marcarLida(n: Notificacao) {
     if (n.lida_em) return
-    const { error } = await supabase.from('notificacoes_cobranca').update({ lida_em: new Date().toISOString() }).eq('id', n.id)
-    if (!error) setNotificacoes(v => v.map(x => x.id === n.id ? { ...x, lida_em: new Date().toISOString() } : x))
+    const agora = new Date().toISOString()
+    const { error } = await supabase.from('notificacoes_cobranca').update({ lida_em: agora }).eq('id', n.id)
+    if (!error) setNotificacoes(v => v.map(x => x.id === n.id ? { ...x, lida_em: agora } : x))
   }
 
   async function cancelar() {
-    if (!window.confirm('Deseja cancelar a renovação automática? Seu acesso permanece até o fim do período já pago.')) return
+    if (!window.confirm('Deseja programar o encerramento da assinatura? Seu acesso permanece até o fim do período já pago.')) return
     setOcupado(true); setErro(''); setAviso('')
     const { error } = await supabase.rpc('solicitar_cancelamento_assinatura')
     setOcupado(false)
@@ -94,63 +115,133 @@ export default function CobrancaCliente() {
   }
 
   const pendente = pagamentos.find(p => p.status === 'aguardando_comprovante' || p.status === 'em_analise')
+  const precoEscolhido = planos.find(p => p.plano === planoEscolhido)?.preco
+  const pagamentoConfirmado = pagamentos.find(p => p.status === 'confirmado')
+  const statusPagamento = (status: string) => status === 'confirmado' ? 'Pagamento confirmado' : status === 'em_analise' ? 'Comprovante em análise' : status === 'cancelado' ? 'Cobrança cancelada' : 'Aguardando comprovante'
 
   return (
-    <section className="space-y-4 rounded-xl border border-orange-200 bg-white p-4 shadow">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <section className="cc-shell" aria-labelledby="cc-title">
+      <div className="cc-heading">
         <div>
-          <h2 className="text-lg font-semibold text-gray-800">Pagamentos e renovação</h2>
-          <p className="mt-1 text-sm text-gray-600">Pagamento manual por Pix. O comprovante será conferido pela administração antes da ativação.</p>
+          <span className="cc-eyebrow">ÁREA FINANCEIRA · ASSINATURA</span>
+          <h2 id="cc-title">Pagamentos e renovação</h2>
+          <p>Gerencie seu plano e acompanhe cada etapa da ativação.</p>
         </div>
-        <button type="button" onClick={() => { void recarregarPerfil(); void carregar() }} className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700">Atualizar status</button>
+        <button type="button" onClick={() => { void recarregarPerfil(); void carregar() }} className="cc-refresh" disabled={carregando}>↻ <span>Atualizar</span></button>
       </div>
-      {erro && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
-      {aviso && <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-800">{aviso}</p>}
-      {carregando ? <p className="text-sm text-gray-500">Carregando dados de cobrança...</p> : <>
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-          <label className="text-sm font-medium text-gray-700">Plano
-            <select value={planoEscolhido} onChange={e => setPlanoEscolhido(e.target.value)} disabled={Boolean(pendente)} className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-3">
-              {planos.map(p => <option key={p.plano} value={p.plano}>{p.plano === 'completo' ? 'Completo' : 'Básico'} — {moeda(p.preco)}/mês</option>)}
-            </select>
-          </label>
-          <button type="button" disabled={ocupado || Boolean(pendente) || !planos.length || !pix?.chave_pix} onClick={() => void solicitar()} className="rounded-lg bg-orange-500 px-5 py-3 font-semibold text-white disabled:opacity-50">
-            {pendente ? 'Existe cobrança em aberto' : !pix?.chave_pix ? 'Pix ainda não configurado' : 'Gerar cobrança Pix'}
-          </button>
+
+      <div className="cc-trust-row">
+        <span><b>✓</b> PIX configurado</span>
+        <span><b>✓</b> Comprovante privado</span>
+        <span><b>✓</b> Ativação após conferência</span>
+      </div>
+
+      {erro && <p role="alert" className="cc-feedback cc-error">{erro}</p>}
+      {aviso && <p role="status" className="cc-feedback cc-success">{aviso}</p>}
+
+      {carregando ? <div className="cc-loading"><span className="cc-spinner" /> Carregando informações de pagamento...</div> : <>
+        <div className="cc-current-plan">
+          <div className="cc-current-icon" aria-hidden="true">✦</div>
+          <div className="cc-current-copy">
+            <span>PLANO ATUAL DA OFICINA</span>
+            <strong>{nomePlano(oficina.plano)}</strong>
+            <small>{oficina.status_assinatura === 'teste' ? 'Você está no período de teste grátis.' : oficina.status_assinatura === 'ativo' ? 'Sua assinatura está ativa.' : 'Seu acesso está em modo de consulta.'}</small>
+          </div>
+          {oficina.vencimento_assinatura && <div className="cc-current-date"><span>VENCIMENTO</span><strong>{dataTeste(oficina.vencimento_assinatura)}</strong></div>}
         </div>
-        {pendente && (
-          <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
-            <p className="font-semibold text-gray-800">Cobrança {pendente.status === 'em_analise' ? 'em análise' : 'aguardando comprovante'}</p>
-            <p className="text-sm text-gray-700">{pendente.plano === 'completo' ? 'Plano Completo' : 'Plano Básico'} · {moeda(Number(pendente.valor))}</p>
-            {pix?.chave_pix ? (
-              <div className="space-y-1 text-sm text-gray-700">
-                <p><strong>Chave Pix ({pix.tipo_chave ?? 'Pix'}):</strong> {pix.chave_pix}</p>
-                {pix.titular && <p><strong>Favorecido:</strong> {pix.titular}</p>}
-                {pix.instrucoes && <p>{pix.instrucoes}</p>}
-                <button type="button" onClick={() => { void navigator.clipboard.writeText(pix.chave_pix!); setAviso('Chave Pix copiada.') }} className="rounded-lg bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-800">Copiar chave Pix</button>
-              </div>
-            ) : <p className="text-sm text-amber-800">Os dados Pix ainda não foram configurados. Entre em contato com o suporte.</p>}
-            {pendente.status === 'aguardando_comprovante' && <label className="block text-sm font-semibold text-gray-700">Enviar comprovante (PDF ou imagem, até 5 MB)
-              <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" disabled={ocupado} onChange={e => void enviarComprovante(pendente,e)} className="mt-2 block w-full text-sm" />
-            </label>}
-            {pendente.status === 'em_analise' && <p className="text-sm text-gray-700">Seu comprovante foi recebido. Aguarde a conferência administrativa.</p>}
+
+        {!pendente && !oficina.cancelamento_agendado && (
+          <div className="cc-select-plan">
+            <div className="cc-section-heading">
+              <div><span>01 / ESCOLHA</span><h3>Selecione seu plano</h3></div>
+              <small>Valores mensais · em reais</small>
+            </div>
+            <div className="cc-plan-grid">
+              {planos.map(p => {
+                const completo = p.plano === 'completo'
+                const selecionado = planoEscolhido === p.plano
+                return (
+                  <button type="button" key={p.plano} onClick={() => setPlanoEscolhido(p.plano)} aria-pressed={selecionado} className={'cc-plan-card'+(selecionado?' is-selected':'')}>
+                    {completo && <span className="cc-recommended">MAIS RECURSOS</span>}
+                    <span className="cc-plan-name">{nomePlano(p.plano)}</span>
+                    <span className="cc-plan-price">{moeda(Number(p.preco))}<small>/mês</small></span>
+                    <span className="cc-plan-description">{completo ? 'Gestão completa da rotina e do financeiro da oficina.' : 'Organização essencial dos clientes e serviços.'}</span>
+                    <span className="cc-plan-features">{completo ? '✓ Estoque  ✓ Lembretes  ✓ Financeiro' : '✓ Clientes  ✓ Motocicletas  ✓ Ordens de serviço'}</span>
+                    <span className="cc-plan-choice">{selecionado ? '✓ Plano selecionado' : 'Selecionar este plano'}</span>
+                  </button>
+                )
+              })}
+            </div>
+            <div className="cc-order-summary">
+              <div><span>RESUMO DA CONTRATAÇÃO</span><strong>Plano {nomePlano(planoEscolhido)}</strong><small>Pagamento mensal por PIX · sem cobrança automática</small></div>
+              <div className="cc-order-value"><span>VALOR DO CICLO</span><strong>{precoEscolhido === undefined ? '—' : moeda(Number(precoEscolhido))}</strong></div>
+            </div>
+            <button type="button" disabled={ocupado || !planos.length || !pix?.chave_pix || precoEscolhido === undefined} onClick={() => void solicitar()} className="cc-primary-action">
+              {ocupado ? 'Preparando cobrança...' : !pix?.chave_pix ? 'PIX temporariamente indisponível' : 'Continuar para pagamento'} <span>→</span>
+            </button>
+            <p className="cc-no-surprise">Nenhuma cobrança é feita ao selecionar o plano. A solicitação apenas prepara os dados para o PIX.</p>
           </div>
         )}
-        {oficina.status_assinatura === 'ativo' && oficina.vencimento_assinatura && !oficina.cancelamento_agendado && (
-          <button type="button" disabled={ocupado} onClick={() => void cancelar()} className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">Cancelar renovação</button>
-        )}
-        {oficina.cancelamento_agendado && <p className="text-sm text-amber-800">Renovação cancelada. Seu acesso termina em {dataTeste(oficina.vencimento_assinatura)}.</p>}
-        {notificacoes.length > 0 && <div className="space-y-2"><h3 className="font-semibold text-gray-800">Avisos da assinatura</h3>{notificacoes.map(n => <button type="button" key={n.id} onClick={() => void marcarLida(n)} className={'block w-full rounded-lg border p-3 text-left '+(n.lida_em?'border-gray-200 bg-white':'border-orange-200 bg-orange-50')}><strong className="text-sm text-gray-800">{n.titulo}</strong><p className="mt-1 text-sm text-gray-700">{n.mensagem}</p><span className="text-xs text-gray-500">{new Date(n.criado_em).toLocaleString('pt-BR')}{n.lida_em?' · lida':' · toque para marcar como lida'}</span></button>)}</div>}
-        <div className="space-y-2">
-          <h3 className="font-semibold text-gray-800">Histórico de pagamentos</h3>
-          {pagamentos.length === 0 ? <p className="text-sm text-gray-500">Nenhum pagamento registrado.</p> : pagamentos.map(p => (
-            <article key={p.id} className="rounded-lg border border-gray-200 p-3 text-sm">
-              <div className="flex flex-wrap justify-between gap-2">
-                <strong>{p.plano === 'completo' ? 'Completo' : 'Básico'} · {moeda(Number(p.valor))}</strong>
-                <span>{p.status === 'confirmado' ? 'Confirmado' : p.status === 'em_analise' ? 'Em análise' : p.status === 'cancelado' ? 'Cancelado' : 'Aguardando comprovante'}</span>
+
+        {pendente && (
+          <div className="cc-payment-flow">
+            <div className="cc-section-heading">
+              <div><span>02 / PAGAMENTO EM ANDAMENTO</span><h3>Conclua sua ativação</h3></div>
+              <span className={'cc-status-pill '+(pendente.status === 'em_analise' ? 'is-review' : 'is-pending')}>{statusPagamento(pendente.status)}</span>
+            </div>
+            <div className="cc-steps">
+              <div className="is-done"><b>1</b><span>Cobrança criada</span></div>
+              <div className={pendente.status === 'em_analise' ? 'is-done' : 'is-current'}><b>2</b><span>PIX e comprovante</span></div>
+              <div className={pendente.status === 'em_analise' ? 'is-current' : ''}><b>3</b><span>Conferência</span></div>
+              <div><b>4</b><span>Acesso liberado</span></div>
+            </div>
+            <div className="cc-payment-summary">
+              <div><span>PLANO</span><strong>{nomePlano(pendente.plano)}</strong></div>
+              <div><span>VALOR EXATO</span><strong className="cc-highlight">{moeda(Number(pendente.valor))}</strong></div>
+              <div><span>SOLICITADO EM</span><strong>{dataHora(pendente.criado_em)}</strong></div>
+            </div>
+            {pendente.status === 'aguardando_comprovante' && pix?.chave_pix ? (
+              <div className="cc-pix-card">
+                <div className="cc-pix-top"><span className="cc-pix-symbol">PIX</span><div><strong>Faça a transferência pelo aplicativo do seu banco</strong><small>Confira o favorecido antes de confirmar a operação.</small></div></div>
+                <div className="cc-pix-detail"><span>{tipoChave(pix.tipo_chave)}</span><strong className="cc-pix-key">{pix.chave_pix}</strong></div>
+                {pix.titular && <div className="cc-pix-detail"><span>FAVORECIDO</span><strong>{pix.titular}</strong></div>}
+                <button type="button" onClick={() => void copiarChave()} className="cc-copy-button">{copiado ? '✓ Chave copiada' : '▣ Copiar chave PIX'}</button>
+                {pix.instrucoes && <p className="cc-pix-instructions">{pix.instrucoes}</p>}
+                <div className="cc-security-note"><b>Importante:</b> a chave PIX acima é o dado configurado para recebimento. Confirme nome e valor no aplicativo do banco antes de pagar.</div>
               </div>
-              <p className="mt-1 text-gray-500">Solicitado em {new Date(p.criado_em).toLocaleDateString('pt-BR')}</p>
-              {p.novo_vencimento && <p className="text-gray-600">Vencimento do ciclo: {dataTeste(p.novo_vencimento)}</p>}
-              {p.comprovantes_assinatura?.map(c => c.status === 'rejeitado' && <p key={c.id} className="mt-2 rounded bg-red-50 p-2 text-red-700">Comprovante rejeitado: {c.motivo_rejeicao}</p>)}
+            ) : pendente.status === 'em_analise' ? (
+              <div className="cc-review-panel"><span className="cc-review-icon">◷</span><div><strong>Comprovante recebido com sucesso</strong><p>A administração está conferindo o pagamento. Você verá a atualização aqui assim que a análise for concluída. Não envie outro comprovante enquanto este estiver em análise.</p></div></div>
+            ) : <p className="cc-feedback cc-error">Os dados PIX não estão disponíveis no momento. Fale com o suporte para receber orientação.</p>}
+            {pendente.status === 'aguardando_comprovante' && (
+              <label className="cc-upload">
+                <span className="cc-upload-icon">↑</span>
+                <span><strong>Depois de pagar, envie o comprovante</strong><small>PDF, JPG, PNG ou WEBP · máximo de 5 MB</small></span>
+                <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" disabled={ocupado} onChange={e => void enviarComprovante(pendente,e)} />
+                <span className="cc-upload-button">{ocupado ? 'Enviando...' : 'Escolher arquivo'}</span>
+              </label>
+            )}
+            {pendente.motivo_rejeicao && <p className="cc-feedback cc-error"><strong>Comprovante recusado:</strong> {pendente.motivo_rejeicao} Confira os dados e envie um novo arquivo.</p>}
+          </div>
+        )}
+
+        {oficina.status_assinatura === 'ativo' && oficina.vencimento_assinatura && !oficina.cancelamento_agendado && !pendente && (
+          <div className="cc-renewal-row"><div><strong>Renovação da assinatura</strong><p>Seu acesso permanece ativo até o fim do período pago. Você pode solicitar o encerramento da assinatura. O acesso permanece até o fim do período pago.</p></div><button type="button" disabled={ocupado} onClick={() => void cancelar()} className="cc-cancel-button">Solicitar encerramento</button></div>
+        )}
+        {oficina.cancelamento_agendado && <p className="cc-feedback cc-warning">Renovação cancelada. Seu acesso permanece até {dataTeste(oficina.vencimento_assinatura)}.</p>}
+
+        {pagamentoConfirmado && (
+          <div className="cc-confirmed"><span>✓</span><div><strong>Último pagamento confirmado</strong><p>{nomePlano(pagamentoConfirmado.plano)} · {moeda(Number(pagamentoConfirmado.valor))}{pagamentoConfirmado.novo_vencimento ? ' · próximo vencimento ' + dataTeste(pagamentoConfirmado.novo_vencimento) : ''}</p></div></div>
+        )}
+
+        {notificacoes.length > 0 && <div className="cc-notifications"><div className="cc-section-heading"><div><span>AVISOS</span><h3>Atualizações da assinatura</h3></div></div>{notificacoes.map(n => <button type="button" key={n.id} onClick={() => void marcarLida(n)} className={'cc-notification'+(n.lida_em?' is-read':'')}><strong>{n.titulo}</strong><p>{n.mensagem}</p><small>{dataHora(n.criado_em)}{n.lida_em ? ' · lida' : ' · toque para marcar como lida'}</small></button>)}</div>}
+
+        <div className="cc-history">
+          <div className="cc-section-heading"><div><span>HISTÓRICO</span><h3>Movimentações de pagamento</h3></div><small>{pagamentos.length} registro(s)</small></div>
+          {pagamentos.length === 0 ? <p className="cc-empty">Nenhuma cobrança registrada. Quando solicitar uma ativação, ela aparecerá aqui.</p> : pagamentos.map(p => (
+            <article key={p.id} className="cc-history-item">
+              <div className="cc-history-icon">{p.status === 'confirmado' ? '✓' : p.status === 'cancelado' ? '×' : '◷'}</div>
+              <div className="cc-history-main"><strong>{nomePlano(p.plano)} · {moeda(Number(p.valor))}</strong><small>{dataHora(p.criado_em)}</small>{p.novo_vencimento && <small>Vencimento aplicado: {dataTeste(p.novo_vencimento)}</small>}{p.comprovantes_assinatura?.filter(c=>c.status==='rejeitado').map(c=><small className="cc-history-rejected" key={c.id}>Comprovante recusado: {c.motivo_rejeicao || 'verifique os dados e reenvie'}</small>)}</div>
+              <span className={'cc-history-status '+(p.status==='confirmado'?'is-confirmed':p.status==='em_analise'?'is-review':'')}>{statusPagamento(p.status)}</span>
             </article>
           ))}
         </div>

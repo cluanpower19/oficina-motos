@@ -34,6 +34,18 @@ export default function Contratacao() {
             <span className="sp-contract-label">PLANO ESCOLHIDO</span>
             <h2>{escolhido.nome}</h2>
             <p>{escolhido.descricao}</p>
+            <div className="sp-contract-includes">
+              <strong>O que está incluído</strong>
+              <ul>
+                <li>✓ Cadastro de clientes e motocicletas</li>
+                <li>✓ Ordens de serviço e histórico de atendimentos</li>
+                <li>✓ Orçamentos compartilhados por link</li>
+                {plano === 'completo' && <>
+                  <li>✓ Controle de estoque de peças</li>
+                  <li>✓ Lembretes e controle financeiro</li>
+                </>}
+              </ul>
+            </div>
             <div className="sp-contract-price">{escolhido.preco}<small> / mês após o teste</small></div>
           </div>
           <div className="sp-contract-switch" aria-label="Escolher outro plano">
@@ -43,6 +55,7 @@ export default function Contratacao() {
           </div>
           <Link className="sp-contract-cta" to={'/cadastro?plano=' + plano}>Criar conta e começar grátis <span>→</span></Link>
           <small className="sp-contract-contact">Sem cartão, sem cobrança antecipada e sem compromisso.</small>
+          <div className="sp-contract-payment-note"><b>Como você paga depois do teste</b><span>Se decidir continuar, a ativação é feita por PIX. Você recebe os dados da cobrança, envia o comprovante e a equipe confirma o pagamento. Não existe cobrança automática.</span></div>
         </div>
         <div className="sp-contract-terms">
           <div className="sp-contract-section-title"><span>01 / COMO FUNCIONA</span><h2>Sete dias para experimentar.</h2></div>
@@ -51,7 +64,7 @@ export default function Contratacao() {
             <article><b>Sem pagamento antecipado</b><p>Não pedimos cartão, PIX ou dados bancários para criar a conta e experimentar.</p></article>
             <article><b>Recursos do plano</b><p>Durante o teste, você usa os recursos do plano escolhido: Básico ou Completo.</p></article>
             <article><b>Depois dos sete dias</b><p>Sem ativação de uma assinatura paga, novas inclusões e alterações ficam suspensas. Seus dados continuam disponíveis para consulta.</p></article>
-            <article><b>Pagamento</b><p>O plano mensal custa {escolhido.preco}. A ativação paga ocorre após a confirmação do pagamento.</p></article>
+            <article><b>Pagamento transparente</b><p>Se decidir continuar, você solicita a cobrança mensal de {escolhido.preco} por PIX. Envie o comprovante e a assinatura é ativada depois da conferência administrativa. Não há cobrança automática.</p></article>
             <article><b>Cancelamento</b><p>O teste não gera cobrança automática. Você decide se deseja continuar depois de conhecer o sistema.</p></article>
           </div>
         </div>
