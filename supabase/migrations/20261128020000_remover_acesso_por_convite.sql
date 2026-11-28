@@ -14,3 +14,5 @@ alter table public.ordens_servico
   drop constraint if exists ordens_servico_mecanico_id_fkey,
   drop constraint if exists ordens_servico_mecanico_oficina_fk;
 alter table public.ordens_servico drop column if exists mecanico_id;
+
+-- Alteração aplicada junto com a retirada dos componentes da interface.
