@@ -1,6 +1,6 @@
 // Service worker simples: só guarda arquivos do próprio site (nunca Supabase nem fontes externas).
 // Para forçar atualização do cache, troque o número da versão.
-const VERSAO = 'oficio-v1'
+const VERSAO = 'oficio-identidade-v2'
 
 self.addEventListener('install', () => self.skipWaiting())
 

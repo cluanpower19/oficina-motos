@@ -102,12 +102,14 @@ export function Chave({ className = '', style }: { className?: string; style?: C
 
 export function Emblema({ tamanho = 44 }: { tamanho?: number }) {
   return (
-    <span className="emblema" style={{ width: tamanho, height: tamanho }} aria-hidden="true">
-      <Engrenagem className="emblema-engrenagem" />
-      <svg viewBox="0 0 24 24" className="emblema-chave" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.5 17.2a1.8 1.8 0 0 0 2.6 2.6l5.8-5.8a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.2-.6-.6-2.2 2.4-2.4z" />
-      </svg>
-    </span>
+    <svg viewBox="0 0 128 128" width={tamanho} height={tamanho}
+      style={{ display: 'block', flex: 'none' }} role="img" aria-label="Símbolo Ofício do Motor">
+      <path d="M64 5 113 23v40c0 29-19 49-49 60C34 112 15 92 15 63V23L64 5Z" fill="#0B1118" stroke="#D8B46A" strokeWidth="5" />
+      <path d="M64 14 104 29v34c0 24-15 41-40 52C39 104 24 87 24 63V29l40-15Z" fill="#14202A" stroke="#75818A" strokeWidth="1.5" />
+      <path d="M37 82V42l27 26 27-26v40" fill="none" stroke="#E8C783" strokeWidth="8" strokeLinecap="square" strokeLinejoin="round" />
+      <path d="M64 25v15M47 94h34" fill="none" stroke="#D8B46A" strokeWidth="4" strokeLinecap="round" />
+      <path d="M31 31 41 35M97 31 87 35" stroke="#F3E2B8" strokeWidth="2" strokeLinecap="round" opacity=".8" />
+    </svg>
   )
 }
 
